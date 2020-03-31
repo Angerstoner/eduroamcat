@@ -2,9 +2,9 @@ name: eduroam CAT (Android) master
 
 on:
   push:
-    branches: [ ci-test ]
+    branches: [ * ]
   pull_request:
-    branches: [ ci-test ]
+    branches: [ * ]
 
 jobs:
   build:
