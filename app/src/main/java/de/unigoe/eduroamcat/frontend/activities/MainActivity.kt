@@ -2,6 +2,7 @@ package de.unigoe.eduroamcat.frontend.activities
 
 import android.Manifest.permission.*
 import android.content.Context
+import android.content.pm.PackageManager
 import android.net.wifi.WifiConfiguration
 import android.net.wifi.WifiManager
 import android.net.wifi.WifiNetworkSuggestion
@@ -52,7 +53,14 @@ class MainActivity : AppCompatActivity() {
             wifiConf.SSID = networkSsid
             wifiConf.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE)
             wifiManager.addNetwork(wifiConf)
-            val networkList = wifiManager.configuredNetworks
+
+            val networkList =
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M ||
+                    checkSelfPermission(ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                ) {
+                    wifiManager.configuredNetworks
+                } else arrayListOf()
+
             wifiManager.enableNetwork(networkList.first { networkSsid == it.SSID }.networkId, true)
         }
 
