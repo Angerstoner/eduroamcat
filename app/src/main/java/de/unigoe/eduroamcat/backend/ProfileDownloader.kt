@@ -1,10 +1,54 @@
 package de.unigoe.eduroamcat.backend
 
+import android.R
+import android.app.DownloadManager
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Context.DOWNLOAD_SERVICE
+import android.content.Intent
+import android.content.IntentFilter
+import android.net.Uri
 import android.os.Build
+import android.util.Log
 
-const val ORGANIZATION_ID = 5042 // (GWDG); TODO: remove after initial testing
 
-class ProfileDownloader {
+// TEST CODE START -> TODO: remove after initial testing
+const val ORGANIZATION_ID = 5042
+const val LANG = "en"
+// TEST CODE END
+
+
+const val TAG = "ProfileDownloader"
+
+class ProfileDownloader(private val context: Context) {
+    private var lastDownload = -1L
+    private val downloadManager = context.getSystemService(DOWNLOAD_SERVICE) as DownloadManager
+
+    var onComplete: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(ctxt: Context, intent: Intent) {
+            Log.i(TAG, "Download complete")
+        }
+    }
+
+    fun downloadProfile() {
+        val profileDownloadUri = Uri.parse(
+            "https://cat.eduroam.org/user/API.php?action=downloadInstaller" +
+                    "&id=${AndroidId.getAndroidId()}" +
+                    "&profile=$ORGANIZATION_ID" +
+                    "&lang=$LANG"
+        )
+
+        context.registerReceiver(onComplete, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
+        context.getExternalFilesDir(null)!!.mkdirs()
+        lastDownload = downloadManager.enqueue(
+            DownloadManager.Request(profileDownloadUri)
+                .setDestinationInExternalFilesDir(
+                    context,
+                    null,
+                    "eduroam-$ORGANIZATION_ID.eap-config"
+                )
+        )
+    }
 
 
 }

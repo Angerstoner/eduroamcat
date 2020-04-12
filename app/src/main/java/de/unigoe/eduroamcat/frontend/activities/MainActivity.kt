@@ -1,13 +1,17 @@
 package de.unigoe.eduroamcat.frontend.activities
 
+import android.Manifest.permission.INTERNET
+import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.content.Context
 import android.net.wifi.WifiConfiguration
 import android.net.wifi.WifiManager
 import android.net.wifi.WifiNetworkSuggestion
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import de.unigoe.eduroamcat.R
+import de.unigoe.eduroamcat.backend.ProfileDownloader
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -15,7 +19,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        connectToOpenWifi()
+        ProfileDownloader(this).downloadProfile()
+//        connectToOpenWifi()
     }
 
 
@@ -38,3 +43,5 @@ class MainActivity : AppCompatActivity() {
 
     }
 }
+
+
