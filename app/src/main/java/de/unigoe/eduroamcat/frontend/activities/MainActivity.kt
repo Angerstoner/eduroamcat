@@ -1,7 +1,6 @@
 package de.unigoe.eduroamcat.frontend.activities
 
-import android.Manifest.permission.INTERNET
-import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+import android.Manifest.permission.*
 import android.content.Context
 import android.net.wifi.WifiConfiguration
 import android.net.wifi.WifiManager
@@ -19,8 +18,24 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        requestAppPermissions()
         ProfileDownloader(this).downloadProfile()
 //        connectToOpenWifi()
+    }
+
+
+    /**
+     * Requests needed permissions if Android M or higher is used
+     * Android L and lower use only the AndroidManifest to grant permissions
+     */
+    private fun requestAppPermissions() {
+        val permissionsNeeded = arrayOf(ACCESS_FINE_LOCATION)
+        val permissionsRequestCode = 1
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            requestPermissions(permissionsNeeded, permissionsRequestCode)
+        }
+
     }
 
 

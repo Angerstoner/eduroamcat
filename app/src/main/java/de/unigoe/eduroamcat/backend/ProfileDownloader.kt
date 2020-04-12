@@ -1,6 +1,5 @@
 package de.unigoe.eduroamcat.backend
 
-import android.R
 import android.app.DownloadManager
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -24,7 +23,7 @@ class ProfileDownloader(private val context: Context) {
     private var lastDownload = -1L
     private val downloadManager = context.getSystemService(DOWNLOAD_SERVICE) as DownloadManager
 
-    var onComplete: BroadcastReceiver = object : BroadcastReceiver() {
+    private var onComplete: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(ctxt: Context, intent: Intent) {
             Log.i(TAG, "Download complete")
         }
