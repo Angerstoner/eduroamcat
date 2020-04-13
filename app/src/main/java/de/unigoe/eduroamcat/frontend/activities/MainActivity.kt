@@ -16,7 +16,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         requestAppPermissions()
-        ProfileApi(this).downloadProfile(ORGANIZATION_ID)
+        ProfileApi(this).getAllIdentityProviders()
     }
 
 
