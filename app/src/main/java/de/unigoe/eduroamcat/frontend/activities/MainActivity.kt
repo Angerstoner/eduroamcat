@@ -3,6 +3,8 @@ package de.unigoe.eduroamcat.frontend.activities
 import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.os.Build
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import de.unigoe.eduroamcat.R
@@ -13,6 +15,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
     private val tag = "MainActivity"
+    private lateinit var identityProviderArrayAdapter: IdentityProviderArrayAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -20,7 +23,7 @@ class MainActivity : AppCompatActivity() {
 
         requestAppPermissions()
         initIdentityProviderListView()
-
+        initIdentityProviderSearchBox()
     }
 
     /**
@@ -36,13 +39,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
     private fun initIdentityProviderListView() {
-        val identityProviderArrayAdapter =
-            IdentityProviderArrayAdapter(
-                this,
-                android.R.layout.simple_list_item_1
-            )
+        identityProviderArrayAdapter =
+            IdentityProviderArrayAdapter(this, android.R.layout.simple_list_item_1)
 
         identityProviderListView.adapter = identityProviderArrayAdapter
 
@@ -50,6 +49,23 @@ class MainActivity : AppCompatActivity() {
             .observe(this, Observer { identityProviders ->
                 identityProviderArrayAdapter.setIdentityProviders(identityProviders)
             })
+    }
+
+
+    private fun initIdentityProviderSearchBox() {
+        identitySearchEditText.addTextChangedListener(object : TextWatcher {
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                identityProviderArrayAdapter.filter.filter(s)
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                // do nothing
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                // do nothing
+            }
+        })
     }
 
 
