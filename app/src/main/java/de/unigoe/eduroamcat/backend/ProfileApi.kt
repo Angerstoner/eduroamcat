@@ -7,6 +7,8 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.net.Uri
 import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonArrayRequest
@@ -20,14 +22,13 @@ import kotlin.collections.ArrayList
 // TEST CODE START -> TODO: remove after initial testing
 const val ORGANIZATION_ID = 5042
 const val LANG = "en"
-
 // TEST CODE END
-const val API_URL_BASE = "https://cat.eduroam.org/user/API.php?action="
 
+const val API_URL_BASE = "https://cat.eduroam.org/user/API.php?action="
 
 class ProfileApi(private val activityContext: Context) {
     private val tag = "ProfileApi"
-
+    private val identityProviderLiveData = MutableLiveData<ArrayList<IdentityProvider>>()
 
     private val onProfileDownloadComplete: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(ctxt: Context, intent: Intent) {
@@ -81,30 +82,10 @@ class ProfileApi(private val activityContext: Context) {
         )
     }
 
-    // TEST-CODE START
-    private val identityProviderList: ArrayList<IdentityProvider> = arrayListOf()
-
-    private fun parseIdentityProviderArray(identityProviderJSONArray: JSONArray) {
-        // JSONArray does not provide an iterator, so we add one
-        operator fun JSONArray.iterator(): Iterator<JSONObject> =
-            (0 until length()).asSequence().map { get(it) as JSONObject }.iterator()
-
-        identityProviderJSONArray.iterator().forEach {
-            // TODO: add parse-exception
-            val entityId = it.get("entityID").toString().toLong()
-            val country = it.get("country").toString()
-            val title = it.get("title").toString()
-            identityProviderList.add(IdentityProvider(entityId, country, title))
-        }
-
-        identityProviderList.forEach { Log.i(tag, it.toString()) }
-    }
-
-
-    fun getAllIdentityProviders(): List<IdentityProvider> {
+    // TODO: javadoc
+    fun getAllIdentityProviders(): LiveData<ArrayList<IdentityProvider>> {
         val lang = Locale.getDefault().language
         val identityProviderListUrl = API_URL_BASE + "listAllIdentityProviders&" + "lang=$lang"
-
 
         val queue = Volley.newRequestQueue(activityContext)
         val identityProviderListRequest =
@@ -114,7 +95,23 @@ class ProfileApi(private val activityContext: Context) {
 
         queue.add(identityProviderListRequest)
 
-        return arrayListOf()
+        return identityProviderLiveData
     }
-    // TEST-CODE END
+
+    // TODO: javadoc
+    private fun parseIdentityProviderArray(identityProviderJSONArray: JSONArray) {
+        // JSONArray does not provide an iterator, so we add one
+        operator fun JSONArray.iterator(): Iterator<JSONObject> =
+            (0 until length()).asSequence().map { get(it) as JSONObject }.iterator()
+
+        val identityProviderList = ArrayList<IdentityProvider>()
+        identityProviderJSONArray.iterator().forEach {
+            // TODO: add parse-exception
+            val entityId = it.get("entityID").toString().toLong()
+            val country = it.get("country").toString()
+            val title = it.get("title").toString()
+            identityProviderList.add(IdentityProvider(entityId, country, title))
+        }
+        identityProviderLiveData.postValue(identityProviderList)
+    }
 }
