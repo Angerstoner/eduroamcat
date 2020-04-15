@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.net.Uri
 import android.util.Log
+import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.android.volley.Request
@@ -31,7 +32,9 @@ class ProfileApi(private val activityContext: Context) {
 
     private val onProfileDownloadComplete: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(ctxt: Context, intent: Intent) {
-            Log.i(tag, "Download complete")
+            val msg = "Profile download finished"
+            Toast.makeText(activityContext, msg, Toast.LENGTH_SHORT).show()
+            Log.i(tag, msg)
         }
     }
 
@@ -47,7 +50,7 @@ class ProfileApi(private val activityContext: Context) {
      * Downloads file from [uri] to [filename] and calls [onComplete] afterwards using the [DownloadManager]
      */
     private fun downloadToAppData(uri: Uri, filename: String, onComplete: BroadcastReceiver?) {
-        // TODO: maybe use Volley
+        // TODO: maybe use Volley and request simple strings
         val downloadManager =
             activityContext.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
 
@@ -105,17 +108,17 @@ class ProfileApi(private val activityContext: Context) {
      *
      * see [ProfileApi.getAllIdentityProviders]
      */
-    fun downloadProfile(profileId: Int) {
+    fun downloadProfileConfig(profile: Profile) {
         val lang = Locale.getDefault().language
         val profileDownloadUri = Uri.parse(
             API_URL_BASE + "downloadInstaller" + "&id=${AndroidId.getAndroidId()}" +
-                    "&profile=$profileId" + "&lang=$lang"
+                    "&profile=${profile.profileId}" + "&lang=$lang"
         )
-        downloadToAppData(
-            profileDownloadUri,
-            "eduroam-${profileId}_${lang}.eap-config",
-            onProfileDownloadComplete
-        )
+        val filename =
+            "eduroam-${profile.identityProvider}_${profile.identityProvider}.eap-config"
+                .replace(" ", "_")
+
+        downloadToAppData(profileDownloadUri, filename, onProfileDownloadComplete)
     }
 
     /**

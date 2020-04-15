@@ -5,8 +5,6 @@ import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
-import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import androidx.appcompat.app.AppCompatActivity
@@ -14,6 +12,7 @@ import androidx.lifecycle.Observer
 import de.unigoe.eduroamcat.R
 import de.unigoe.eduroamcat.backend.ProfileApi
 import de.unigoe.eduroamcat.backend.models.IdentityProvider
+import de.unigoe.eduroamcat.backend.models.Profile
 import de.unigoe.eduroamcat.frontend.adapters.IdentityProviderArrayAdapter
 import de.unigoe.eduroamcat.frontend.adapters.ProfileArrayAdapter
 import kotlinx.android.synthetic.main.activity_main.*
@@ -22,6 +21,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 class MainActivity : AppCompatActivity() {
     private val tag = "MainActivity"
     private lateinit var identityProviderArrayAdapter: IdentityProviderArrayAdapter
+    private lateinit var profileArrayAdapter: ProfileArrayAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,6 +30,8 @@ class MainActivity : AppCompatActivity() {
         requestAppPermissions()
         initIdentityProviderListView()
         initIdentityProviderSearchBox()
+        initProfileSelectionSpinner()
+        initProfileDownloadButton()
     }
 
     /**
@@ -79,14 +81,27 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
+    private fun initProfileSelectionSpinner() {
+        profileArrayAdapter = ProfileArrayAdapter(this, android.R.layout.simple_spinner_item)
+        profileSpinner.adapter = profileArrayAdapter
+    }
+
+    private fun initProfileDownloadButton() {
+        profileDownloadButton.setOnClickListener {
+            ProfileApi(this).downloadProfileConfig(
+                profileSpinner.selectedItem as Profile
+            )
+        }
+    }
+
 
     private fun showProfilesForIdentityProvider(identityProvider: IdentityProvider) {
-        val profileArrayAdapter = ProfileArrayAdapter(this, android.R.layout.simple_spinner_item)
         ProfileApi(this).getProfilesForIdentityProvider(identityProvider)
             .observe(this, Observer { profiles ->
                 profileArrayAdapter.setProfiles(profiles)
-                profileSpinner.adapter = profileArrayAdapter
                 profileSpinner.visibility = if (profileArrayAdapter.count == 0) GONE else VISIBLE
+                profileDownloadButton.visibility =
+                    if (profileArrayAdapter.count == 0) GONE else VISIBLE
             })
     }
 
