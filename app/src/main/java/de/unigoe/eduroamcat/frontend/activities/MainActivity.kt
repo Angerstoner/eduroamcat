@@ -5,11 +5,17 @@ import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
+import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import de.unigoe.eduroamcat.R
 import de.unigoe.eduroamcat.backend.ProfileApi
+import de.unigoe.eduroamcat.backend.models.IdentityProvider
 import de.unigoe.eduroamcat.frontend.adapters.IdentityProviderArrayAdapter
+import de.unigoe.eduroamcat.frontend.adapters.ProfileArrayAdapter
 import kotlinx.android.synthetic.main.activity_main.*
 
 
@@ -45,12 +51,17 @@ class MainActivity : AppCompatActivity() {
 
         identityProviderListView.adapter = identityProviderArrayAdapter
 
+        identityProviderListView.setOnItemClickListener { _, _, position, _ ->
+            val item = identityProviderArrayAdapter.getItem(position)
+            identityProviderArrayAdapter.filter.filter(item.toString())
+            showProfilesForIdentityProvider(item)
+        }
+
         ProfileApi(this).getAllIdentityProviders()
             .observe(this, Observer { identityProviders ->
                 identityProviderArrayAdapter.setIdentityProviders(identityProviders)
             })
     }
-
 
     private fun initIdentityProviderSearchBox() {
         identitySearchEditText.addTextChangedListener(object : TextWatcher {
@@ -66,6 +77,17 @@ class MainActivity : AppCompatActivity() {
                 // do nothing
             }
         })
+    }
+
+
+    private fun showProfilesForIdentityProvider(identityProvider: IdentityProvider) {
+        val profileArrayAdapter = ProfileArrayAdapter(this, android.R.layout.simple_spinner_item)
+        ProfileApi(this).getProfilesForIdentityProvider(identityProvider)
+            .observe(this, Observer { profiles ->
+                profileArrayAdapter.setProfiles(profiles)
+                profileSpinner.adapter = profileArrayAdapter
+                profileSpinner.visibility = if (profileArrayAdapter.count == 0) GONE else VISIBLE
+            })
     }
 
 

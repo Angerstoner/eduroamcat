@@ -15,6 +15,8 @@ class IdentityProviderArrayAdapter(context: Context, resource: Int) :
     private var originalIdentityProviderList: ArrayList<IdentityProvider> = ArrayList()
 
     override fun getCount(): Int = identityProviderList.size
+    override fun getItem(position: Int): IdentityProvider = identityProviderList[position]
+    override fun getPosition(item: IdentityProvider?): Int = identityProviderList.indexOf(item)
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         val listItem = convertView
@@ -55,7 +57,6 @@ class IdentityProviderArrayAdapter(context: Context, resource: Int) :
     }
 
     fun setIdentityProviders(identityProviders: ArrayList<IdentityProvider>) {
-        this.clear()
         identityProviderList = identityProviders
         originalIdentityProviderList = (identityProviderList.clone() as List<*>)
             .filterIsInstance<IdentityProvider>() as ArrayList<IdentityProvider>

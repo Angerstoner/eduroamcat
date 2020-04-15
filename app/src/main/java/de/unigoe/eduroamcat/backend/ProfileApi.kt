@@ -6,13 +6,13 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.net.Uri
-import android.provider.ContactsContract
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonArrayRequest
+import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import de.unigoe.eduroamcat.backend.models.IdentityProvider
 import de.unigoe.eduroamcat.backend.models.Profile
@@ -21,10 +21,6 @@ import org.json.JSONObject
 import java.util.*
 import kotlin.collections.ArrayList
 
-// TEST CODE START -> TODO: remove after initial testing
-const val ORGANIZATION_ID = 5042
-const val LANG = "en"
-// TEST CODE END
 
 const val API_URL_BASE = "https://cat.eduroam.org/user/API.php?action="
 
@@ -88,6 +84,21 @@ class ProfileApi(private val activityContext: Context) {
         queue.add(identityProviderListRequest)
     }
 
+    private fun downloadJsonObject(
+        downloadUrl: String,
+        responseListener: Response.Listener<JSONObject>,
+        errorListener: Response.ErrorListener = defaultErrorListener
+    ) {
+        val queue = Volley.newRequestQueue(activityContext)
+        val identityProviderListRequest =
+            JsonObjectRequest(
+                Request.Method.GET, downloadUrl, null,
+                responseListener,
+                errorListener
+            )
+        queue.add(identityProviderListRequest)
+    }
+
 
     /**
      * Downloads the eap-config/profile for the given profile identified by its [profileId]
@@ -129,14 +140,17 @@ class ProfileApi(private val activityContext: Context) {
         val profileListUrl = API_URL_BASE + "listProfiles&" +
                 "idp=${identityProvider.entityId}" + "&lang=$lang"
 
+        // TODO: refactor this
         val responseListener =
-            Response.Listener<JSONArray> { response ->
+            Response.Listener<JSONObject> { response ->
                 parseProfileListJsonArray(
-                    response,
+                    JSONArray(response.get("data").toString()),
                     identityProvider
                 )
             }
-        downloadJsonArray(profileListUrl, responseListener)
+        // end refactor
+
+        downloadJsonObject(profileListUrl, responseListener)
 
         return profileLiveData
     }
