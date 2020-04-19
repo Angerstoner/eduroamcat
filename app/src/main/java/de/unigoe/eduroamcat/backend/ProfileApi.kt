@@ -15,6 +15,7 @@ import com.android.volley.Response
 import com.android.volley.toolbox.JsonArrayRequest
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
+import de.unigoe.eduroamcat.backend.models.EapConfigParser
 import de.unigoe.eduroamcat.backend.models.IdentityProvider
 import de.unigoe.eduroamcat.backend.models.Profile
 import org.json.JSONArray
@@ -30,13 +31,6 @@ class ProfileApi(private val activityContext: Context) {
     private val identityProviderLiveData = MutableLiveData<ArrayList<IdentityProvider>>()
     private val profileLiveData = MutableLiveData<ArrayList<Profile>>()
 
-    private val onProfileDownloadComplete: BroadcastReceiver = object : BroadcastReceiver() {
-        override fun onReceive(ctxt: Context, intent: Intent) {
-            val msg = "Profile download finished"
-            Toast.makeText(activityContext, msg, Toast.LENGTH_SHORT).show()
-            Log.i(tag, msg)
-        }
-    }
 
     private val defaultErrorListener =
         Response.ErrorListener { error -> Log.e(tag, error.toString()) }
@@ -87,6 +81,10 @@ class ProfileApi(private val activityContext: Context) {
         queue.add(identityProviderListRequest)
     }
 
+    /**
+     * Downloads JSON Object from [downloadUrl].
+     * Calls [responseListener] after download finished or [errorListener] if download fails
+     */
     private fun downloadJsonObject(
         downloadUrl: String,
         responseListener: Response.Listener<JSONObject>,
@@ -104,7 +102,7 @@ class ProfileApi(private val activityContext: Context) {
 
 
     /**
-     * Downloads the eap-config/profile for the given profile identified by its [profileId]
+     * Downloads the eap-config/profile for the given profile identified by its [Profile.profileId]
      *
      * see [ProfileApi.getAllIdentityProviders]
      */
@@ -115,8 +113,21 @@ class ProfileApi(private val activityContext: Context) {
                     "&profile=${profile.profileId}" + "&lang=$lang"
         )
         val filename =
-            "eduroam-${profile.identityProvider}_${profile.identityProvider}.eap-config"
-                .replace(" ", "_")
+            "eduroam-${profile.identityProvider}_.eap-config"
+                .replace("[<>:\"/\\\\|?*, ]".toRegex(), "_")
+
+        val onProfileDownloadComplete: BroadcastReceiver = object : BroadcastReceiver() {
+            override fun onReceive(ctxt: Context, intent: Intent) {
+                val msg = "Profile download finished"
+                Toast.makeText(activityContext, msg, Toast.LENGTH_SHORT).show()
+                Log.i(tag, msg)
+
+                EapConfigParser.fromXml(
+                    activityContext.getExternalFilesDir(null).toString().plus("/").plus(filename)
+                )
+            }
+        }
+
 
         downloadToAppData(profileDownloadUri, filename, onProfileDownloadComplete)
     }
@@ -138,7 +149,7 @@ class ProfileApi(private val activityContext: Context) {
     /**
      * Returns LiveData of Profile List for given [identityProvider]
      */
-    fun getProfilesForIdentityProvider(identityProvider: IdentityProvider): LiveData<ArrayList<Profile>> {
+    fun getIdentityProviderProfiles(identityProvider: IdentityProvider): LiveData<ArrayList<Profile>> {
         val lang = Locale.getDefault().language
         val profileListUrl = API_URL_BASE + "listProfiles&" +
                 "idp=${identityProvider.entityId}" + "&lang=$lang"

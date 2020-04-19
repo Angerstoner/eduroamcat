@@ -32,6 +32,8 @@ class MainActivity : AppCompatActivity() {
         initIdentityProviderSearchBox()
         initProfileSelectionSpinner()
         initProfileDownloadButton()
+
+        downloadAndParseTest()
     }
 
     /**
@@ -94,15 +96,21 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
     private fun showProfilesForIdentityProvider(identityProvider: IdentityProvider) {
-        ProfileApi(this).getProfilesForIdentityProvider(identityProvider)
+        ProfileApi(this).getIdentityProviderProfiles(identityProvider)
             .observe(this, Observer { profiles ->
                 profileArrayAdapter.setProfiles(profiles)
                 profileSpinner.visibility = if (profileArrayAdapter.count == 0) GONE else VISIBLE
                 profileDownloadButton.visibility =
                     if (profileArrayAdapter.count == 0) GONE else VISIBLE
             })
+    }
+
+
+    private fun downloadAndParseTest() {
+        val gwdgTestIdentityProvider = IdentityProvider(5055, "DE", "GWDG")
+        val gwdgTestProfile = Profile(5042, "GWDG Goettingen", gwdgTestIdentityProvider)
+        ProfileApi(this).downloadProfileConfig(gwdgTestProfile)
     }
 
 
