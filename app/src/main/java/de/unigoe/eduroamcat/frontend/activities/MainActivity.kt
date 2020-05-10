@@ -33,7 +33,7 @@ class MainActivity : AppCompatActivity() {
         initProfileSelectionSpinner()
         initProfileDownloadButton()
 
-        downloadAndParseTest()
+//        downloadAndParseTest()
     }
 
     /**
@@ -73,13 +73,11 @@ class MainActivity : AppCompatActivity() {
                 identityProviderArrayAdapter.filter.filter(s)
             }
 
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-                // do nothing
-            }
+            // do nothing
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
-            override fun afterTextChanged(s: Editable?) {
-                // do nothing
-            }
+            // do nothing
+            override fun afterTextChanged(s: Editable?) {}
         })
     }
 
@@ -101,7 +99,7 @@ class MainActivity : AppCompatActivity() {
             .observe(this, Observer { profiles ->
                 profileArrayAdapter.setProfiles(profiles)
                 profileSpinner.visibility = if (profileArrayAdapter.count == 0) GONE else VISIBLE
-                profileDownloadButton.visibility =
+                hiddenConstraintLayout.visibility =
                     if (profileArrayAdapter.count == 0) GONE else VISIBLE
             })
     }
