@@ -33,7 +33,7 @@ class MainActivity : AppCompatActivity() {
         initProfileSelectionSpinner()
         initProfileDownloadButton()
 
-//        downloadAndParseTest()
+        downloadAndParseTest()
     }
 
     /**
