@@ -10,6 +10,5 @@ internal class EapConfigParserTest {
     @Test
     fun providerNameTest() {
         assertEquals("GWDG Goettingen - GWDG", eapConfigParser.getProviderName())
-        assertEquals("GWDG Goettinen - GWDG", eapConfigParser.getProviderName())
     }
 }
