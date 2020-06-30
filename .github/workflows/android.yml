@@ -23,6 +23,7 @@ jobs:
       run: ./gradlew build --stacktrace -x test
 
   test:
+    name: Run tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
@@ -40,7 +41,7 @@ jobs:
         uses: asadmansr/android-test-report-action@v1.2.0
 
   apk-build:
-    name: Generate and upload APK
+    name: Generate and upload apk
     runs-on: ubuntu-latest
 
     steps:
