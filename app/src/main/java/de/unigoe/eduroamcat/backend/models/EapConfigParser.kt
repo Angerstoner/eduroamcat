@@ -1,8 +1,12 @@
 package de.unigoe.eduroamcat.backend.models
 
+import android.renderscript.ScriptGroup
 import org.w3c.dom.Document
 import org.w3c.dom.Element
+import org.xml.sax.InputSource
 import java.io.File
+import java.io.FileInputStream
+import java.io.InputStreamReader
 import javax.xml.parsers.DocumentBuilderFactory
 
 // AUTHENTICATION METHOD KEYS START
@@ -57,8 +61,22 @@ class EapConfigParser(eapConfigFilePath: String) {
         eapConfig = configBuilder.parse(eapConfigFile)
     }
 
-    fun getProviderName(): String {
-        return eapConfig.getFirstElementByTagName(PROVIDER_INFO)
-            .getFirstElementByTagName(PROVIDER_DISPLAY_NAME).textContent
-    }
+    fun getProviderDisplayName(): String = eapConfig.getFirstElementByTagName(PROVIDER_INFO)
+        .getFirstElementByTagName(PROVIDER_DISPLAY_NAME).textContent
+
+
+    fun getProviderDescription(): String =
+        eapConfig.getFirstElementByTagName(PROVIDER_INFO)
+            .getFirstElementByTagName(PROVIDER_DESCRIPTION).textContent
+
+    fun getProviderLogo(): String = ""
+
+    fun getTermsOfUse(): String = eapConfig.getFirstElementByTagName(PROVIDER_INFO)
+        .getFirstElementByTagName(PROVIDER_TERMS_OF_USE).textContent
+
+    fun getHelpdeskEmailAddress(): String = ""
+    fun getHelpdeskWebAddress(): String = ""
+    fun getHelpdeskPhoneNumber(): String = ""
+
+
 }
