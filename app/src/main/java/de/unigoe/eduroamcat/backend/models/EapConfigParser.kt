@@ -1,6 +1,5 @@
 package de.unigoe.eduroamcat.backend.models
 
-import android.util.Log
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import java.io.File
@@ -37,42 +36,29 @@ const val PROVIDER_WEB_ADDRESS = "WebAddress"
 const val PROVIDER_PHONE = "Phone"
 // PROVIDER INFO KEYS END
 
+// Adds a method for getting the first element with given [tag]
+private fun Element.getFirstElementByTagName(tag: String): Element =
+    getElementsByTagName(tag).item(0) as Element
 
-class EapConfigParser {
-    companion object {
-
-        /**
-         * Adds a method for getting the first element with given [tag]
-         */
-        private fun Element.getFirstElementByTagName(tag: String): Element =
-            getElementsByTagName(tag).item(0) as Element
-
-        private fun Document.getFirstElementByTagName(tag: String): Element =
-            getElementsByTagName(tag).item(0) as Element
+private fun Document.getFirstElementByTagName(tag: String): Element =
+    getElementsByTagName(tag).item(0) as Element
 
 
-        private const val tag = "EAPConfigParser"
-        private val ns: String? = null
-        private val parsedConfig = EapConfig()
+class EapConfigParser(eapConfigFilePath: String) {
+    private val tag = "EAPConfigParser"
+    private val ns: String? = null
+    private val parsedConfig = EapConfig()
 
-        fun parseXml(eapConfigFilePath: String) {
-            val eapConfigFile = File(eapConfigFilePath)
-            val configBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder()
-            val parsedConfigFile = configBuilder.parse(eapConfigFile)
+    private val eapConfig: Document
 
-            Log.i(tag, parseProviderName(parsedConfigFile))
+    init {
+        val eapConfigFile = File(eapConfigFilePath)
+        val configBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder()
+        eapConfig = configBuilder.parse(eapConfigFile)
+    }
 
-            //TODO: refactor, this was only a test
-//            val test = ((parsedConfigFile
-//                .getElementsByTagName(AUTHENTICATION_METHOD).item(0) as Element)
-//                .getElementsByTagName(OUTER_EAP_METHOD).item(0) as Element)
-//                .getElementsByTagName(OUTER_EAP_METHOD_TYPE).item(0).textContent
-//            Log.d(tag, test)
-        }
-
-        private fun parseProviderName(eapConfig: Document): String {
-            return eapConfig.getFirstElementByTagName(PROVIDER_INFO)
-                .getFirstElementByTagName(PROVIDER_DISPLAY_NAME).textContent
-        }
+    fun getProviderName(): String {
+        return eapConfig.getFirstElementByTagName(PROVIDER_INFO)
+            .getFirstElementByTagName(PROVIDER_DISPLAY_NAME).textContent
     }
 }

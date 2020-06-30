@@ -123,9 +123,9 @@ class ProfileApi(private val activityContext: Context) {
                 Toast.makeText(activityContext, msg, Toast.LENGTH_SHORT).show()
                 Log.i(tag, msg)
 
-                EapConfigParser.parseXml(
+                val eapConfigPath =
                     activityContext.getExternalFilesDir(null).toString().plus("/").plus(filename)
-                )
+                val configParser = EapConfigParser(eapConfigPath)
             }
         }
 
