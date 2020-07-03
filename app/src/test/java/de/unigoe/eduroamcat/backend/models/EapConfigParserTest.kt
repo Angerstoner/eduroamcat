@@ -6,8 +6,9 @@ import org.junit.Test
 /**
  * JUnit Test for parsing of downloaded eap-config
  *
- * ProviderLogo Test is missing, because Base64-decoding requires calls to the Android API which
- * are not available in plain JUnit tests
+ * Some tests are missing, because they require calls to the Android API which is not available via
+ * - ProviderLogoTest depends on [android.util.Base64.decode]
+ * - ProviderLocationTest depends on [android.location.Location]
  */
 internal class EapConfigParserTest {
     private val eapConfigParser = EapConfigParser("src/test/res/XmlParserTestConfig.eap-config")

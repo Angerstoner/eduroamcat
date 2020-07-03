@@ -126,6 +126,7 @@ class ProfileApi(private val activityContext: Context) {
                 val eapConfigPath =
                     activityContext.getExternalFilesDir(null).toString().plus("/").plus(filename)
                 val configParser = EapConfigParser(eapConfigPath)
+//                configParser.getProviderLocations().forEach { Log.i(tag, it.toString()) }
             }
         }
 

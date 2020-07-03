@@ -2,9 +2,13 @@ package de.unigoe.eduroamcat.backend.models
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.location.Location
 import android.util.Base64
+import android.util.Log
 import org.w3c.dom.Document
 import org.w3c.dom.Element
+import org.w3c.dom.Node
+import org.w3c.dom.NodeList
 import java.io.File
 import javax.xml.parsers.DocumentBuilderFactory
 
@@ -31,6 +35,8 @@ const val PROVIDER_INFO = "ProviderInfo"
 const val PROVIDER_DISPLAY_NAME = "DisplayName"
 const val PROVIDER_DESCRIPTION = "Description"
 const val PROVIDER_LOCATION = "ProviderLocation"
+const val PROVIDER_LOCATION_LONG = "Longitude"
+const val PROVIDER_LOCATION_LAT = "Latitude"
 const val PROVIDER_LOGO = "ProviderLogo"
 const val PROVIDER_TERMS_OF_USE = "TermsOfUse"
 const val PROVIDER_HELPDESK = "Helpdesk"
@@ -45,6 +51,9 @@ private fun Element.getFirstElementByTagName(tag: String): Element =
 
 private fun Document.getFirstElementByTagName(tag: String): Element =
     getElementsByTagName(tag).item(0) as Element
+
+private operator fun NodeList.iterator(): Iterator<Node> =
+    (0 until length).asSequence().map { item(it) as Node }.iterator()
 
 
 class EapConfigParser(eapConfigFilePath: String) {
@@ -66,6 +75,32 @@ class EapConfigParser(eapConfigFilePath: String) {
     fun getProviderDescription(): String =
         eapConfig.getFirstElementByTagName(PROVIDER_INFO)
             .getFirstElementByTagName(PROVIDER_DESCRIPTION).textContent
+
+    fun getProviderLocations(): List<Location> {
+        val locationStringList = eapConfig.getFirstElementByTagName(PROVIDER_INFO)
+            .getElementsByTagName(PROVIDER_LOCATION)
+        val locationList = ArrayList<Location>()
+        locationStringList.iterator().asSequence()
+            .filter { it.nodeType == Node.ELEMENT_NODE }
+            .map { it as Element }
+            .forEach {
+                try {
+                    val location = Location("")
+
+                    //@formatter:off
+                    with(location) {
+                        longitude = it.getFirstElementByTagName(PROVIDER_LOCATION_LONG).textContent.toDouble()
+                        latitude = it.getFirstElementByTagName(PROVIDER_LOCATION_LAT).textContent.toDouble()
+                    }
+                    //@formatter:on
+
+                    locationList.add(location)
+                } catch (e: NumberFormatException) {
+                    Log.e(tag, "COULD NOT PARSE LONGITUDE/LATITUDE TO DOUBLE")
+                }
+            }
+        return locationList
+    }
 
     fun getProviderLogo(): Bitmap {
         val base64LogoString = eapConfig.getFirstElementByTagName(PROVIDER_INFO)
