@@ -1,6 +1,7 @@
 package de.unigoe.eduroamcat.backend.models
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.w3c.dom.Element
 
@@ -27,6 +28,11 @@ internal class EapConfigParserTest {
     fun serverIdTest() {
         val expectedServerId = "eduroam.gwdg.de"
         assertEquals(expectedServerId, eapConfigParser.getServerId(getFirstAuthMethod()))
+    }
+
+    @Test
+    fun allowSaveTest() {
+        assertTrue(eapConfigParser.getAllowSave(getFirstAuthMethod()))
     }
 
     @Test

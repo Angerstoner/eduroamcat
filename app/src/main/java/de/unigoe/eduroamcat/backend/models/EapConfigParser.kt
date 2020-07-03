@@ -22,7 +22,8 @@ const val SERVER_SIDE_CREDENTIALS = "ServerSideCredential"
 const val SERVER_SIDE_CERTIFICATE = "CA"
 const val SERVER_ID = "ServerID"
 const val CLIENT_SIDE_CREDENTIALS = "ClientSideCredential"
-const val CLIENT_OUTER_IDENTITY = "OuterIdentity"
+const val CLIENT_SIDE_ALLOW_SAVE = "allow-save"
+const val CLIENT_SIDE_OUTER_IDENTITY = "OuterIdentity"
 const val INNER_AUTHENTICATION_METHOD = "InnerAuthenticationMethod"
 // AUTHENTICATION METHOD KEYS END
 
@@ -97,14 +98,20 @@ class EapConfigParser(eapConfigFilePath: String) {
         authenticationMethodElement.getFirstElementByTag(SERVER_SIDE_CREDENTIALS)
             .getFirstElementByTag(SERVER_ID).textContent
 
+    fun getAllowSave(authenticationMethodElement: Element): Boolean {
+        val clientSideCredElement = authenticationMethodElement.getFirstElementByTag(CLIENT_SIDE_CREDENTIALS)
+        return if (clientSideCredElement.hasAttribute(CLIENT_SIDE_ALLOW_SAVE)) {
+            clientSideCredElement.getFirstElementByTag(CLIENT_SIDE_ALLOW_SAVE).textContent!!.toBoolean()
+        } else true
+    }
 
     fun getProviderDisplayName(): String = eapConfig.getFirstElementByTag(PROVIDER_INFO)
         .getFirstElementByTag(PROVIDER_DISPLAY_NAME).textContent
 
+
     fun getProviderDescription(): String =
         eapConfig.getFirstElementByTag(PROVIDER_INFO)
             .getFirstElementByTag(PROVIDER_DESCRIPTION).textContent
-
 
     fun getProviderLocations(): List<Location> {
         val locationStringList = eapConfig.getFirstElementByTag(PROVIDER_INFO)
