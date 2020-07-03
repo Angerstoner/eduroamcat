@@ -3,7 +3,12 @@ package de.unigoe.eduroamcat.backend.models
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-
+/**
+ * JUnit Test for parsing of downloaded eap-config
+ *
+ * ProviderLogo Test is missing, because Base64-decoding requires calls to the Android API which
+ * are not available in plain JUnit tests
+ */
 internal class EapConfigParserTest {
     private val eapConfigParser = EapConfigParser("src/test/res/XmlParserTestConfig.eap-config")
 
@@ -26,16 +31,22 @@ internal class EapConfigParserTest {
                 "Vestibulum bibendum condimentum justo, in tempus dolor bibendum in."
         assertEquals(expectedTermsOfUse, eapConfigParser.getTermsOfUse())
     }
-//    @Test
-//    fun providerTest() {
-//    }
-//    @Test
-//    fun providerTest() {
-//    }
-//    @Test
-//    fun providerTest() {
-//    }
-//    @Test
-//    fun providerTest() {
-//    }
+
+    @Test
+    fun providerHelpdeskEmailTest() {
+        val expectedEmail = "support@gwdg.de"
+        assertEquals(expectedEmail, eapConfigParser.getHelpdeskEmailAddress())
+    }
+
+    @Test
+    fun providerHelpdeskPhoneTest() {
+        val expectedPhoneNumber = "+49 551 201 1523"
+        assertEquals(expectedPhoneNumber, eapConfigParser.getHelpdeskPhoneNumber())
+    }
+
+    @Test
+    fun providerWebAddressTest() {
+        val expectedWebAddress = "https://www.gwdg.de/wlan"
+        assertEquals(expectedWebAddress, eapConfigParser.getHelpdeskWebAddress())
+    }
 }

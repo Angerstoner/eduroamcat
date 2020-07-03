@@ -1,10 +1,12 @@
 package de.unigoe.eduroamcat.frontend.activities
 
 import android.Manifest.permission.ACCESS_FINE_LOCATION
+import android.graphics.BitmapFactory
 import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Base64
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import androidx.appcompat.app.AppCompatActivity

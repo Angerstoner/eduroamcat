@@ -1,12 +1,11 @@
 package de.unigoe.eduroamcat.backend.models
 
-import android.renderscript.ScriptGroup
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.util.Base64
 import org.w3c.dom.Document
 import org.w3c.dom.Element
-import org.xml.sax.InputSource
 import java.io.File
-import java.io.FileInputStream
-import java.io.InputStreamReader
 import javax.xml.parsers.DocumentBuilderFactory
 
 // AUTHENTICATION METHOD KEYS START
@@ -64,19 +63,30 @@ class EapConfigParser(eapConfigFilePath: String) {
     fun getProviderDisplayName(): String = eapConfig.getFirstElementByTagName(PROVIDER_INFO)
         .getFirstElementByTagName(PROVIDER_DISPLAY_NAME).textContent
 
-
     fun getProviderDescription(): String =
         eapConfig.getFirstElementByTagName(PROVIDER_INFO)
             .getFirstElementByTagName(PROVIDER_DESCRIPTION).textContent
 
-    fun getProviderLogo(): String = ""
+    fun getProviderLogo(): Bitmap {
+        val base64LogoString = eapConfig.getFirstElementByTagName(PROVIDER_INFO)
+            .getFirstElementByTagName(PROVIDER_LOGO).textContent
+        val base64Logo = Base64.decode(base64LogoString.toByteArray(), Base64.DEFAULT)
+
+        return BitmapFactory.decodeByteArray(base64Logo, 0, base64Logo.size)
+    }
 
     fun getTermsOfUse(): String = eapConfig.getFirstElementByTagName(PROVIDER_INFO)
         .getFirstElementByTagName(PROVIDER_TERMS_OF_USE).textContent
 
-    fun getHelpdeskEmailAddress(): String = ""
-    fun getHelpdeskWebAddress(): String = ""
-    fun getHelpdeskPhoneNumber(): String = ""
+    fun getHelpdeskEmailAddress(): String = eapConfig.getFirstElementByTagName(PROVIDER_INFO)
+        .getFirstElementByTagName(PROVIDER_HELPDESK)
+        .getFirstElementByTagName(PROVIDER_EMAIL).textContent
 
+    fun getHelpdeskWebAddress(): String = eapConfig.getFirstElementByTagName(PROVIDER_INFO)
+        .getFirstElementByTagName(PROVIDER_HELPDESK)
+        .getFirstElementByTagName(PROVIDER_WEB_ADDRESS).textContent
 
+    fun getHelpdeskPhoneNumber(): String = eapConfig.getFirstElementByTagName(PROVIDER_INFO)
+        .getFirstElementByTagName(PROVIDER_HELPDESK)
+        .getFirstElementByTagName(PROVIDER_PHONE).textContent
 }
