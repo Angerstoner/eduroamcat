@@ -58,6 +58,15 @@ private fun Document.getFirstElementByTag(tag: String): Element =
 private operator fun NodeList.iterator(): Iterator<Node> =
     (0 until length).asSequence().map { item(it) as Node }.iterator()
 
+// highly likely, that this will be used withs paths not starting with ProviderInfo
+@Suppress("SameParameterValue")
+private fun Document.getTextContentForXmlPath(vararg tags: String): String {
+    if (tags.isEmpty()) throw IllegalArgumentException()
+    var currentElement = this.getFirstElementByTag(tags[0])
+    (1 until tags.size).forEach { currentElement = currentElement.getFirstElementByTag(tags[it]) }
+    return currentElement.textContent
+}
+
 
 class EapConfigParser(eapConfigFilePath: String) {
     private val tag = "EAPConfigParser"
@@ -105,21 +114,18 @@ class EapConfigParser(eapConfigFilePath: String) {
         } else true
     }
 
-    fun getProviderDisplayName(): String = eapConfig.getFirstElementByTag(PROVIDER_INFO)
-        .getFirstElementByTag(PROVIDER_DISPLAY_NAME).textContent
+    fun getProviderDisplayName(): String =
+        eapConfig.getTextContentForXmlPath(PROVIDER_INFO, PROVIDER_DISPLAY_NAME)
 
 
     fun getProviderDescription(): String =
-        eapConfig.getFirstElementByTag(PROVIDER_INFO)
-            .getFirstElementByTag(PROVIDER_DESCRIPTION).textContent
+        eapConfig.getTextContentForXmlPath(PROVIDER_INFO, PROVIDER_DESCRIPTION)
 
     fun getProviderLocations(): List<Location> {
-        val locationStringList = eapConfig.getFirstElementByTag(PROVIDER_INFO)
-            .getElementsByTagName(PROVIDER_LOCATION)
+        val locationStringList = eapConfig.getFirstElementByTag(PROVIDER_INFO).getElementsByTagName(PROVIDER_LOCATION)
         val locationList = ArrayList<Location>()
         locationStringList.iterator().asSequence()
-            .filter { it.nodeType == Node.ELEMENT_NODE }
-            .map { it as Element }
+            .filter { it.nodeType == Node.ELEMENT_NODE }.map { it as Element }
             .forEach {
                 try {
                     val location = Location("")
@@ -136,25 +142,21 @@ class EapConfigParser(eapConfigFilePath: String) {
     }
 
     fun getProviderLogo(): Bitmap {
-        val base64LogoString = eapConfig.getFirstElementByTag(PROVIDER_INFO)
-            .getFirstElementByTag(PROVIDER_LOGO).textContent
+        val base64LogoString = eapConfig.getTextContentForXmlPath(PROVIDER_INFO, PROVIDER_LOGO)
         val base64Logo = Base64.decode(base64LogoString.toByteArray(), Base64.DEFAULT)
 
         return BitmapFactory.decodeByteArray(base64Logo, 0, base64Logo.size)
     }
 
-    fun getTermsOfUse(): String = eapConfig.getFirstElementByTag(PROVIDER_INFO)
-        .getFirstElementByTag(PROVIDER_TERMS_OF_USE).textContent
+    fun getTermsOfUse(): String =
+        eapConfig.getTextContentForXmlPath(PROVIDER_INFO, PROVIDER_TERMS_OF_USE)
 
-    fun getHelpdeskEmailAddress(): String = eapConfig.getFirstElementByTag(PROVIDER_INFO)
-        .getFirstElementByTag(PROVIDER_HELPDESK)
-        .getFirstElementByTag(PROVIDER_EMAIL).textContent
+    fun getHelpdeskEmailAddress(): String =
+        eapConfig.getTextContentForXmlPath(PROVIDER_INFO, PROVIDER_HELPDESK, PROVIDER_EMAIL)
 
-    fun getHelpdeskWebAddress(): String = eapConfig.getFirstElementByTag(PROVIDER_INFO)
-        .getFirstElementByTag(PROVIDER_HELPDESK)
-        .getFirstElementByTag(PROVIDER_WEB_ADDRESS).textContent
+    fun getHelpdeskWebAddress(): String =
+        eapConfig.getTextContentForXmlPath(PROVIDER_INFO, PROVIDER_HELPDESK, PROVIDER_WEB_ADDRESS)
 
-    fun getHelpdeskPhoneNumber(): String = eapConfig.getFirstElementByTag(PROVIDER_INFO)
-        .getFirstElementByTag(PROVIDER_HELPDESK)
-        .getFirstElementByTag(PROVIDER_PHONE).textContent
+    fun getHelpdeskPhoneNumber(): String =
+        eapConfig.getTextContentForXmlPath(PROVIDER_INFO, PROVIDER_HELPDESK, PROVIDER_PHONE)
 }
