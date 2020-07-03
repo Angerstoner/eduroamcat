@@ -2,16 +2,32 @@ package de.unigoe.eduroamcat.backend.models
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import org.w3c.dom.Element
 
 /**
  * JUnit Test for parsing of downloaded eap-config
  *
  * Some tests are missing, because they require calls to the Android API which is not available via
- * - ProviderLogoTest depends on [android.util.Base64.decode]
- * - ProviderLocationTest depends on [android.location.Location]
+ * - Test for [EapConfigParser.getServerCertificateList] depends on [android.util.Base64.decode]
+ * - Test for [EapConfigParser.getProviderLogo] depends on [android.util.Base64.decode]
+ * - Test for [EapConfigParser.getProviderLocations] depends on [android.location.Location]
  */
 internal class EapConfigParserTest {
     private val eapConfigParser = EapConfigParser("src/test/res/XmlParserTestConfig.eap-config")
+    private fun getFirstAuthMethod() = eapConfigParser.getAuthenticationMethodElements().item(0) as Element
+
+
+    @Test
+    fun outerEapTypeTest() {
+        val expectedEapType = EapType.PEAP
+        assertEquals(expectedEapType, eapConfigParser.getOuterEapType(getFirstAuthMethod()))
+    }
+
+    @Test
+    fun serverIdTest() {
+        val expectedServerId = "eduroam.gwdg.de"
+        assertEquals(expectedServerId, eapConfigParser.getServerId(getFirstAuthMethod()))
+    }
 
     @Test
     fun providerDisplayNameTest() {

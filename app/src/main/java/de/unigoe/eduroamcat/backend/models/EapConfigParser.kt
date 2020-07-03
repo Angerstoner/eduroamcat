@@ -10,12 +10,14 @@ import org.w3c.dom.Element
 import org.w3c.dom.Node
 import org.w3c.dom.NodeList
 import java.io.File
+import javax.security.cert.X509Certificate
 import javax.xml.parsers.DocumentBuilderFactory
 
 // AUTHENTICATION METHOD KEYS START
+const val AUTHENTICATION_METHOD_LIST = "AuthenticationMethods"
 const val AUTHENTICATION_METHOD = "AuthenticationMethod"
-const val OUTER_EAP_METHOD = "EAPMethod"
-const val OUTER_EAP_METHOD_TYPE = "Type"
+const val EAP_METHOD = "EAPMethod"
+const val EAP_METHOD_TYPE = "Type"
 const val SERVER_SIDE_CREDENTIALS = "ServerSideCredential"
 const val SERVER_SIDE_CERTIFICATE = "CA"
 const val SERVER_ID = "ServerID"
@@ -46,10 +48,10 @@ const val PROVIDER_PHONE = "Phone"
 // PROVIDER INFO KEYS END
 
 // Adds a method for getting the first element with given [tag]
-private fun Element.getFirstElementByTagName(tag: String): Element =
+private fun Element.getFirstElementByTag(tag: String): Element =
     getElementsByTagName(tag).item(0) as Element
 
-private fun Document.getFirstElementByTagName(tag: String): Element =
+private fun Document.getFirstElementByTag(tag: String): Element =
     getElementsByTagName(tag).item(0) as Element
 
 private operator fun NodeList.iterator(): Iterator<Node> =
@@ -58,7 +60,6 @@ private operator fun NodeList.iterator(): Iterator<Node> =
 
 class EapConfigParser(eapConfigFilePath: String) {
     private val tag = "EAPConfigParser"
-    private val ns: String? = null
     private val parsedConfig = EapConfig()
 
     private val eapConfig: Document
@@ -69,15 +70,44 @@ class EapConfigParser(eapConfigFilePath: String) {
         eapConfig = configBuilder.parse(eapConfigFile)
     }
 
-    fun getProviderDisplayName(): String = eapConfig.getFirstElementByTagName(PROVIDER_INFO)
-        .getFirstElementByTagName(PROVIDER_DISPLAY_NAME).textContent
+    fun getAuthenticationMethodElements(): NodeList =
+        eapConfig.getFirstElementByTag(AUTHENTICATION_METHOD_LIST).getElementsByTagName(AUTHENTICATION_METHOD)
+
+    fun getOuterEapType(authenticationMethodElement: Element): EapType =
+        EapType.getEapType(
+            authenticationMethodElement.getFirstElementByTag(EAP_METHOD).getFirstElementByTag(EAP_METHOD_TYPE)
+                .textContent.toInt()
+        )
+
+    fun getServerCertificateList(authenticationMethodElement: Element): List<X509Certificate> {
+        val certificateList = ArrayList<X509Certificate>()
+        val base64CertificateElementList = authenticationMethodElement.getFirstElementByTag(SERVER_SIDE_CREDENTIALS)
+            .getElementsByTagName(SERVER_SIDE_CERTIFICATE)
+
+        base64CertificateElementList.iterator().forEach {
+            val parsedCertificateBase64 = Base64.decode(it.textContent, Base64.DEFAULT)
+            val parsedServerCertificate = X509Certificate.getInstance(parsedCertificateBase64)
+            certificateList.add(parsedServerCertificate)
+        }
+
+        return certificateList
+    }
+
+    fun getServerId(authenticationMethodElement: Element): String =
+        authenticationMethodElement.getFirstElementByTag(SERVER_SIDE_CREDENTIALS)
+            .getFirstElementByTag(SERVER_ID).textContent
+
+
+    fun getProviderDisplayName(): String = eapConfig.getFirstElementByTag(PROVIDER_INFO)
+        .getFirstElementByTag(PROVIDER_DISPLAY_NAME).textContent
 
     fun getProviderDescription(): String =
-        eapConfig.getFirstElementByTagName(PROVIDER_INFO)
-            .getFirstElementByTagName(PROVIDER_DESCRIPTION).textContent
+        eapConfig.getFirstElementByTag(PROVIDER_INFO)
+            .getFirstElementByTag(PROVIDER_DESCRIPTION).textContent
+
 
     fun getProviderLocations(): List<Location> {
-        val locationStringList = eapConfig.getFirstElementByTagName(PROVIDER_INFO)
+        val locationStringList = eapConfig.getFirstElementByTag(PROVIDER_INFO)
             .getElementsByTagName(PROVIDER_LOCATION)
         val locationList = ArrayList<Location>()
         locationStringList.iterator().asSequence()
@@ -86,14 +116,10 @@ class EapConfigParser(eapConfigFilePath: String) {
             .forEach {
                 try {
                     val location = Location("")
-
-                    //@formatter:off
                     with(location) {
-                        longitude = it.getFirstElementByTagName(PROVIDER_LOCATION_LONG).textContent.toDouble()
-                        latitude = it.getFirstElementByTagName(PROVIDER_LOCATION_LAT).textContent.toDouble()
+                        longitude = it.getFirstElementByTag(PROVIDER_LOCATION_LONG).textContent.toDouble()
+                        latitude = it.getFirstElementByTag(PROVIDER_LOCATION_LAT).textContent.toDouble()
                     }
-                    //@formatter:on
-
                     locationList.add(location)
                 } catch (e: NumberFormatException) {
                     Log.e(tag, "COULD NOT PARSE LONGITUDE/LATITUDE TO DOUBLE")
@@ -103,25 +129,25 @@ class EapConfigParser(eapConfigFilePath: String) {
     }
 
     fun getProviderLogo(): Bitmap {
-        val base64LogoString = eapConfig.getFirstElementByTagName(PROVIDER_INFO)
-            .getFirstElementByTagName(PROVIDER_LOGO).textContent
+        val base64LogoString = eapConfig.getFirstElementByTag(PROVIDER_INFO)
+            .getFirstElementByTag(PROVIDER_LOGO).textContent
         val base64Logo = Base64.decode(base64LogoString.toByteArray(), Base64.DEFAULT)
 
         return BitmapFactory.decodeByteArray(base64Logo, 0, base64Logo.size)
     }
 
-    fun getTermsOfUse(): String = eapConfig.getFirstElementByTagName(PROVIDER_INFO)
-        .getFirstElementByTagName(PROVIDER_TERMS_OF_USE).textContent
+    fun getTermsOfUse(): String = eapConfig.getFirstElementByTag(PROVIDER_INFO)
+        .getFirstElementByTag(PROVIDER_TERMS_OF_USE).textContent
 
-    fun getHelpdeskEmailAddress(): String = eapConfig.getFirstElementByTagName(PROVIDER_INFO)
-        .getFirstElementByTagName(PROVIDER_HELPDESK)
-        .getFirstElementByTagName(PROVIDER_EMAIL).textContent
+    fun getHelpdeskEmailAddress(): String = eapConfig.getFirstElementByTag(PROVIDER_INFO)
+        .getFirstElementByTag(PROVIDER_HELPDESK)
+        .getFirstElementByTag(PROVIDER_EMAIL).textContent
 
-    fun getHelpdeskWebAddress(): String = eapConfig.getFirstElementByTagName(PROVIDER_INFO)
-        .getFirstElementByTagName(PROVIDER_HELPDESK)
-        .getFirstElementByTagName(PROVIDER_WEB_ADDRESS).textContent
+    fun getHelpdeskWebAddress(): String = eapConfig.getFirstElementByTag(PROVIDER_INFO)
+        .getFirstElementByTag(PROVIDER_HELPDESK)
+        .getFirstElementByTag(PROVIDER_WEB_ADDRESS).textContent
 
-    fun getHelpdeskPhoneNumber(): String = eapConfig.getFirstElementByTagName(PROVIDER_INFO)
-        .getFirstElementByTagName(PROVIDER_HELPDESK)
-        .getFirstElementByTagName(PROVIDER_PHONE).textContent
+    fun getHelpdeskPhoneNumber(): String = eapConfig.getFirstElementByTag(PROVIDER_INFO)
+        .getFirstElementByTag(PROVIDER_HELPDESK)
+        .getFirstElementByTag(PROVIDER_PHONE).textContent
 }

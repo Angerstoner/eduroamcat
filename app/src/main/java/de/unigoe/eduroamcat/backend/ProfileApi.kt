@@ -125,8 +125,14 @@ class ProfileApi(private val activityContext: Context) {
 
                 val eapConfigPath =
                     activityContext.getExternalFilesDir(null).toString().plus("/").plus(filename)
-                val configParser = EapConfigParser(eapConfigPath)
-//                configParser.getProviderLocations().forEach { Log.i(tag, it.toString()) }
+
+
+                //TODO: remove test code
+//                val eapConfigParser = EapConfigParser(eapConfigPath)
+//                val testAuthenticationMethodElement =
+//                    eapConfigParser.getAuthenticationMethodElements().item(0) as org.w3c.dom.Element
+//                eapConfigParser.getServerCertificateList(testAuthenticationMethodElement)
+//                    .forEach { Log.i(tag, it.toString()) }
             }
         }
 
