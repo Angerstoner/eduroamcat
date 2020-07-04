@@ -49,11 +49,17 @@ const val PROVIDER_PHONE = "Phone"
 // PROVIDER INFO KEYS END
 
 // Adds a method for getting the first element with given [tag]
-private fun Element.getFirstElementByTag(tag: String): Element =
-    getElementsByTagName(tag).item(0) as Element
+private fun Element.getFirstElementByTag(tag: String): Element? {
+    val element = getElementsByTagName(tag)
+    return if (element.length > 0) element.item(0) as Element
+    else null
+}
 
-private fun Document.getFirstElementByTag(tag: String): Element =
-    getElementsByTagName(tag).item(0) as Element
+private fun Document.getFirstElementByTag(tag: String): Element? {
+    val element = getElementsByTagName(tag)
+    return if (element.length > 0) element.item(0) as Element
+    else null
+}
 
 private operator fun NodeList.iterator(): Iterator<Node> =
     (0 until length).asSequence().map { item(it) as Node }.iterator()
@@ -62,8 +68,25 @@ private operator fun NodeList.iterator(): Iterator<Node> =
 @Suppress("SameParameterValue")
 private fun Document.getTextContentForXmlPath(vararg tags: String): String {
     if (tags.isEmpty()) throw IllegalArgumentException()
-    var currentElement = this.getFirstElementByTag(tags[0])
-    (1 until tags.size).forEach { currentElement = currentElement.getFirstElementByTag(tags[it]) }
+    var currentElement: Element = this.getFirstElementByTag(tags[0]) ?: throw NoSuchElementException()
+
+    (1 until tags.size).forEach {
+        val nextElement = currentElement.getFirstElementByTag(tags[it])
+        if (nextElement != null)
+            currentElement = nextElement
+    }
+    return currentElement.textContent
+}
+
+private fun Element.getTextContentForXmlPath(vararg tags: String): String {
+    if (tags.isEmpty()) throw IllegalArgumentException()
+    var currentElement: Element = this.getFirstElementByTag(tags[0]) ?: throw NoSuchElementException()
+
+    (1 until tags.size).forEach {
+        val nextElement = currentElement.getFirstElementByTag(tags[it])
+        if (nextElement != null)
+            currentElement = nextElement
+    }
     return currentElement.textContent
 }
 
@@ -81,17 +104,14 @@ class EapConfigParser(eapConfigFilePath: String) {
     }
 
     fun getAuthenticationMethodElements(): NodeList =
-        eapConfig.getFirstElementByTag(AUTHENTICATION_METHOD_LIST).getElementsByTagName(AUTHENTICATION_METHOD)
+        eapConfig.getFirstElementByTag(AUTHENTICATION_METHOD_LIST)!!.getElementsByTagName(AUTHENTICATION_METHOD)
 
     fun getOuterEapType(authenticationMethodElement: Element): EapType =
-        EapType.getEapType(
-            authenticationMethodElement.getFirstElementByTag(EAP_METHOD).getFirstElementByTag(EAP_METHOD_TYPE)
-                .textContent.toInt()
-        )
+        EapType.getEapType(authenticationMethodElement.getTextContentForXmlPath(EAP_METHOD, EAP_METHOD_TYPE).toInt())
 
     fun getServerCertificateList(authenticationMethodElement: Element): List<X509Certificate> {
         val certificateList = ArrayList<X509Certificate>()
-        val base64CertificateElementList = authenticationMethodElement.getFirstElementByTag(SERVER_SIDE_CREDENTIALS)
+        val base64CertificateElementList = authenticationMethodElement.getFirstElementByTag(SERVER_SIDE_CREDENTIALS)!!
             .getElementsByTagName(SERVER_SIDE_CERTIFICATE)
 
         base64CertificateElementList.iterator().forEach {
@@ -104,15 +124,17 @@ class EapConfigParser(eapConfigFilePath: String) {
     }
 
     fun getServerId(authenticationMethodElement: Element): String =
-        authenticationMethodElement.getFirstElementByTag(SERVER_SIDE_CREDENTIALS)
-            .getFirstElementByTag(SERVER_ID).textContent
+        authenticationMethodElement.getTextContentForXmlPath(SERVER_SIDE_CREDENTIALS, SERVER_ID)
 
     fun getAllowSave(authenticationMethodElement: Element): Boolean {
-        val clientSideCredElement = authenticationMethodElement.getFirstElementByTag(CLIENT_SIDE_CREDENTIALS)
-        return if (clientSideCredElement.hasAttribute(CLIENT_SIDE_ALLOW_SAVE)) {
-            clientSideCredElement.getFirstElementByTag(CLIENT_SIDE_ALLOW_SAVE).textContent!!.toBoolean()
-        } else true
+        val clientSideCredElement = authenticationMethodElement.getFirstElementByTag(CLIENT_SIDE_CREDENTIALS)!!
+        val clientSideAllowSaveElement =
+            clientSideCredElement.getFirstElementByTag(CLIENT_SIDE_ALLOW_SAVE) ?: return true
+        return clientSideAllowSaveElement.textContent!!.toBoolean()
     }
+
+//    fun getAnonymousIdentity(authenticationMethodElement: Element): String =
+
 
     fun getProviderDisplayName(): String =
         eapConfig.getTextContentForXmlPath(PROVIDER_INFO, PROVIDER_DISPLAY_NAME)
@@ -122,7 +144,7 @@ class EapConfigParser(eapConfigFilePath: String) {
         eapConfig.getTextContentForXmlPath(PROVIDER_INFO, PROVIDER_DESCRIPTION)
 
     fun getProviderLocations(): List<Location> {
-        val locationStringList = eapConfig.getFirstElementByTag(PROVIDER_INFO).getElementsByTagName(PROVIDER_LOCATION)
+        val locationStringList = eapConfig.getFirstElementByTag(PROVIDER_INFO)!!.getElementsByTagName(PROVIDER_LOCATION)
         val locationList = ArrayList<Location>()
         locationStringList.iterator().asSequence()
             .filter { it.nodeType == Node.ELEMENT_NODE }.map { it as Element }
@@ -130,8 +152,8 @@ class EapConfigParser(eapConfigFilePath: String) {
                 try {
                     val location = Location("")
                     with(location) {
-                        longitude = it.getFirstElementByTag(PROVIDER_LOCATION_LONG).textContent.toDouble()
-                        latitude = it.getFirstElementByTag(PROVIDER_LOCATION_LAT).textContent.toDouble()
+                        longitude = it.getTextContentForXmlPath(PROVIDER_LOCATION_LONG).toDouble()
+                        latitude = it.getTextContentForXmlPath(PROVIDER_LOCATION_LAT).toDouble()
                     }
                     locationList.add(location)
                 } catch (e: NumberFormatException) {
