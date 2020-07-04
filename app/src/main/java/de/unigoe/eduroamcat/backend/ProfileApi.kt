@@ -130,10 +130,10 @@ class ProfileApi(private val activityContext: Context) {
                 //TODO: remove test code
                 val eapConfigParser = EapConfigParser(eapConfigPath)
 //                val testLogo = eapConfigParser.getProviderLogo()
-//                val testAuthenticationMethodElement =
-//                    eapConfigParser.getAuthenticationMethodElements().item(0) as org.w3c.dom.Element
-//                eapConfigParser.getServerCertificateList(testAuthenticationMethodElement)
-//                    .forEach { Log.i(tag, it.toString()) }
+                val testAuthenticationMethodElement =
+                    eapConfigParser.getAuthenticationMethodElements().item(0) as org.w3c.dom.Element
+                eapConfigParser.getServerCertificateList(testAuthenticationMethodElement)
+                    .forEach { Log.i(tag, it.toString()) }
             }
         }
 

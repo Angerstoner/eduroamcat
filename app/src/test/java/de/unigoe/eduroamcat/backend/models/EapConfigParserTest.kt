@@ -15,25 +15,88 @@ import org.w3c.dom.Element
  */
 internal class EapConfigParserTest {
     private val eapConfigParser = EapConfigParser("src/test/res/XmlParserTestConfig.eap-config")
-    private fun getFirstAuthMethod() = eapConfigParser.getAuthenticationMethodElements().item(0) as Element
+    private val eapConfigParserMissingFields =
+        EapConfigParser("src/test/res/XmlParserTestConfigWithMissingFields.eap-config")
+    private val firstAuthMethodElement = eapConfigParser.getAuthenticationMethodElements().item(0) as Element
+    private val firstInnerAuthMethod =
+        eapConfigParser.getInnerAuthMethodElements(firstAuthMethodElement).item(0) as Element
+
+    private fun getInnerAuthWithClientAndServerSide(): Element {
+        val authMethod =
+            eapConfigParserMissingFields.getAuthenticationMethodElements().item(1) as Element
+        return eapConfigParserMissingFields
+            .getInnerAuthMethodElements(authMethod).item(0) as Element
+    }
 
 
     @Test
-    fun outerEapTypeTest() {
-        val expectedEapType = EapType.PEAP
-        assertEquals(expectedEapType, eapConfigParser.getOuterEapType(getFirstAuthMethod()))
+    fun eapTypeTest() {
+        val expectedOuterEapType = EapType.PEAP
+        val expectedInnerEapType = EapType.MSCHAPv2
+
+        assertEquals(expectedOuterEapType, eapConfigParser.getEapType(firstAuthMethodElement))
+        assertEquals(expectedInnerEapType, eapConfigParser.getEapType(firstInnerAuthMethod))
+    }
+
+    @Test
+    fun nonEapTypeTest() {
+        val authEltWithNonEapType =
+            eapConfigParserMissingFields.getAuthenticationMethodElements().item(2) as Element
+        val innerAuthEltWithNonEapType = eapConfigParserMissingFields
+            .getInnerAuthMethodElements(authEltWithNonEapType).item(0) as Element
+
+        val expectedNonEapType = 1
+        assertEquals(
+            expectedNonEapType,
+            eapConfigParserMissingFields.getNonEapAuthMethod(innerAuthEltWithNonEapType)
+        )
     }
 
     @Test
     fun serverIdTest() {
-        val expectedServerId = "eduroam.gwdg.de"
-        assertEquals(expectedServerId, eapConfigParser.getServerId(getFirstAuthMethod()))
+        val serverSideCredElt = eapConfigParser.getServerSideCredentialElements(firstAuthMethodElement)!!
+        val expectedServerId = arrayListOf("eduroam.gwdg.de")
+
+        assertEquals(expectedServerId, eapConfigParser.getServerId(serverSideCredElt))
+
+
+        val innerServerSideCredElt =
+            eapConfigParserMissingFields.getServerSideCredentialElements(getInnerAuthWithClientAndServerSide())!!
+        val expectedInnerServerId = arrayListOf("radius1.umk.pl", "radius2.umk.pl")
+
+        assertEquals(expectedInnerServerId, eapConfigParserMissingFields.getServerId(innerServerSideCredElt))
     }
 
     @Test
     fun allowSaveTest() {
-        assertTrue(eapConfigParser.getAllowSave(getFirstAuthMethod()))
+        val clientSideCredElt = eapConfigParser.getClientSideCredentialElements(firstAuthMethodElement)!!
+        assertTrue(eapConfigParser.getAllowSave(clientSideCredElt))
     }
+
+    @Test
+    fun anonymousIdentityTest() {
+        val expectedOuterIdentity = "eduroam@gwdg.de"
+        val clientSideCredElt = eapConfigParser.getClientSideCredentialElements(firstAuthMethodElement)!!
+        assertEquals(expectedOuterIdentity, eapConfigParser.getAnonymousIdentity(clientSideCredElt))
+
+        val innerClientSideCredElt =
+            eapConfigParserMissingFields.getClientSideCredentialElements(getInnerAuthWithClientAndServerSide())!!
+        val expectedOuterIdentityInnerAuth = "anonymous@umk.pl"
+
+        assertEquals(
+            expectedOuterIdentityInnerAuth,
+            eapConfigParserMissingFields.getAnonymousIdentity(innerClientSideCredElt)
+        )
+    }
+
+    @Test
+    fun credentialApplicabilityTest() {
+        assertEquals("eduroam", eapConfigParser.getSsid())
+        assertEquals("CCMP", eapConfigParser.getMinRsnProto())
+        assertEquals("001bc50460", eapConfigParser.getConsortiumOID())
+    }
+
+
 
     @Test
     fun providerDisplayNameTest() {

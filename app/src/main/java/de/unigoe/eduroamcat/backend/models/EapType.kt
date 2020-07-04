@@ -9,7 +9,7 @@ enum class EapType(val label: String, val ianaId: Int) {
     // INNER TYPES
     PAP("PAP", 1),
     GTC("GTC", 6),
-    TTLS("MSCHAPv2", 26);
+    MSCHAPv2("MSCHAPv2", 26);
 
     companion object {
         fun getEapType(ianaId: Int) = values().single() { it.ianaId == ianaId }

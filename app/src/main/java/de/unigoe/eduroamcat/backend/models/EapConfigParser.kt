@@ -13,11 +13,14 @@ import java.io.File
 import javax.security.cert.X509Certificate
 import javax.xml.parsers.DocumentBuilderFactory
 
+
+// TODO: outsource to different file
 // AUTHENTICATION METHOD KEYS START
 const val AUTHENTICATION_METHOD_LIST = "AuthenticationMethods"
 const val AUTHENTICATION_METHOD = "AuthenticationMethod"
 const val EAP_METHOD = "EAPMethod"
 const val EAP_METHOD_TYPE = "Type"
+const val NON_EAP_METHOD = "NonEAPAuthMethod"
 const val SERVER_SIDE_CREDENTIALS = "ServerSideCredential"
 const val SERVER_SIDE_CERTIFICATE = "CA"
 const val SERVER_ID = "ServerID"
@@ -31,6 +34,8 @@ const val INNER_AUTHENTICATION_METHOD = "InnerAuthenticationMethod"
 const val CREDENTIAL_APPLICABILITY = "CredentialApplicability"
 const val IEEE_80211 = "IEEE80211"
 const val SSID = "SSID"
+const val MIN_RSN_PROTO = "MinRSNProto"
+const val CONSORTIUM_OID = "ConsortiumOID"
 // CREDENTIAL APPLICABILITY KEYS END
 
 // PROVIDER INFO KEYS START
@@ -55,10 +60,12 @@ private fun Element.getFirstElementByTag(tag: String): Element? {
     else null
 }
 
-private fun Document.getFirstElementByTag(tag: String): Element? {
+private fun Document.getFirstElementByTag(tag: String): Element {
     val element = getElementsByTagName(tag)
-    return if (element.length > 0) element.item(0) as Element
-    else null
+    if (element.length > 0)
+        return element.item(0) as Element
+    else
+        throw NoSuchElementException()
 }
 
 private operator fun NodeList.iterator(): Iterator<Node> =
@@ -90,7 +97,13 @@ private fun Element.getTextContentForXmlPath(vararg tags: String): String {
     return currentElement.textContent
 }
 
-
+/**
+ * Parser for .eap-config files
+ *
+ *
+ * Some methods throw NoSuchElementExceptions if the user tries to access an Element not given in the eap-config
+ * The calling method must catch those exceptions and provide feedback to the user and the debug log
+ */
 class EapConfigParser(eapConfigFilePath: String) {
     private val tag = "EAPConfigParser"
     private val parsedConfig = EapConfig()
@@ -106,13 +119,21 @@ class EapConfigParser(eapConfigFilePath: String) {
     fun getAuthenticationMethodElements(): NodeList =
         eapConfig.getFirstElementByTag(AUTHENTICATION_METHOD_LIST)!!.getElementsByTagName(AUTHENTICATION_METHOD)
 
-    fun getOuterEapType(authenticationMethodElement: Element): EapType =
+    fun getInnerAuthMethodElements(authenticationMethodElement: Element): NodeList =
+        authenticationMethodElement.getElementsByTagName(INNER_AUTHENTICATION_METHOD)
+
+    fun getServerSideCredentialElements(authenticationMethodElement: Element): Element? =
+        authenticationMethodElement.getFirstElementByTag(SERVER_SIDE_CREDENTIALS)
+
+    fun getClientSideCredentialElements(authenticationMethodElement: Element): Element? =
+        authenticationMethodElement.getFirstElementByTag(CLIENT_SIDE_CREDENTIALS)
+
+    fun getEapType(authenticationMethodElement: Element): EapType =
         EapType.getEapType(authenticationMethodElement.getTextContentForXmlPath(EAP_METHOD, EAP_METHOD_TYPE).toInt())
 
-    fun getServerCertificateList(authenticationMethodElement: Element): List<X509Certificate> {
+    fun getServerCertificateList(serverSideCredentialElement: Element): List<X509Certificate> {
         val certificateList = ArrayList<X509Certificate>()
-        val base64CertificateElementList = authenticationMethodElement.getFirstElementByTag(SERVER_SIDE_CREDENTIALS)!!
-            .getElementsByTagName(SERVER_SIDE_CERTIFICATE)
+        val base64CertificateElementList = serverSideCredentialElement.getElementsByTagName(SERVER_SIDE_CERTIFICATE)
 
         base64CertificateElementList.iterator().forEach {
             val parsedCertificateBase64 = Base64.decode(it.textContent, Base64.DEFAULT)
@@ -123,18 +144,33 @@ class EapConfigParser(eapConfigFilePath: String) {
         return certificateList
     }
 
-    fun getServerId(authenticationMethodElement: Element): String =
-        authenticationMethodElement.getTextContentForXmlPath(SERVER_SIDE_CREDENTIALS, SERVER_ID)
 
-    fun getAllowSave(authenticationMethodElement: Element): Boolean {
-        val clientSideCredElement = authenticationMethodElement.getFirstElementByTag(CLIENT_SIDE_CREDENTIALS)!!
-        val clientSideAllowSaveElement =
-            clientSideCredElement.getFirstElementByTag(CLIENT_SIDE_ALLOW_SAVE) ?: return true
-        return clientSideAllowSaveElement.textContent!!.toBoolean()
+    fun getServerId(serverSideCredentialElement: Element): List<String> {
+        val serverIdList = ArrayList<String>()
+        serverSideCredentialElement.getElementsByTagName(SERVER_ID).iterator()
+            .forEach { serverIdList.add(it.textContent) }
+        return serverIdList
     }
 
-//    fun getAnonymousIdentity(authenticationMethodElement: Element): String =
+    fun getAllowSave(clientSideCredElt: Element): Boolean {
+        return try {
+            clientSideCredElt.getTextContentForXmlPath(CLIENT_SIDE_ALLOW_SAVE).toBoolean()
+        } catch (e: NoSuchElementException) {
+            Log.i(tag, "Tag $CLIENT_SIDE_ALLOW_SAVE not found")
+            true
+        }
+    }
 
+    fun getNonEapAuthMethod(innerAuthMethodElt: Element): Int =
+        innerAuthMethodElt.getTextContentForXmlPath(NON_EAP_METHOD, EAP_METHOD_TYPE).toInt()
+
+
+    fun getAnonymousIdentity(clientSideCredElt: Element): String =
+        clientSideCredElt.getTextContentForXmlPath(CLIENT_SIDE_OUTER_IDENTITY)
+
+    fun getSsid(): String = getFromCredentialApplicability(SSID)
+    fun getMinRsnProto(): String = getFromCredentialApplicability(MIN_RSN_PROTO)
+    fun getConsortiumOID(): String = getFromCredentialApplicability(CONSORTIUM_OID)
 
     fun getProviderDisplayName(): String =
         eapConfig.getTextContentForXmlPath(PROVIDER_INFO, PROVIDER_DISPLAY_NAME)
@@ -144,7 +180,8 @@ class EapConfigParser(eapConfigFilePath: String) {
         eapConfig.getTextContentForXmlPath(PROVIDER_INFO, PROVIDER_DESCRIPTION)
 
     fun getProviderLocations(): List<Location> {
-        val locationStringList = eapConfig.getFirstElementByTag(PROVIDER_INFO)!!.getElementsByTagName(PROVIDER_LOCATION)
+        val locationStringList =
+            eapConfig.getFirstElementByTag(PROVIDER_INFO).getElementsByTagName(PROVIDER_LOCATION)
         val locationList = ArrayList<Location>()
         locationStringList.iterator().asSequence()
             .filter { it.nodeType == Node.ELEMENT_NODE }.map { it as Element }
@@ -181,4 +218,15 @@ class EapConfigParser(eapConfigFilePath: String) {
 
     fun getHelpdeskPhoneNumber(): String =
         eapConfig.getTextContentForXmlPath(PROVIDER_INFO, PROVIDER_HELPDESK, PROVIDER_PHONE)
+
+    private fun getFromCredentialApplicability(tag: String): String {
+        eapConfig.getFirstElementByTag(CREDENTIAL_APPLICABILITY).getElementsByTagName(IEEE_80211)
+            .iterator().forEach {
+                try {
+                    return (it as Element).getTextContentForXmlPath(tag)
+                } catch (e: NoSuchElementException) { //do nothing, check the next element
+                }
+            }
+        throw NoSuchElementException()
+    }
 }
