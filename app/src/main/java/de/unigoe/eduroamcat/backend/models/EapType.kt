@@ -1,5 +1,8 @@
 package de.unigoe.eduroamcat.backend.models
 
+
+// Todo: replace with android.net.wifi.WifiEnterpriseConfig
+
 enum class EapType(val label: String, val ianaId: Int) {
     // OUTER TYPES
     EAP_TLS("EAP-TLS", 13),
