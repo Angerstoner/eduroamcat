@@ -28,8 +28,6 @@ import javax.xml.parsers.DocumentBuilderFactory
  */
 class EapConfigParser(eapConfigFilePath: String) {
     private val tag = "EAPConfigParser"
-    private val parsedConfig = EapConfig()
-
     private val eapConfig: Document
 
     /**
@@ -42,14 +40,34 @@ class EapConfigParser(eapConfigFilePath: String) {
         eapConfig = configBuilder.parse(eapConfigFile)
     }
 
-    /** Returns Authentication Methods from the 'AuthenticationMethods' block as NodeList for further processing */
+    /**
+     * Searches the given [AUTHENTICATION_METHOD_PARENT] block for the given AuthenticationsMethods.
+     * Typically the [AUTHENTICATION_METHOD_PARENT] block contains one or more [AUTHENTICATION_METHOD]s
+     *
+     * Returns [NodeList] of given AuthenticationMethods
+     */
     fun getAuthenticationMethodElements(): NodeList =
+        eapConfig.getFirstElementByTag(AUTHENTICATION_METHOD_PARENT).getElementsByTagName(AUTHENTICATION_METHOD)
         eapConfig.getFirstElementByTag(AUTHENTICATION_METHOD_LIST).getElementsByTagName(AUTHENTICATION_METHOD)
 
+    /**
+     * [EapType.EAP_TTLS] and [EapType.PEAP] require inner authentications
+     * such as [EapType.MSCHAPv2], [EapType.PAP] or [EapType.GTC]
+     *
+     * Returns [NodeList] of InnerAuthenticationsMethods within [authenticationMethodElement] block
+     */
+    fun getInnerAuthMethodElements(authenticationMethodElement: Element): NodeList =
+        authenticationMethodElement.getElementsByTagName(INNER_AUTHENTICATION_METHOD)
     /** Returns the InnerAuthenticationMethod block as NodeList. This typically contains the EAPType used in Phase 2 */
     fun getInnerAuthMethodElements(authenticationMethodElt: Element): NodeList =
         authenticationMethodElt.getElementsByTagName(INNER_AUTHENTICATION_METHOD)
 
+    /**
+     * Returns ServerSideCredentials block as [Element] for further parsing
+     * ServerSideCredentials block contains [SERVER_SIDE_CERTIFICATE] and [SERVER_ID]
+     */
+    fun getServerSideCredentialElements(authenticationMethodElement: Element): Element? =
+        authenticationMethodElement.getFirstElementByTag(SERVER_SIDE_CREDENTIALS)
     /**
      * Returns the ServerSideCredential block as NodeList.
      * This typically contains the ServerID and the server side certificates used in TTLS, TLS and PEAP
@@ -58,6 +76,12 @@ class EapConfigParser(eapConfigFilePath: String) {
         authenticationMethodElt.getFirstElementByTag(SERVER_SIDE_CREDENTIALS)
 
     /**
+     * Returns ClientSideCredentials block as [Element] for further parsing
+     * ClientSideCredentials block contains [CLIENT_SIDE_ALLOW_SAVE] and [CLIENT_SIDE_OUTER_IDENTITY]
+     */
+    fun getClientSideCredentialElements(authenticationMethodElement: Element): Element? =
+        authenticationMethodElement.getFirstElementByTag(CLIENT_SIDE_CREDENTIALS)
+    /**
      * Returns the ClientSideCredential block as NodeList.
      * This typically contains the OuterIdentity/AnonymousIdentity and in some cases the allow-save flag
      */
@@ -65,11 +89,22 @@ class EapConfigParser(eapConfigFilePath: String) {
         authenticationMethodElt.getFirstElementByTag(CLIENT_SIDE_CREDENTIALS)
 
     /**
+     * Returns [EapType] for given [authenticationMethodElement] block.
+     *
+     * Gives inner EapType, if called with innerAuthenticationMethod
+     */
+    /**
      * Returns the EapType in the given AuthenticationMethodElement
      */
     fun getEapType(authenticationMethodElement: Element): EapType =
         EapType.getEapType(authenticationMethodElement.getTextContentForXmlPath(EAP_METHOD, EAP_METHOD_TYPE).toInt())
 
+    /**
+     * Collects and returns [List] of ServerSideCertificates in [X509Certificate] format.
+     *
+     * Certificates are given as [Base64] in the eap-config
+     */
+    fun getServerCertificateList(serverSideCredentialElement: Element): List<X509Certificate> {
     /**
      * Returns Base64-decoded certificates found in the given [serverSideCredentialElt] block as [ArrayList] containing [X509Certificate]
      */
@@ -91,6 +126,10 @@ class EapConfigParser(eapConfigFilePath: String) {
      * Can contain multiple Server IDs, when multiple authentication servers are used
      */
     fun getServerId(serverSideCredentialElt: Element): List<String> {
+    /**
+     * Collects and returns [List] of ServerIDs as String
+     */
+    fun getServerId(serverSideCredentialElement: Element): List<String> {
         val serverIdList = ArrayList<String>()
         serverSideCredentialElt.getElementsByTagName(SERVER_ID).iterator()
             .forEach { serverIdList.add(it.textContent) }
@@ -98,10 +137,12 @@ class EapConfigParser(eapConfigFilePath: String) {
     }
 
     /**
-     * Returns value of allow-save flag if set in the given [clientSideCredElt], otherwise it defaults to true
+     * Returns [Boolean] if entered or parsed credentials are legal to store on the device
+     *
+     * Defaults to true, if the is no such element
      */
-    fun getAllowSave(clientSideCredElt: Element): Boolean {
-        return try {
+    fun getAllowSave(clientSideCredElt: Element): Boolean =
+        try {
             clientSideCredElt.getTextContentForXmlPath(CLIENT_SIDE_ALLOW_SAVE).toBoolean()
         } catch (e: NoSuchElementException) {
             Log.i(tag, "Tag $CLIENT_SIDE_ALLOW_SAVE not found")
@@ -109,17 +150,25 @@ class EapConfigParser(eapConfigFilePath: String) {
         }
     }
 
-    /**
-     * Returns value of NonEAPAuthMethod if a non eap method is used for phase 2 authentication
-     */
     fun getNonEapAuthMethod(innerAuthMethodElt: Element): Int =
         innerAuthMethodElt.getTextContentForXmlPath(NON_EAP_METHOD, EAP_METHOD_TYPE).toInt()
 
+    /**
+     * Returns Anonymous/OuterIdentity for the tunnel for disguising the real user
+     */
     /**
      * Returns outer/anonymous identity which should be used outside of the tunnel in TTLS or PEAP
      */
     fun getAnonymousIdentity(clientSideCredElt: Element): String =
         clientSideCredElt.getTextContentForXmlPath(CLIENT_SIDE_OUTER_IDENTITY)
+
+    /**
+     * Returns NonEapType for given [innerAuthMethodElt] block.
+     *
+     * Mutual exclusive with [EapType] within InnerAuthentication block
+     */
+    fun getNonEapAuthMethod(innerAuthMethodElt: Element): Int =
+        innerAuthMethodElt.getTextContentForXmlPath(NON_EAP_METHOD, EAP_METHOD_TYPE).toInt()
 
     /**
      * Returns specified SSID (eduroam in most cases) from the CredentialApplicability block

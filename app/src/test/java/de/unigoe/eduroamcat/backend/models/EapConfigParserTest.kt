@@ -4,6 +4,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.w3c.dom.Element
+import java.util.NoSuchElementException
 
 /**
  * JUnit Test for parsing of downloaded eap-config
@@ -16,7 +17,7 @@ import org.w3c.dom.Element
 internal class EapConfigParserTest {
     private val eapConfigParser = EapConfigParser("src/test/res/XmlParserTestConfig.eap-config")
     private val eapConfigParserMissingFields =
-        EapConfigParser("src/test/res/XmlParserTestConfigWithMissingFields.eap-config")
+        EapConfigParser("src/test/res/XmlParserTestConfigFull.eap-config")
     private val firstAuthMethodElement = eapConfigParser.getAuthenticationMethodElements().item(0) as Element
     private val firstInnerAuthMethod =
         eapConfigParser.getInnerAuthMethodElements(firstAuthMethodElement).item(0) as Element
@@ -28,6 +29,11 @@ internal class EapConfigParserTest {
             .getInnerAuthMethodElements(authMethod).item(0) as Element
     }
 
+    @Test(expected = NoSuchElementException::class)
+    fun exceptionTest() {
+        val eapParserWithExceptions = EapConfigParser("src/test/res/XmlParserTestConfigEmpty.eap-config")
+        val testAuthMethod = eapParserWithExceptions.getAuthenticationMethodElements()
+    }
 
     @Test
     fun eapTypeTest() {
@@ -95,7 +101,6 @@ internal class EapConfigParserTest {
         assertEquals("CCMP", eapConfigParser.getMinRsnProto())
         assertEquals("001bc50460", eapConfigParser.getConsortiumOID())
     }
-
 
 
     @Test
