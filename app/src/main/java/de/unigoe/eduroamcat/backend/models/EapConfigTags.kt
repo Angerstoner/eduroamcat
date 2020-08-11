@@ -1,7 +1,7 @@
 package de.unigoe.eduroamcat.backend.models
 
 // AUTHENTICATION METHOD KEYS START
-const val AUTHENTICATION_METHOD_LIST = "AuthenticationMethods"
+const val AUTHENTICATION_METHOD_PARENT = "AuthenticationMethods"
 const val AUTHENTICATION_METHOD = "AuthenticationMethod"
 const val EAP_METHOD = "EAPMethod"
 const val EAP_METHOD_TYPE = "Type"

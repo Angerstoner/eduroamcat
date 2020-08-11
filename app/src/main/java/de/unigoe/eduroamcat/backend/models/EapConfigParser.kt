@@ -48,65 +48,43 @@ class EapConfigParser(eapConfigFilePath: String) {
      */
     fun getAuthenticationMethodElements(): NodeList =
         eapConfig.getFirstElementByTag(AUTHENTICATION_METHOD_PARENT).getElementsByTagName(AUTHENTICATION_METHOD)
-        eapConfig.getFirstElementByTag(AUTHENTICATION_METHOD_LIST).getElementsByTagName(AUTHENTICATION_METHOD)
 
     /**
+     * Returns [NodeList] of InnerAuthenticationsMethods within [authenticationMethodElt] block
+     *
      * [EapType.EAP_TTLS] and [EapType.PEAP] require inner authentications
      * such as [EapType.MSCHAPv2], [EapType.PAP] or [EapType.GTC]
-     *
-     * Returns [NodeList] of InnerAuthenticationsMethods within [authenticationMethodElement] block
      */
-    fun getInnerAuthMethodElements(authenticationMethodElement: Element): NodeList =
-        authenticationMethodElement.getElementsByTagName(INNER_AUTHENTICATION_METHOD)
-    /** Returns the InnerAuthenticationMethod block as NodeList. This typically contains the EAPType used in Phase 2 */
     fun getInnerAuthMethodElements(authenticationMethodElt: Element): NodeList =
         authenticationMethodElt.getElementsByTagName(INNER_AUTHENTICATION_METHOD)
 
     /**
-     * Returns ServerSideCredentials block as [Element] for further parsing
+     * Returns ServerSideCredentials block as [Element] for further processing
      * ServerSideCredentials block contains [SERVER_SIDE_CERTIFICATE] and [SERVER_ID]
      */
     fun getServerSideCredentialElements(authenticationMethodElement: Element): Element? =
         authenticationMethodElement.getFirstElementByTag(SERVER_SIDE_CREDENTIALS)
-    /**
-     * Returns the ServerSideCredential block as NodeList.
-     * This typically contains the ServerID and the server side certificates used in TTLS, TLS and PEAP
-     */
-    fun getServerSideCredentialElements(authenticationMethodElt: Element): Element? =
-        authenticationMethodElt.getFirstElementByTag(SERVER_SIDE_CREDENTIALS)
+
 
     /**
-     * Returns ClientSideCredentials block as [Element] for further parsing
-     * ClientSideCredentials block contains [CLIENT_SIDE_ALLOW_SAVE] and [CLIENT_SIDE_OUTER_IDENTITY]
-     */
-    fun getClientSideCredentialElements(authenticationMethodElement: Element): Element? =
-        authenticationMethodElement.getFirstElementByTag(CLIENT_SIDE_CREDENTIALS)
-    /**
-     * Returns the ClientSideCredential block as NodeList.
-     * This typically contains the OuterIdentity/AnonymousIdentity and in some cases the allow-save flag
+     * Returns ClientSideCredentials block as [Element] for further processing
+     * ClientSideCredentials block contains [CLIENT_SIDE_OUTER_IDENTITY] and [CLIENT_SIDE_ALLOW_SAVE]
      */
     fun getClientSideCredentialElements(authenticationMethodElt: Element): Element? =
         authenticationMethodElt.getFirstElementByTag(CLIENT_SIDE_CREDENTIALS)
 
     /**
-     * Returns [EapType] for given [authenticationMethodElement] block.
+     * Returns [EapType] for given [authenticationMethodElt] block.
      *
      * Gives inner EapType, if called with innerAuthenticationMethod
      */
-    /**
-     * Returns the EapType in the given AuthenticationMethodElement
-     */
-    fun getEapType(authenticationMethodElement: Element): EapType =
-        EapType.getEapType(authenticationMethodElement.getTextContentForXmlPath(EAP_METHOD, EAP_METHOD_TYPE).toInt())
+    fun getEapType(authenticationMethodElt: Element): EapType =
+        EapType.getEapType(authenticationMethodElt.getTextContentForXmlPath(EAP_METHOD, EAP_METHOD_TYPE).toInt())
 
     /**
      * Collects and returns [List] of ServerSideCertificates in [X509Certificate] format.
      *
      * Certificates are given as [Base64] in the eap-config
-     */
-    fun getServerCertificateList(serverSideCredentialElement: Element): List<X509Certificate> {
-    /**
-     * Returns Base64-decoded certificates found in the given [serverSideCredentialElt] block as [ArrayList] containing [X509Certificate]
      */
     fun getServerCertificateList(serverSideCredentialElt: Element): List<X509Certificate> {
         val certificateList = ArrayList<X509Certificate>()
@@ -122,14 +100,10 @@ class EapConfigParser(eapConfigFilePath: String) {
     }
 
     /**
-     * Returns list of ServerID (e.g. URL of the authentication server) found in the given [serverSideCredentialElt] block
+     * Returns [ArrayList] of ServerID (e.g. URL of the authentication server) found in the given [serverSideCredentialElt] block
      * Can contain multiple Server IDs, when multiple authentication servers are used
      */
     fun getServerId(serverSideCredentialElt: Element): List<String> {
-    /**
-     * Collects and returns [List] of ServerIDs as String
-     */
-    fun getServerId(serverSideCredentialElement: Element): List<String> {
         val serverIdList = ArrayList<String>()
         serverSideCredentialElt.getElementsByTagName(SERVER_ID).iterator()
             .forEach { serverIdList.add(it.textContent) }
@@ -148,16 +122,11 @@ class EapConfigParser(eapConfigFilePath: String) {
             Log.i(tag, "Tag $CLIENT_SIDE_ALLOW_SAVE not found")
             true
         }
-    }
-
-    fun getNonEapAuthMethod(innerAuthMethodElt: Element): Int =
-        innerAuthMethodElt.getTextContentForXmlPath(NON_EAP_METHOD, EAP_METHOD_TYPE).toInt()
 
     /**
      * Returns Anonymous/OuterIdentity for the tunnel for disguising the real user
-     */
-    /**
-     * Returns outer/anonymous identity which should be used outside of the tunnel in TTLS or PEAP
+     *
+     * Used in EAP-TTLS and PEAP
      */
     fun getAnonymousIdentity(clientSideCredElt: Element): String =
         clientSideCredElt.getTextContentForXmlPath(CLIENT_SIDE_OUTER_IDENTITY)
@@ -204,7 +173,8 @@ class EapConfigParser(eapConfigFilePath: String) {
      * Returns location of the EAP provider (e.g. for the helpdesk)
      */
     fun getProviderLocations(): List<Location> {
-        val locationStringList = eapConfig.getFirstElementByTag(PROVIDER_INFO).getElementsByTagName(PROVIDER_LOCATION)
+        val locationStringList =
+            eapConfig.getFirstElementByTag(PROVIDER_INFO).getElementsByTagName(PROVIDER_LOCATION)
         val locationList = ArrayList<Location>()
         locationStringList.iterator().asSequence()
             .filter { it.nodeType == Node.ELEMENT_NODE }.map { it as Element }
