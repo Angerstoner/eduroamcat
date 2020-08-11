@@ -1,10 +1,11 @@
 package de.unigoe.eduroamcat.backend.models
 
+import android.net.wifi.WifiEnterpriseConfig
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.w3c.dom.Element
-import java.util.NoSuchElementException
+import java.util.*
 
 /**
  * JUnit Test for parsing of downloaded eap-config
@@ -32,13 +33,13 @@ internal class EapConfigParserTest {
     @Test(expected = NoSuchElementException::class)
     fun exceptionTest() {
         val eapParserWithExceptions = EapConfigParser("src/test/res/XmlParserTestConfigEmpty.eap-config")
-        val testAuthMethod = eapParserWithExceptions.getAuthenticationMethodElements()
+        eapParserWithExceptions.getAuthenticationMethodElements() // this should raise a NoSuchElementException
     }
 
     @Test
     fun eapTypeTest() {
-        val expectedOuterEapType = EapType.PEAP
-        val expectedInnerEapType = EapType.MSCHAPv2
+        val expectedOuterEapType = WifiEnterpriseConfig.Eap.PEAP
+        val expectedInnerEapType = WifiEnterpriseConfig.Phase2.MSCHAPV2
 
         assertEquals(expectedOuterEapType, eapConfigParser.getEapType(firstAuthMethodElement))
         assertEquals(expectedInnerEapType, eapConfigParser.getEapType(firstInnerAuthMethod))
