@@ -3,6 +3,7 @@ package de.unigoe.eduroamcat.backend.models
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.location.Location
+import android.net.wifi.WifiEnterpriseConfig
 import android.util.Base64
 import android.util.Log
 import de.unigoe.eduroamcat.backend.util.getFirstElementByTag
@@ -74,12 +75,17 @@ class EapConfigParser(eapConfigFilePath: String) {
         authenticationMethodElt.getFirstElementByTag(CLIENT_SIDE_CREDENTIALS)
 
     /**
-     * Returns [EapType] for given [authenticationMethodElt] block.
+     * Returns eap type as constant for given [authenticationMethodElt] block.
+     *
+     * Constants taken from [WifiEnterpriseConfig.Eap] and [WifiEnterpriseConfig.Phase2]
      *
      * Gives inner EapType, if called with innerAuthenticationMethod
      */
-    fun getEapType(authenticationMethodElt: Element): EapType =
-        EapType.getEapType(authenticationMethodElt.getTextContentForXmlPath(EAP_METHOD, EAP_METHOD_TYPE).toInt())
+    fun getEapType(authenticationMethodElt: Element): Int {
+        val eapTypeIanaId = authenticationMethodElt.getTextContentForXmlPath(EAP_METHOD, EAP_METHOD_TYPE).toInt()
+        return getEapTypeFromIanaID(eapTypeIanaId)
+
+    }
 
     /**
      * Collects and returns [List] of ServerSideCertificates in [X509Certificate] format.
@@ -247,9 +253,26 @@ class EapConfigParser(eapConfigFilePath: String) {
             .iterator().forEach {
                 try {
                     return (it as Element).getTextContentForXmlPath(tag)
-                } catch (e: NoSuchElementException) { //do nothing, check the next element
-                }
+                } catch (e: NoSuchElementException) {
+                } //do nothing, check the next element
             }
         throw NoSuchElementException()
     }
+
+    /**
+     * Helper function to map between IANA IDs and [WifiEnterpriseConfig] constants
+     * for different Eap types
+     *
+     * see https://www.iana.org/assignments/eap-numbers/eap-numbers.xhtml#eap-numbers-4 for more information
+     */
+    private fun getEapTypeFromIanaID(ianaId: Int) =
+        when (ianaId) {
+            13 -> WifiEnterpriseConfig.Eap.TLS
+            21 -> WifiEnterpriseConfig.Eap.TTLS
+            25 -> WifiEnterpriseConfig.Eap.PEAP
+            1 -> WifiEnterpriseConfig.Phase2.PAP
+            6 -> WifiEnterpriseConfig.Phase2.GTC
+            26 -> WifiEnterpriseConfig.Phase2.MSCHAPV2
+            else -> throw NoSuchElementException()
+        }
 }
