@@ -9,10 +9,10 @@ import android.util.Log
 import de.unigoe.eduroamcat.backend.util.getFirstElementByTag
 import de.unigoe.eduroamcat.backend.util.getTextContentForXmlPath
 import de.unigoe.eduroamcat.backend.util.iterator
+import de.unigoe.eduroamcat.backend.util.toElementList
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.w3c.dom.Node
-import org.w3c.dom.NodeList
 import java.io.File
 import javax.security.cert.X509Certificate
 import javax.xml.parsers.DocumentBuilderFactory
@@ -45,19 +45,21 @@ class EapConfigParser(eapConfigFilePath: String) {
      * Searches the given [AUTHENTICATION_METHOD_PARENT] block for the given AuthenticationsMethods.
      * Typically the [AUTHENTICATION_METHOD_PARENT] block contains one or more [AUTHENTICATION_METHOD]s
      *
-     * Returns [NodeList] of given AuthenticationMethods
+     * Returns [List] of [Element] containing given AuthenticationMethods
      */
-    fun getAuthenticationMethodElements(): NodeList =
-        eapConfig.getFirstElementByTag(AUTHENTICATION_METHOD_PARENT).getElementsByTagName(AUTHENTICATION_METHOD)
+    fun getAuthenticationMethodElements(): List<Element> =
+        eapConfig.getFirstElementByTag(AUTHENTICATION_METHOD_PARENT)
+            .getElementsByTagName(AUTHENTICATION_METHOD).toElementList()
 
     /**
-     * Returns [NodeList] of InnerAuthenticationsMethods within [authenticationMethodElt] block
+     * Returns [List] of [Element] containing InnerAuthenticationsMethods within [authenticationMethodElt] block
      *
-     * [EapType.EAP_TTLS] and [EapType.PEAP] require inner authentications
-     * such as [EapType.MSCHAPv2], [EapType.PAP] or [EapType.GTC]
+     * [WifiEnterpriseConfig.Eap.TTLS] and [WifiEnterpriseConfig.Eap.PEAP] require inner authentications
+     * such as [WifiEnterpriseConfig.Phase2.MSCHAPV2], [WifiEnterpriseConfig.Phase2.PAP]
+     * or [WifiEnterpriseConfig.Phase2.GTC]
      */
-    fun getInnerAuthMethodElements(authenticationMethodElt: Element): NodeList =
-        authenticationMethodElt.getElementsByTagName(INNER_AUTHENTICATION_METHOD)
+    fun getInnerAuthMethodElements(authenticationMethodElt: Element): List<Element> =
+        authenticationMethodElt.getElementsByTagName(INNER_AUTHENTICATION_METHOD).toElementList()
 
     /**
      * Returns ServerSideCredentials block as [Element] for further processing

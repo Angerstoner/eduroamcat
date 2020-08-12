@@ -23,6 +23,13 @@ internal fun Document.getFirstElementByTag(tag: String): Element {
 internal operator fun NodeList.iterator(): Iterator<Node> =
     (0 until length).asSequence().map { item(it) as Node }.iterator()
 
+internal fun NodeList.toElementList(): List<Element> =
+    (0 until length).asSequence().map {
+        if (item(it) is Element) item(it) as Element
+        else throw TypeCastException()
+    }.toList()
+
+
 // highly likely, that this will be used withs paths not starting with ProviderInfo
 @Suppress("SameParameterValue")
 internal fun Document.getTextContentForXmlPath(vararg tags: String): String {

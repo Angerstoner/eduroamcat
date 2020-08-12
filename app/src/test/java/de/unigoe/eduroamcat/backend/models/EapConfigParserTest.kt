@@ -19,15 +19,15 @@ internal class EapConfigParserTest {
     private val eapConfigParser = EapConfigParser("src/test/res/XmlParserTestConfig.eap-config")
     private val eapConfigParserMissingFields =
         EapConfigParser("src/test/res/XmlParserTestConfigFull.eap-config")
-    private val firstAuthMethodElement = eapConfigParser.getAuthenticationMethodElements().item(0) as Element
+    private val firstAuthMethodElement = eapConfigParser.getAuthenticationMethodElements()[0]
     private val firstInnerAuthMethod =
-        eapConfigParser.getInnerAuthMethodElements(firstAuthMethodElement).item(0) as Element
+        eapConfigParser.getInnerAuthMethodElements(firstAuthMethodElement)[0]
 
     private fun getInnerAuthWithClientAndServerSide(): Element {
         val authMethod =
-            eapConfigParserMissingFields.getAuthenticationMethodElements().item(1) as Element
+            eapConfigParserMissingFields.getAuthenticationMethodElements()[1]
         return eapConfigParserMissingFields
-            .getInnerAuthMethodElements(authMethod).item(0) as Element
+            .getInnerAuthMethodElements(authMethod)[0]
     }
 
     @Test(expected = NoSuchElementException::class)
@@ -48,9 +48,9 @@ internal class EapConfigParserTest {
     @Test
     fun nonEapTypeTest() {
         val authEltWithNonEapType =
-            eapConfigParserMissingFields.getAuthenticationMethodElements().item(2) as Element
+            eapConfigParserMissingFields.getAuthenticationMethodElements()[2]
         val innerAuthEltWithNonEapType = eapConfigParserMissingFields
-            .getInnerAuthMethodElements(authEltWithNonEapType).item(0) as Element
+            .getInnerAuthMethodElements(authEltWithNonEapType)[0]
 
         val expectedNonEapType = 1
         assertEquals(
