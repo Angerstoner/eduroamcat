@@ -6,10 +6,12 @@ import org.w3c.dom.Node
 import org.w3c.dom.NodeList
 
 // Adds a method for getting the first element with given [tag]
-internal fun Element.getFirstElementByTag(tag: String): Element? {
+internal fun Element.getFirstElementByTag(tag: String): Element {
     val element = getElementsByTagName(tag)
-    return if (element.length > 0) element.item(0) as Element
-    else null
+    if (element.length > 0)
+        return element.item(0) as Element
+    else
+        throw NoSuchElementException()
 }
 
 internal fun Document.getFirstElementByTag(tag: String): Element {

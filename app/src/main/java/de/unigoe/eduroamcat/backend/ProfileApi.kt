@@ -132,7 +132,7 @@ class ProfileApi(private val activityContext: Context) {
 //                val testLogo = eapConfigParser.getProviderLogo()
                 val testAuthenticationMethodElement =
                     eapConfigParser.getAuthenticationMethodElements()[0]
-                eapConfigParser.getServerCertificateList(testAuthenticationMethodElement)
+                eapConfigParser.getServerCertificates(testAuthenticationMethodElement)
                     .forEach { Log.i(tag, it.toString()) }
             }
         }

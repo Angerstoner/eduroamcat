@@ -14,7 +14,8 @@ import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.w3c.dom.Node
 import java.io.File
-import javax.security.cert.X509Certificate
+import java.security.cert.CertificateFactory
+import java.security.cert.X509Certificate
 import javax.xml.parsers.DocumentBuilderFactory
 
 /**
@@ -65,7 +66,7 @@ class EapConfigParser(eapConfigFilePath: String) {
      * Returns ServerSideCredentials block as [Element] for further processing
      * ServerSideCredentials block contains [SERVER_SIDE_CERTIFICATE] and [SERVER_ID]
      */
-    fun getServerSideCredentialElements(authenticationMethodElement: Element): Element? =
+    fun getServerSideCredentialElements(authenticationMethodElement: Element): Element =
         authenticationMethodElement.getFirstElementByTag(SERVER_SIDE_CREDENTIALS)
 
 
@@ -73,7 +74,7 @@ class EapConfigParser(eapConfigFilePath: String) {
      * Returns ClientSideCredentials block as [Element] for further processing
      * ClientSideCredentials block contains [CLIENT_SIDE_OUTER_IDENTITY] and [CLIENT_SIDE_ALLOW_SAVE]
      */
-    fun getClientSideCredentialElements(authenticationMethodElt: Element): Element? =
+    fun getClientSideCredentialElements(authenticationMethodElt: Element): Element =
         authenticationMethodElt.getFirstElementByTag(CLIENT_SIDE_CREDENTIALS)
 
     /**
@@ -90,21 +91,23 @@ class EapConfigParser(eapConfigFilePath: String) {
     }
 
     /**
-     * Collects and returns [List] of ServerSideCertificates in [X509Certificate] format.
+     * Collects and returns Array of ServerSideCertificates in [X509Certificate] format.
      *
      * Certificates are given as [Base64] in the eap-config
      */
-    fun getServerCertificateList(serverSideCredentialElt: Element): List<X509Certificate> {
+    fun getServerCertificates(serverSideCredentialElt: Element): Array<X509Certificate> {
         val certificateList = ArrayList<X509Certificate>()
         val base64CertificateEltList = serverSideCredentialElt.getElementsByTagName(SERVER_SIDE_CERTIFICATE)
+        val certFactory = CertificateFactory.getInstance("X.509")
 
         base64CertificateEltList.iterator().forEach {
             val parsedCertificateBase64 = Base64.decode(it.textContent, Base64.DEFAULT)
-            val parsedServerCertificate = X509Certificate.getInstance(parsedCertificateBase64)
+            val certInputStream = parsedCertificateBase64.inputStream()
+            val parsedServerCertificate = certFactory.generateCertificate(certInputStream) as X509Certificate
             certificateList.add(parsedServerCertificate)
         }
 
-        return certificateList
+        return certificateList.toTypedArray()
     }
 
     /**
