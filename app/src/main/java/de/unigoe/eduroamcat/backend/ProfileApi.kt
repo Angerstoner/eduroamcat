@@ -114,7 +114,7 @@ class ProfileApi(private val activityContext: Context) {
                     "&profile=${profile.profileId}" + "&lang=$lang"
         )
         val filename =
-            "eduroam-${profile.identityProvider}_.eap-config"
+            "eduroam-${profile.identityProvider}_${profile.profileId}_.eap-config"
                 .replace("[<>:\"/\\\\|?*, ]".toRegex(), "_")
 
         val onProfileDownloadComplete: BroadcastReceiver = object : BroadcastReceiver() {
@@ -132,8 +132,8 @@ class ProfileApi(private val activityContext: Context) {
 //                val testLogo = eapConfigParser.getProviderLogo()
                 val testAuthenticationMethodElement =
                     eapConfigParser.getAuthenticationMethodElements()[0]
-                eapConfigParser.getServerCertificates(testAuthenticationMethodElement)
-                    .forEach { Log.i(tag, it.toString()) }
+//                eapConfigParser.getServerCertificates(testAuthenticationMethodElement)
+//                    .forEach { Log.i(tag, it.toString()) }
             }
         }
 

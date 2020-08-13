@@ -114,7 +114,7 @@ class EapConfigParser(eapConfigFilePath: String) {
      * Returns [ArrayList] of ServerID (e.g. URL of the authentication server) found in the given [serverSideCredentialElt] block
      * Can contain multiple Server IDs, when multiple authentication servers are used
      */
-    fun getServerId(serverSideCredentialElt: Element): List<String> {
+    fun getServerIds(serverSideCredentialElt: Element): List<String> {
         val serverIdList = ArrayList<String>()
         serverSideCredentialElt.getElementsByTagName(SERVER_ID).iterator()
             .forEach { serverIdList.add(it.textContent) }

@@ -1,12 +1,10 @@
 package de.unigoe.eduroamcat.frontend.activities
 
 import android.Manifest.permission.ACCESS_FINE_LOCATION
-import android.graphics.BitmapFactory
 import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Base64
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import androidx.appcompat.app.AppCompatActivity
@@ -15,6 +13,7 @@ import de.unigoe.eduroamcat.R
 import de.unigoe.eduroamcat.backend.ProfileApi
 import de.unigoe.eduroamcat.backend.models.IdentityProvider
 import de.unigoe.eduroamcat.backend.models.Profile
+import de.unigoe.eduroamcat.backend.util.WifiEnterpriseConfigurator
 import de.unigoe.eduroamcat.frontend.adapters.IdentityProviderArrayAdapter
 import de.unigoe.eduroamcat.frontend.adapters.ProfileArrayAdapter
 import kotlinx.android.synthetic.main.activity_main.*
@@ -111,8 +110,17 @@ class MainActivity : AppCompatActivity() {
         val gwdgTestIdentityProvider = IdentityProvider(5055, "DE", "GWDG")
         val gwdgTestProfile = Profile(5042, "GWDG Goettingen", gwdgTestIdentityProvider)
         ProfileApi(this).downloadProfileConfig(gwdgTestProfile)
+        val filename = "eduroam-${gwdgTestProfile.identityProvider}_${gwdgTestProfile.profileId}_.eap-config"
+            .replace("[<>:\"/\\\\|?*, ]".toRegex(), "_")
+        val fullpath = getExternalFilesDir(null).toString().plus("/").plus(filename)
+        wifiEnterpriseConfiguratorTest(fullpath)
     }
 
+    private fun wifiEnterpriseConfiguratorTest(filename: String) {
+        val testConfigurator = WifiEnterpriseConfigurator()
+
+        testConfigurator.getConfigFromFile(filename)
+    }
 
 }
 
