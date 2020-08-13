@@ -11,7 +11,7 @@ import java.util.*
  * JUnit Test for parsing of downloaded eap-config
  *
  * Some tests are missing, because they require calls to the Android API which is not available via
- * - Test for [EapConfigParser.getServerCertificateList] depends on [android.util.Base64.decode]
+ * - Test for [EapConfigParser.getServerCertificates] depends on [android.util.Base64.decode]
  * - Test for [EapConfigParser.getProviderLogo] depends on [android.util.Base64.decode]
  * - Test for [EapConfigParser.getProviderLocations] depends on [android.location.Location]
  */
@@ -64,14 +64,14 @@ internal class EapConfigParserTest {
         val serverSideCredElt = eapConfigParser.getServerSideCredentialElements(firstAuthMethodElement)!!
         val expectedServerId = arrayListOf("eduroam.gwdg.de")
 
-        assertEquals(expectedServerId, eapConfigParser.getServerId(serverSideCredElt))
+        assertEquals(expectedServerId, eapConfigParser.getServerIds(serverSideCredElt))
 
 
         val innerServerSideCredElt =
             eapConfigParserMissingFields.getServerSideCredentialElements(getInnerAuthWithClientAndServerSide())!!
         val expectedInnerServerId = arrayListOf("radius1.umk.pl", "radius2.umk.pl")
 
-        assertEquals(expectedInnerServerId, eapConfigParserMissingFields.getServerId(innerServerSideCredElt))
+        assertEquals(expectedInnerServerId, eapConfigParserMissingFields.getServerIds(innerServerSideCredElt))
     }
 
     @Test
