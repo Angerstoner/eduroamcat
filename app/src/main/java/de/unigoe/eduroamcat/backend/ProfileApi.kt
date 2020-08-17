@@ -3,11 +3,9 @@ package de.unigoe.eduroamcat.backend
 import android.app.DownloadManager
 import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.Intent
 import android.content.IntentFilter
 import android.net.Uri
 import android.util.Log
-import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.android.volley.Request
@@ -15,7 +13,6 @@ import com.android.volley.Response
 import com.android.volley.toolbox.JsonArrayRequest
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
-import de.unigoe.eduroamcat.backend.models.EapConfigParser
 import de.unigoe.eduroamcat.backend.models.IdentityProvider
 import de.unigoe.eduroamcat.backend.models.Profile
 import org.json.JSONArray
@@ -107,38 +104,13 @@ class ProfileApi(private val activityContext: Context) {
      *
      * see [ProfileApi.getAllIdentityProviders]
      */
-    fun downloadProfileConfig(profile: Profile) {
+    fun downloadProfileConfig(profile: Profile, filename: String, onDownloadFinished: BroadcastReceiver) {
         val lang = Locale.getDefault().language
         val profileDownloadUri = Uri.parse(
             API_URL_BASE + "downloadInstaller" + "&id=${AndroidId.getAndroidId()}" +
                     "&profile=${profile.profileId}" + "&lang=$lang"
         )
-        val filename =
-            "eduroam-${profile.identityProvider}_${profile.profileId}_.eap-config"
-                .replace("[<>:\"/\\\\|?*, ]".toRegex(), "_")
-
-        val onProfileDownloadComplete: BroadcastReceiver = object : BroadcastReceiver() {
-            override fun onReceive(ctxt: Context, intent: Intent) {
-                val msg = "Profile download finished"
-                Toast.makeText(activityContext, msg, Toast.LENGTH_SHORT).show()
-                Log.i(tag, msg)
-
-                val eapConfigPath =
-                    activityContext.getExternalFilesDir(null).toString().plus("/").plus(filename)
-
-
-                //TODO: remove test code
-                val eapConfigParser = EapConfigParser(eapConfigPath)
-//                val testLogo = eapConfigParser.getProviderLogo()
-                val testAuthenticationMethodElement =
-                    eapConfigParser.getAuthenticationMethodElements()[0]
-//                eapConfigParser.getServerCertificates(testAuthenticationMethodElement)
-//                    .forEach { Log.i(tag, it.toString()) }
-            }
-        }
-
-
-        downloadToAppData(profileDownloadUri, filename, onProfileDownloadComplete)
+        downloadToAppData(profileDownloadUri, filename, onDownloadFinished)
     }
 
     /**

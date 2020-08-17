@@ -2,6 +2,9 @@ package de.unigoe.eduroamcat.frontend.activities
 
 import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.Manifest.permission.CHANGE_NETWORK_STATE
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.text.Editable
@@ -24,6 +27,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
     private val tag = "MainActivity"
+    private val profileApi = ProfileApi(this)
     private lateinit var identityProviderArrayAdapter: IdentityProviderArrayAdapter
     private lateinit var profileArrayAdapter: ProfileArrayAdapter
 
@@ -35,7 +39,7 @@ class MainActivity : AppCompatActivity() {
         initIdentityProviderListView()
         initIdentityProviderSearchBox()
         initProfileSelectionSpinner()
-        initProfileDownloadButton()
+        initConnectButton()
 
 //        downloadAndParseTest()
     }
@@ -91,11 +95,18 @@ class MainActivity : AppCompatActivity() {
         profileSpinner.adapter = profileArrayAdapter
     }
 
-    private fun initProfileDownloadButton() {
-        profileDownloadButton.setOnClickListener {
-            ProfileApi(this).downloadProfileConfig(
-                profileSpinner.selectedItem as Profile
-            )
+    private fun initConnectButton() {
+        connectButton.setOnClickListener {
+            val selectedProfile = profileSpinner.selectedItem as Profile
+
+            val filename = getFilenameForProfile(selectedProfile)
+            val onDownloadFinished: BroadcastReceiver = object : BroadcastReceiver() {
+                override fun onReceive(context: Context?, intent: Intent?) {
+                    val filenameWithPath = getExternalFilesDir(null).toString().plus("/").plus(filename)
+                    connectToWifi(filenameWithPath)
+                }
+            }
+            profileApi.downloadProfileConfig(selectedProfile, filename, onDownloadFinished)
         }
     }
 
@@ -104,32 +115,32 @@ class MainActivity : AppCompatActivity() {
             .observe(this, Observer { profiles ->
                 profileArrayAdapter.setProfiles(profiles)
                 profileSpinner.visibility = if (profileArrayAdapter.count == 0) GONE else VISIBLE
+                profileSpinner.isEnabled = (profileArrayAdapter.count <= 1)
                 hiddenConstraintLayout.visibility =
                     if (profileArrayAdapter.count == 0) GONE else VISIBLE
             })
     }
 
+    private fun connectToWifi(configFilename: String) {
+        val wifiEnterpriseConfigurator = WifiEnterpriseConfigurator()
+        val configParser = EapConfigParser(configFilename)
 
-//    private fun downloadAndParseTest() {
-//        val gwdgTestIdentityProvider = IdentityProvider(5055, "DE", "GWDG")
-//        val gwdgTestProfile = Profile(5042, "GWDG Goettingen", gwdgTestIdentityProvider)
-//        ProfileApi(this).downloadProfileConfig(gwdgTestProfile)
-//        val filename = "eduroam-${gwdgTestProfile.identityProvider}_${gwdgTestProfile.profileId}_.eap-config"
-//            .replace("[<>:\"/\\\\|?*, ]".toRegex(), "_")
-//        val fullpath = getExternalFilesDir(null).toString().plus("/").plus(filename)
-//        wifiEnterpriseConfiguratorTest(fullpath)
-//    }
-//
-//    private fun wifiEnterpriseConfiguratorTest(filename: String) {
-//        val testConfigurator = WifiEnterpriseConfigurator()
-//        val configParser = EapConfigParser(filename)
-//
-//        val gwdgConfig = testConfigurator.getConfigFromFile(configParser).first()
-//        val ssid = configParser.getSsid()
-//
-//        val wifiConfig = WifiConfig(this)
-//        wifiConfig.connectToEapNetwork(gwdgConfig, ssid)
-//    }
+        val enterpriseConfig = wifiEnterpriseConfigurator.getConfigFromFile(configParser).first()
+        enterpriseConfig.identity = usernameEditText.text.toString()
+        enterpriseConfig.password = passwordEditText.text.toString()
+
+        val ssid = configParser.getSsid()
+
+        val wifiConfig = WifiConfig(this)
+        wifiConfig.connectToEapNetwork(enterpriseConfig, ssid)
+    }
+
+
+    //TODO: move to util as this could be static
+    private fun getFilenameForProfile(profile: Profile): String {
+        return "eduroam-${profile.identityProvider}_${profile.profileId}_.eap-config"
+            .replace("[<>:\"/\\\\|?*, ]".toRegex(), "_")
+    }
 
 }
 
