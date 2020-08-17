@@ -1,40 +1,49 @@
 package de.unigoe.eduroamcat.backend
 
-import android.Manifest
+import android.app.Activity
 import android.content.Context
-import android.content.pm.PackageManager
 import android.net.wifi.WifiConfiguration
+import android.net.wifi.WifiEnterpriseConfig
 import android.net.wifi.WifiManager
 import android.net.wifi.WifiNetworkSuggestion
 import android.os.Build
+import androidx.annotation.RequiresApi
 
-class WifiConfig(private val activityContext: Context) {
 
-    // TEST CODE START -> TODO: remove after initial testing
-    private fun connectToOpenWifi() {
-        // testing a connection to my "freifunk" router here
-        val networkSsid = "\"Freifunk\""
-        val wifiManager =
-            activityContext.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+class WifiConfig(activity: Activity) {
+    private val wifiManager: WifiManager =
+        activity.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
 
+    internal fun connectToEapNetwork(enterpriseConfig: WifiEnterpriseConfig, ssid: String) {
+        // TODO: check permission
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            val wifiNetworkSuggestion = WifiNetworkSuggestion.Builder().setSsid(networkSsid).build()
-            wifiManager.addNetworkSuggestions(listOf(wifiNetworkSuggestion))
+            connectNetworkAndroidQ(enterpriseConfig, ssid)
         } else {
-            val wifiConf = WifiConfiguration()
-            wifiConf.SSID = networkSsid
-            wifiConf.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE)
-            wifiManager.addNetwork(wifiConf)
-
-            val networkList =
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M ||
-                    activityContext.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-                ) {
-                    wifiManager.configuredNetworks
-                } else arrayListOf()
-
-            wifiManager.enableNetwork(networkList.first { networkSsid == it.SSID }.networkId, true)
+            connectNetworkDeprecated(enterpriseConfig, ssid)
         }
     }
-    // TEST CODE END
+
+    private fun connectNetworkDeprecated(enterpriseConfig: WifiEnterpriseConfig, ssid: String) {
+        val wifiConfig = WifiConfiguration()
+        wifiConfig.SSID = "\"$ssid\""
+        wifiConfig.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_EAP)
+        wifiConfig.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.IEEE8021X)
+        wifiConfig.enterpriseConfig = enterpriseConfig
+
+        val networkId = wifiManager.addNetwork(wifiConfig)
+        wifiManager.enableNetwork(networkId, true)
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.Q)
+    private fun connectNetworkAndroidQ(enterpriseConfig: WifiEnterpriseConfig, ssid: String) {
+        val suggestions: ArrayList<WifiNetworkSuggestion> = ArrayList()
+        val suggestion = WifiNetworkSuggestion.Builder()
+            .setSsid(ssid)
+            .setWpa2EnterpriseConfig(enterpriseConfig)
+            .build()
+        suggestions.add(suggestion)
+        // TODO: check if needed
+        wifiManager.removeNetworkSuggestions(suggestions)
+        wifiManager.addNetworkSuggestions(suggestions)
+    }
 }

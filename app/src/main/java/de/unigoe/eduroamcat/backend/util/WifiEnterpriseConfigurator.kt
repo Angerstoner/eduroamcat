@@ -7,15 +7,20 @@ import de.unigoe.eduroamcat.backend.models.EapConfigParser
 import org.w3c.dom.Element
 import java.security.cert.X509Certificate
 
+
 class WifiEnterpriseConfigurator {
     private val logTag = "WifiEnterpriseConfigur."
 
-    public fun getConfigFromFile(eapConfigFilePath: String) {
+    internal fun getConfigFromFile(eapConfigFilePath: String): List<WifiEnterpriseConfig> {
         val configParser = EapConfigParser(eapConfigFilePath)
+        return getConfigFromFile(configParser)
+    }
+
+    internal fun getConfigFromFile(configParser: EapConfigParser): List<WifiEnterpriseConfig> {
         val wifiEnterpriseConfigList = ArrayList<WifiEnterpriseConfig>()
 
         val authenticationMethods = configParser.getAuthenticationMethodElements()
-        for (authenticationMethod in authenticationMethods){
+        for (authenticationMethod in authenticationMethods) {
             val eapConfig = WifiEnterpriseConfig()
 
             val serverSideCredentials = configParser.getServerSideCredentialElements(authenticationMethod)
@@ -32,10 +37,12 @@ class WifiEnterpriseConfigurator {
                 val clientSideCredentials = configParser.getClientSideCredentialElements(authenticationMethod)
 
                 // if the allow-saved flag is set to false, this authentication method has to be skipped
-                if (configParser.getAllowSave(clientSideCredentials)) {
-                    Log.e(logTag, "The allow-saved flag is set to false, " +
-                            "therefore no passwords or certificates can be safed on this device." +
-                            "eduroamCAT cannot use this AuthenticationMethods")
+                if (!configParser.getAllowSave(clientSideCredentials)) {
+                    Log.e(
+                        logTag, "The allow-saved flag is set to false, " +
+                                "therefore no passwords or certificates can be safed on this device." +
+                                "eduroamCAT cannot use this AuthenticationMethods"
+                    )
                     continue
                     // TODO: display error message to the user
                 }
@@ -49,6 +56,7 @@ class WifiEnterpriseConfigurator {
                 )
             }
         }
+        return wifiEnterpriseConfigList
     }
 
     /**
@@ -75,8 +83,8 @@ class WifiEnterpriseConfigurator {
                     Log.e(logTag, "No inner EAP or Non-EAP Method found. This may lead to problems")
                     e.printStackTrace()
                 }
-                enterpriseConfigList.add(currentEnterpriseConf)
             }
+            enterpriseConfigList.add(currentEnterpriseConf)
         }
         return enterpriseConfigList
     }
@@ -87,9 +95,6 @@ class WifiEnterpriseConfigurator {
         val rootCertificates = serverCertificates
             .filter { it.subjectX500Principal == it.issuerX500Principal }
             .toTypedArray()
-        Log.i(
-            logTag,
-            rootCertificates.joinToString("\n") { "${it.issuerX500Principal} ::::: ${it.subjectX500Principal}" })
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             eapConfig.caCertificates = rootCertificates
         } else {

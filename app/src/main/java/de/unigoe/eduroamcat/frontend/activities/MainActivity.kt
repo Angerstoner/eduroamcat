@@ -1,6 +1,7 @@
 package de.unigoe.eduroamcat.frontend.activities
 
 import android.Manifest.permission.ACCESS_FINE_LOCATION
+import android.Manifest.permission.CHANGE_NETWORK_STATE
 import android.os.Build
 import android.os.Bundle
 import android.text.Editable
@@ -11,6 +12,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import de.unigoe.eduroamcat.R
 import de.unigoe.eduroamcat.backend.ProfileApi
+import de.unigoe.eduroamcat.backend.WifiConfig
+import de.unigoe.eduroamcat.backend.models.EapConfigParser
 import de.unigoe.eduroamcat.backend.models.IdentityProvider
 import de.unigoe.eduroamcat.backend.models.Profile
 import de.unigoe.eduroamcat.backend.util.WifiEnterpriseConfigurator
@@ -34,7 +37,7 @@ class MainActivity : AppCompatActivity() {
         initProfileSelectionSpinner()
         initProfileDownloadButton()
 
-        downloadAndParseTest()
+//        downloadAndParseTest()
     }
 
     /**
@@ -42,7 +45,8 @@ class MainActivity : AppCompatActivity() {
      * Android L and lower use only the AndroidManifest to grant permissions
      */
     private fun requestAppPermissions() {
-        val permissionsNeeded = arrayOf(ACCESS_FINE_LOCATION)
+        //TODO: check for permissions that only needed to be declared in manifest
+        val permissionsNeeded = arrayOf(ACCESS_FINE_LOCATION, CHANGE_NETWORK_STATE)
         val permissionsRequestCode = 1
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -106,21 +110,26 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    private fun downloadAndParseTest() {
-        val gwdgTestIdentityProvider = IdentityProvider(5055, "DE", "GWDG")
-        val gwdgTestProfile = Profile(5042, "GWDG Goettingen", gwdgTestIdentityProvider)
-        ProfileApi(this).downloadProfileConfig(gwdgTestProfile)
-        val filename = "eduroam-${gwdgTestProfile.identityProvider}_${gwdgTestProfile.profileId}_.eap-config"
-            .replace("[<>:\"/\\\\|?*, ]".toRegex(), "_")
-        val fullpath = getExternalFilesDir(null).toString().plus("/").plus(filename)
-        wifiEnterpriseConfiguratorTest(fullpath)
-    }
-
-    private fun wifiEnterpriseConfiguratorTest(filename: String) {
-        val testConfigurator = WifiEnterpriseConfigurator()
-
-        testConfigurator.getConfigFromFile(filename)
-    }
+//    private fun downloadAndParseTest() {
+//        val gwdgTestIdentityProvider = IdentityProvider(5055, "DE", "GWDG")
+//        val gwdgTestProfile = Profile(5042, "GWDG Goettingen", gwdgTestIdentityProvider)
+//        ProfileApi(this).downloadProfileConfig(gwdgTestProfile)
+//        val filename = "eduroam-${gwdgTestProfile.identityProvider}_${gwdgTestProfile.profileId}_.eap-config"
+//            .replace("[<>:\"/\\\\|?*, ]".toRegex(), "_")
+//        val fullpath = getExternalFilesDir(null).toString().plus("/").plus(filename)
+//        wifiEnterpriseConfiguratorTest(fullpath)
+//    }
+//
+//    private fun wifiEnterpriseConfiguratorTest(filename: String) {
+//        val testConfigurator = WifiEnterpriseConfigurator()
+//        val configParser = EapConfigParser(filename)
+//
+//        val gwdgConfig = testConfigurator.getConfigFromFile(configParser).first()
+//        val ssid = configParser.getSsid()
+//
+//        val wifiConfig = WifiConfig(this)
+//        wifiConfig.connectToEapNetwork(gwdgConfig, ssid)
+//    }
 
 }
 
