@@ -3,7 +3,6 @@ package de.unigoe.eduroamcat.backend.util
 import android.net.wifi.WifiEnterpriseConfig
 import android.os.Build
 import android.util.Log
-import de.unigoe.eduroamcat.backend.models.EapConfigParser
 import org.w3c.dom.Element
 import java.security.cert.X509Certificate
 

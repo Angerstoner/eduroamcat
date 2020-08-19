@@ -1,6 +1,7 @@
 package de.unigoe.eduroamcat.backend.models
 
 import android.net.wifi.WifiEnterpriseConfig
+import de.unigoe.eduroamcat.backend.util.EapConfigParser
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test

@@ -15,7 +15,7 @@ import androidx.lifecycle.Observer
 import de.unigoe.eduroamcat.R
 import de.unigoe.eduroamcat.backend.ProfileApi
 import de.unigoe.eduroamcat.backend.WifiConfig
-import de.unigoe.eduroamcat.backend.models.EapConfigParser
+import de.unigoe.eduroamcat.backend.util.EapConfigParser
 import de.unigoe.eduroamcat.backend.models.IdentityProvider
 import de.unigoe.eduroamcat.backend.models.Profile
 import de.unigoe.eduroamcat.backend.util.WifiEnterpriseConfigurator
@@ -131,9 +131,10 @@ class MainActivity : AppCompatActivity() {
         enterpriseConfig.password = passwordEditText.text.toString()
 
         val ssid = configParser.getSsid()
+        val securityProtocol = configParser.getMinRsnProto()
 
         val wifiConfig = WifiConfig(this)
-        wifiConfig.connectToEapNetwork(enterpriseConfig, ssid)
+        wifiConfig.connectToEapNetwork(enterpriseConfig, ssid, securityProtocol)
     }
 
 

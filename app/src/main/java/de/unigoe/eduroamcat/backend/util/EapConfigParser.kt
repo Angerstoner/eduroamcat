@@ -1,4 +1,4 @@
-package de.unigoe.eduroamcat.backend.models
+package de.unigoe.eduroamcat.backend.util
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -6,10 +6,6 @@ import android.location.Location
 import android.net.wifi.WifiEnterpriseConfig
 import android.util.Base64
 import android.util.Log
-import de.unigoe.eduroamcat.backend.util.getFirstElementByTag
-import de.unigoe.eduroamcat.backend.util.getTextContentForXmlPath
-import de.unigoe.eduroamcat.backend.util.iterator
-import de.unigoe.eduroamcat.backend.util.toElementList
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.w3c.dom.Node

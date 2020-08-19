@@ -14,21 +14,34 @@ class WifiConfig(activity: Activity) {
     private val wifiManager: WifiManager =
         activity.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
 
-    internal fun connectToEapNetwork(enterpriseConfig: WifiEnterpriseConfig, ssid: String) {
+    internal fun connectToEapNetwork(enterpriseConfig: WifiEnterpriseConfig, ssid: String, securityProtocol: String) {
         // TODO: check permission
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             connectNetworkAndroidQ(enterpriseConfig, ssid)
         } else {
-            connectNetworkDeprecated(enterpriseConfig, ssid)
+            connectNetworkDeprecated(enterpriseConfig, ssid, securityProtocol)
         }
     }
 
-    private fun connectNetworkDeprecated(enterpriseConfig: WifiEnterpriseConfig, ssid: String) {
+    private fun connectNetworkDeprecated(
+        enterpriseConfig: WifiEnterpriseConfig,
+        ssid: String,
+        securityProtocol: String
+    ) {
         val wifiConfig = WifiConfiguration()
         wifiConfig.SSID = "\"$ssid\""
         wifiConfig.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_EAP)
         wifiConfig.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.IEEE8021X)
         wifiConfig.enterpriseConfig = enterpriseConfig
+
+        when (securityProtocol) {
+            "CCMP" -> {
+                wifiConfig.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP)
+                wifiConfig.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP)
+            }
+            "TKIP" -> wifiConfig.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP)
+        }
+
 
         val networkId = wifiManager.addNetwork(wifiConfig)
         wifiManager.enableNetwork(networkId, true)

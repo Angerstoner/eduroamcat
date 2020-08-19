@@ -1,4 +1,4 @@
-package de.unigoe.eduroamcat.backend.models
+package de.unigoe.eduroamcat.backend.util
 
 // AUTHENTICATION METHOD KEYS START
 const val AUTHENTICATION_METHOD_PARENT = "AuthenticationMethods"
