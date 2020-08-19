@@ -1,7 +1,6 @@
 package de.unigoe.eduroamcat.frontend.activities
 
 import android.Manifest.permission.ACCESS_FINE_LOCATION
-import android.Manifest.permission.CHANGE_NETWORK_STATE
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -49,8 +48,7 @@ class MainActivity : AppCompatActivity() {
      * Android L and lower use only the AndroidManifest to grant permissions
      */
     private fun requestAppPermissions() {
-        //TODO: check for permissions that only needed to be declared in manifest
-        val permissionsNeeded = arrayOf(ACCESS_FINE_LOCATION, CHANGE_NETWORK_STATE)
+        val permissionsNeeded = arrayOf(ACCESS_FINE_LOCATION)
         val permissionsRequestCode = 1
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -58,6 +56,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Initializes list of all identity providers obtained by the [ProfileApi]
+     */
     private fun initIdentityProviderListView() {
         identityProviderArrayAdapter =
             IdentityProviderArrayAdapter(this, android.R.layout.simple_list_item_1)
@@ -115,7 +116,7 @@ class MainActivity : AppCompatActivity() {
             .observe(this, Observer { profiles ->
                 profileArrayAdapter.setProfiles(profiles)
                 profileSpinner.visibility = if (profileArrayAdapter.count == 0) GONE else VISIBLE
-                profileSpinner.isEnabled = (profileArrayAdapter.count <= 1)
+                profileSpinner.isEnabled = (profileArrayAdapter.count > 1)
                 hiddenConstraintLayout.visibility =
                     if (profileArrayAdapter.count == 0) GONE else VISIBLE
             })

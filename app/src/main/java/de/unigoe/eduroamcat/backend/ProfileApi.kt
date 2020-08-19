@@ -22,9 +22,25 @@ import kotlin.collections.ArrayList
 
 
 const val API_URL_BASE = "https://cat.eduroam.org/user/API.php?action="
+const val API_ACTION_LIST_PROFILES = API_URL_BASE + "listProfiles&idp=%d&lang=%s"
+const val API_ACTION_LIST_IDENTITY_PROVIDERS = API_URL_BASE + "listAllIdentityProviders&lang=%s"
+const val API_ACTION_DOWNLOAD_CONFIG = API_URL_BASE + "downloadInstaller&id=%s&profile=%d&lang=%s"
+
+const val JSON_TAG_PROFILE_LIST_DATA = "data"
+
+const val JSON_TAG_IDENTITY_PROVIDER_ID = "entityID"
+const val JSON_TAG_IDENTITY_PROVIDER_COUNTRY = "country"
+const val JSON_TAG_IDENTITY_PROVIDER_TITLE = "title"
+
+const val JSON_TAG_PROFILE_ID = "profile"
+const val JSON_TAG_PROFILE_LABEL = "display"
+
+
+const val LOG_MESSAGE_MISSING_DATA = "Could not add %s (missing data)"
 
 class ProfileApi(private val activityContext: Context) {
     private val tag = "ProfileApi"
+    private val lang = Locale.getDefault().language
     private val identityProviderLiveData = MutableLiveData<ArrayList<IdentityProvider>>()
     private val profileLiveData = MutableLiveData<ArrayList<Profile>>()
 
@@ -48,8 +64,7 @@ class ProfileApi(private val activityContext: Context) {
         activityContext.getExternalFilesDir(null)!!.mkdirs()
 
         if (onComplete != null) activityContext.registerReceiver(
-            onComplete,
-            IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
+            onComplete, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
         )
 
         Log.d(tag, "Downloading $filename from $uri")
@@ -72,9 +87,7 @@ class ProfileApi(private val activityContext: Context) {
         val queue = Volley.newRequestQueue(activityContext)
         val identityProviderListRequest =
             JsonArrayRequest(
-                Request.Method.GET, downloadUrl, null,
-                responseListener,
-                errorListener
+                Request.Method.GET, downloadUrl, null, responseListener, errorListener
             )
         queue.add(identityProviderListRequest)
     }
@@ -89,12 +102,9 @@ class ProfileApi(private val activityContext: Context) {
         errorListener: Response.ErrorListener = defaultErrorListener
     ) {
         val queue = Volley.newRequestQueue(activityContext)
-        val identityProviderListRequest =
-            JsonObjectRequest(
-                Request.Method.GET, downloadUrl, null,
-                responseListener,
-                errorListener
-            )
+        val identityProviderListRequest = JsonObjectRequest(
+            Request.Method.GET, downloadUrl, null, responseListener, errorListener
+        )
         queue.add(identityProviderListRequest)
     }
 
@@ -105,10 +115,8 @@ class ProfileApi(private val activityContext: Context) {
      * see [ProfileApi.getAllIdentityProviders]
      */
     fun downloadProfileConfig(profile: Profile, filename: String, onDownloadFinished: BroadcastReceiver) {
-        val lang = Locale.getDefault().language
         val profileDownloadUri = Uri.parse(
-            API_URL_BASE + "downloadInstaller" + "&id=${AndroidId.getAndroidId()}" +
-                    "&profile=${profile.profileId}" + "&lang=$lang"
+            API_ACTION_DOWNLOAD_CONFIG.format(AndroidId.getAndroidId(), profile.profileId, lang)
         )
         downloadToAppData(profileDownloadUri, filename, onDownloadFinished)
     }
@@ -117,11 +125,9 @@ class ProfileApi(private val activityContext: Context) {
      * Returns LiveData of Identity Provider List
      */
     fun getAllIdentityProviders(): LiveData<ArrayList<IdentityProvider>> {
-        val lang = Locale.getDefault().language
-        val identityProviderListUrl = API_URL_BASE + "listAllIdentityProviders&" + "lang=$lang"
+        val identityProviderListUrl = API_ACTION_LIST_IDENTITY_PROVIDERS.format(lang)
 
-        val responseListener =
-            Response.Listener<JSONArray> { response -> parseIdentityProviderListJsonArray(response) }
+        val responseListener = Response.Listener<JSONArray> { response -> parseIdentityProviderListJsonArray(response) }
         downloadJsonArray(identityProviderListUrl, responseListener)
 
         return identityProviderLiveData
@@ -131,22 +137,13 @@ class ProfileApi(private val activityContext: Context) {
      * Returns LiveData of Profile List for given [identityProvider]
      */
     fun getIdentityProviderProfiles(identityProvider: IdentityProvider): LiveData<ArrayList<Profile>> {
-        val lang = Locale.getDefault().language
-        val profileListUrl = API_URL_BASE + "listProfiles&" +
-                "idp=${identityProvider.entityId}" + "&lang=$lang"
+        val profileListUrl = API_ACTION_LIST_PROFILES.format(identityProvider.entityId, lang)
 
-        // TODO: refactor this
-        val responseListener =
-            Response.Listener<JSONObject> { response ->
-                parseProfileListJsonArray(
-                    JSONArray(response.get("data").toString()),
-                    identityProvider
-                )
-            }
-        // end refactor
+        val responseListener = Response.Listener<JSONObject> { response ->
+            parseProfileListJsonArray(JSONArray(response.getString(JSON_TAG_PROFILE_LIST_DATA)), identityProvider)
+        }
 
         downloadJsonObject(profileListUrl, responseListener)
-
         return profileLiveData
     }
 
@@ -157,11 +154,14 @@ class ProfileApi(private val activityContext: Context) {
     private fun parseIdentityProviderListJsonArray(identityProviderJsonArray: JSONArray) {
         val identityProviderList = ArrayList<IdentityProvider>()
         identityProviderJsonArray.iterator().forEach {
-            // TODO: add parse-exception
-            val entityId = it.get("entityID").toString().toLong()
-            val country = it.get("country").toString()
-            val title = it.get("title").toString()
-            identityProviderList.add(IdentityProvider(entityId, country, title))
+            val entityId = it.getLong(JSON_TAG_IDENTITY_PROVIDER_ID)
+            val country = it.getString(JSON_TAG_IDENTITY_PROVIDER_COUNTRY)
+            val title = it.getString(JSON_TAG_IDENTITY_PROVIDER_TITLE)
+
+            if (null !in listOf(entityId, country, title))
+                identityProviderList.add(IdentityProvider(entityId, country, title))
+            else
+                Log.e(tag, LOG_MESSAGE_MISSING_DATA.format("IdentityProvider"))
         }
         identityProviderLiveData.postValue(identityProviderList)
     }
@@ -171,16 +171,15 @@ class ProfileApi(private val activityContext: Context) {
      * Parses [profileListJsonArray] into List of [Profile] as LiveData.
      * [identityProvider] is stored as [Profile] information
      */
-    private fun parseProfileListJsonArray(
-        profileListJsonArray: JSONArray,
-        identityProvider: IdentityProvider
-    ) {
+    private fun parseProfileListJsonArray(profileListJsonArray: JSONArray, identityProvider: IdentityProvider) {
         val profileList = ArrayList<Profile>()
         profileListJsonArray.iterator().forEach {
-            // TODO: add parse-exception
-            val profileId = it.get("profile").toString().toLong()
-            val displayLabel = it.get("display").toString()
-            profileList.add(Profile(profileId, displayLabel, identityProvider))
+            val profileId = it.getLong(JSON_TAG_PROFILE_ID)
+            val displayLabel = it.getString(JSON_TAG_PROFILE_LABEL)
+            if (null !in listOf(profileId, displayLabel))
+                profileList.add(Profile(profileId, displayLabel, identityProvider))
+            else
+                Log.e(tag, LOG_MESSAGE_MISSING_DATA.format("Profile"))
         }
         profileLiveData.postValue(profileList)
     }
