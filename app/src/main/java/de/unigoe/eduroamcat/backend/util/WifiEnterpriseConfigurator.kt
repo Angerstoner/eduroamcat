@@ -29,7 +29,7 @@ class WifiEnterpriseConfigurator {
             setServerIds(eapConfig, configParser.getServerIds(serverSideCredentials))
 
             // since EAP-TLS uses certificates on both sides, there are no further ClientSideCredentials
-            // additionally, EAP-TLS has no Phase2/InnerAuth
+            // additionally, EAP-TLS and EAP-PWD have no Phase2/InnerAuth
             if (eapConfig.eapMethod == WifiEnterpriseConfig.Eap.TTLS ||
                 eapConfig.eapMethod == WifiEnterpriseConfig.Eap.PEAP
             ) {

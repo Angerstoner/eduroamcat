@@ -260,7 +260,6 @@ class EapConfigParser(eapConfigFilePath: String) {
         throw NoSuchElementException()
     }
 
-    // TODO: implement TTLS-PAP, PWD
     /**
      * Helper function to map between IANA IDs and [WifiEnterpriseConfig] constants
      * for different Eap types
@@ -272,6 +271,7 @@ class EapConfigParser(eapConfigFilePath: String) {
             13 -> WifiEnterpriseConfig.Eap.TLS
             21 -> WifiEnterpriseConfig.Eap.TTLS
             25 -> WifiEnterpriseConfig.Eap.PEAP
+            52 -> WifiEnterpriseConfig.Eap.PWD
             1 -> WifiEnterpriseConfig.Phase2.PAP
             6 -> WifiEnterpriseConfig.Phase2.GTC
             26 -> WifiEnterpriseConfig.Phase2.MSCHAPV2

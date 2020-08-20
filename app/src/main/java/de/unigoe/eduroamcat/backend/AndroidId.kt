@@ -24,8 +24,9 @@ enum class AndroidId(val androidId: String, vararg val applicableApiLevels: Int)
             try {
                 values().single { it.applicableApiLevels.contains(Build.VERSION.SDK_INT) }.androidId
             } catch (e: NoSuchElementException) {
-                Log.i("AndroidId", "Android Version not found in enum, defaulting to ${Q.androidId}")
-                values().last()
+                val default = values().last()
+                Log.i("AndroidId", "Android Version not found in enum, defaulting to $default")
+                default
             }
     }
 }

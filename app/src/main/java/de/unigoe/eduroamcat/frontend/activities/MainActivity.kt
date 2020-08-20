@@ -4,6 +4,7 @@ import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.net.wifi.WifiEnterpriseConfig
 import android.os.Build
 import android.os.Bundle
 import android.text.Editable
@@ -15,9 +16,9 @@ import androidx.lifecycle.Observer
 import de.unigoe.eduroamcat.R
 import de.unigoe.eduroamcat.backend.ProfileApi
 import de.unigoe.eduroamcat.backend.WifiConfig
-import de.unigoe.eduroamcat.backend.util.EapConfigParser
 import de.unigoe.eduroamcat.backend.models.IdentityProvider
 import de.unigoe.eduroamcat.backend.models.Profile
+import de.unigoe.eduroamcat.backend.util.EapConfigParser
 import de.unigoe.eduroamcat.backend.util.WifiEnterpriseConfigurator
 import de.unigoe.eduroamcat.frontend.adapters.IdentityProviderArrayAdapter
 import de.unigoe.eduroamcat.frontend.adapters.ProfileArrayAdapter
@@ -127,7 +128,8 @@ class MainActivity : AppCompatActivity() {
         val configParser = EapConfigParser(configFilename)
 
         val enterpriseConfig = wifiEnterpriseConfigurator.getConfigFromFile(configParser).first()
-        enterpriseConfig.identity = usernameEditText.text.toString()
+        if (enterpriseConfig.eapMethod != WifiEnterpriseConfig.Eap.PWD)
+            enterpriseConfig.identity = usernameEditText.text.toString()
         enterpriseConfig.password = passwordEditText.text.toString()
 
         val ssid = configParser.getSsid()
