@@ -9,7 +9,8 @@ import android.net.wifi.WifiNetworkSuggestion
 import android.os.Build
 import androidx.annotation.RequiresApi
 
-
+//TODO: check for existing configs in system and delete them
+//TODO: check for identifier of WifiConfig
 class WifiConfig(activity: Activity) {
     private val wifiManager: WifiManager =
         activity.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager

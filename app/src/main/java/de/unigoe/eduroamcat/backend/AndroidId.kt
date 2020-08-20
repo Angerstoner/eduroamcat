@@ -1,6 +1,7 @@
 package de.unigoe.eduroamcat.backend
 
 import android.os.Build
+import android.util.Log
 
 /**
  * Enum which determines the 'id' part of the eap-config request URL
@@ -20,6 +21,11 @@ enum class AndroidId(val androidId: String, vararg val applicableApiLevels: Int)
 
     companion object {
         fun getAndroidId() =
-            values().single { it.applicableApiLevels.contains(Build.VERSION.SDK_INT) }.androidId
+            try {
+                values().single { it.applicableApiLevels.contains(Build.VERSION.SDK_INT) }.androidId
+            } catch (e: NoSuchElementException) {
+                Log.i("AndroidId", "Android Version not found in enum, defaulting to ${Q.androidId}")
+                values().last()
+            }
     }
 }
