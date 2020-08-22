@@ -1,7 +1,9 @@
 package de.unigoe.eduroamcat.backend
 
+import android.Manifest
 import android.app.Activity
 import android.content.Context
+import android.content.pm.PackageManager
 import android.net.wifi.WifiConfiguration
 import android.net.wifi.WifiEnterpriseConfig
 import android.net.wifi.WifiManager
@@ -9,17 +11,12 @@ import android.net.wifi.WifiNetworkSuggestion
 import android.os.Build
 import androidx.annotation.RequiresApi
 
-class WifiConfig(activity: Activity) {
+class WifiConfig(val activity: Activity) {
     private val wifiManager: WifiManager =
         activity.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
 
 
-    internal fun connectToEapNetwork(
-        enterpriseConfig: WifiEnterpriseConfig,
-        securityProtocol: String,
-        ssidPairList: List<Pair<String, String>>
-    ) {
-        // TODO: check permission
+    internal fun connectToEapNetwork(enterpriseConfig: WifiEnterpriseConfig, ssidPairList: List<Pair<String, String>>) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             ssidPairList.forEach { ssidPair -> connectNetworkAndroidQ(enterpriseConfig, ssidPair.first) }
         } else {
@@ -28,12 +25,17 @@ class WifiConfig(activity: Activity) {
                 connectNetworkDeprecated(enterpriseConfig, ssidPair.first, ssidPair.second)
             }
         }
+
     }
 
     @Deprecated("Deprecated for API >= Android Q")
     private fun removeOldEapConnectionsDeprecated(ssid: String) {
-        wifiManager.configuredNetworks.filter { it.SSID == "\"$ssid\"" }
-            .forEach { wifiManager.removeNetwork(it.networkId) }
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M ||
+            activity.checkSelfPermission(Manifest.permission.CHANGE_WIFI_STATE) == PackageManager.PERMISSION_GRANTED
+        ) {
+            wifiManager.configuredNetworks.filter { it.SSID == "\"$ssid\"" }
+                .forEach { wifiManager.removeNetwork(it.networkId) }
+        }
     }
 
     @Deprecated("Deprecated for API >= Android Q", replaceWith = ReplaceWith("connectNetworkAndroidQ()"))

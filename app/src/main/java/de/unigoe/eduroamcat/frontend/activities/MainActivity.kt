@@ -136,7 +136,7 @@ class MainActivity : AppCompatActivity() {
         val securityProtocol = configParser.getMinRsnProto()
 
         val wifiConfig = WifiConfig(this)
-        wifiConfig.connectToEapNetwork(enterpriseConfig, securityProtocol, ssid)
+        wifiConfig.connectToEapNetwork(enterpriseConfig, ssid)
     }
 
 

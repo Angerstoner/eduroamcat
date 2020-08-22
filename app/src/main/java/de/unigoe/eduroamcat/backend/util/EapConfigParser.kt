@@ -168,6 +168,8 @@ class EapConfigParser(eapConfigFilePath: String) {
     /**
      * Returns minimal RSN protocol (TKIP/CCMP) version from the CredentialApplicability block
      */
+    //TODO: remove, not needed anymore
+    @Deprecated("Not needed anymore")
     fun getMinRsnProto(): String = getFromCredentialApplicability(MIN_RSN_PROTO)
 
     /**

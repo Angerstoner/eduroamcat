@@ -36,24 +36,20 @@ internal fun NodeList.toElementList(): List<Element> =
 @Suppress("SameParameterValue")
 internal fun Document.getTextContentForXmlPath(vararg tags: String): String {
     if (tags.isEmpty()) throw IllegalArgumentException()
-    var currentElement: Element = this.getFirstElementByTag(tags[0]) ?: throw NoSuchElementException()
+    var currentElement: Element = this.getFirstElementByTag(tags[0])
 
     (1 until tags.size).forEach {
-        val nextElement = currentElement.getFirstElementByTag(tags[it])
-        if (nextElement != null)
-            currentElement = nextElement
+        currentElement = currentElement.getFirstElementByTag(tags[it])
     }
     return currentElement.textContent
 }
 
 internal fun Element.getTextContentForXmlPath(vararg tags: String): String {
     if (tags.isEmpty()) throw IllegalArgumentException()
-    var currentElement: Element = this.getFirstElementByTag(tags[0]) ?: throw NoSuchElementException()
+    var currentElement: Element = this.getFirstElementByTag(tags[0])
 
     (1 until tags.size).forEach {
-        val nextElement = currentElement.getFirstElementByTag(tags[it])
-        if (nextElement != null)
-            currentElement = nextElement
+        currentElement = currentElement.getFirstElementByTag(tags[it])
     }
     return currentElement.textContent
 }
