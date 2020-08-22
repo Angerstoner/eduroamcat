@@ -132,11 +132,11 @@ class MainActivity : AppCompatActivity() {
             enterpriseConfig.identity = usernameEditText.text.toString()
         enterpriseConfig.password = passwordEditText.text.toString()
 
-        val ssid = configParser.getSsid()
+        val ssid = configParser.getSsidPairs()
         val securityProtocol = configParser.getMinRsnProto()
 
         val wifiConfig = WifiConfig(this)
-        wifiConfig.connectToEapNetwork(enterpriseConfig, ssid, securityProtocol)
+        wifiConfig.connectToEapNetwork(enterpriseConfig, securityProtocol, ssid)
     }
 
 

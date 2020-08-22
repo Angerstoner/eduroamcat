@@ -9,21 +9,34 @@ import android.net.wifi.WifiNetworkSuggestion
 import android.os.Build
 import androidx.annotation.RequiresApi
 
-//TODO: check for existing configs in system and delete them
-//TODO: check for identifier of WifiConfig
 class WifiConfig(activity: Activity) {
     private val wifiManager: WifiManager =
         activity.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
 
-    internal fun connectToEapNetwork(enterpriseConfig: WifiEnterpriseConfig, ssid: String, securityProtocol: String) {
+
+    internal fun connectToEapNetwork(
+        enterpriseConfig: WifiEnterpriseConfig,
+        securityProtocol: String,
+        ssidPairList: List<Pair<String, String>>
+    ) {
         // TODO: check permission
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            connectNetworkAndroidQ(enterpriseConfig, ssid)
+            ssidPairList.forEach { ssidPair -> connectNetworkAndroidQ(enterpriseConfig, ssidPair.first) }
         } else {
-            connectNetworkDeprecated(enterpriseConfig, ssid, securityProtocol)
+            ssidPairList.forEach { ssidPair ->
+                removeOldEapConnectionsDeprecated(ssidPair.first)
+                connectNetworkDeprecated(enterpriseConfig, ssidPair.first, ssidPair.second)
+            }
         }
     }
 
+    @Deprecated("Deprecated for API >= Android Q")
+    private fun removeOldEapConnectionsDeprecated(ssid: String) {
+        wifiManager.configuredNetworks.filter { it.SSID == "\"$ssid\"" }
+            .forEach { wifiManager.removeNetwork(it.networkId) }
+    }
+
+    @Deprecated("Deprecated for API >= Android Q", replaceWith = ReplaceWith("connectNetworkAndroidQ()"))
     private fun connectNetworkDeprecated(
         enterpriseConfig: WifiEnterpriseConfig,
         ssid: String,
@@ -60,4 +73,5 @@ class WifiConfig(activity: Activity) {
         wifiManager.removeNetworkSuggestions(suggestions)
         wifiManager.addNetworkSuggestions(suggestions)
     }
+
 }

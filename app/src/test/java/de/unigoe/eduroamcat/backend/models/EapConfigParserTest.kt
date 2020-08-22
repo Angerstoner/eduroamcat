@@ -99,7 +99,11 @@ internal class EapConfigParserTest {
 
     @Test
     fun credentialApplicabilityTest() {
-        assertEquals("eduroam", eapConfigParser.getSsid())
+        val ssidPairOne = Pair("eduroam", "CCMP")
+        val ssidPairTwo = Pair("foobarssidzusatz", "CCMP")
+        val ssidPairThree = Pair("foobarssidzusatzmitTKIP", "TKIP")
+
+        assertEquals(arrayListOf(ssidPairOne, ssidPairTwo, ssidPairThree), eapConfigParser.getSsidPairs())
         assertEquals("CCMP", eapConfigParser.getMinRsnProto())
         assertEquals("001bc50460", eapConfigParser.getConsortiumOID())
     }

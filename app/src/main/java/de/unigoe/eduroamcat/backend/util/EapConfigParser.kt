@@ -25,7 +25,7 @@ import javax.xml.parsers.DocumentBuilderFactory
  * Used util helpers can be found in [de.unigoe.eduroamcat.backend.util.XmlExtensions.kt]
  */
 class EapConfigParser(eapConfigFilePath: String) {
-    private val tag = "EAPConfigParser"
+    private val logTag = "EAPConfigParser"
     private val eapConfig: Document
 
     /**
@@ -126,7 +126,7 @@ class EapConfigParser(eapConfigFilePath: String) {
         try {
             clientSideCredElt.getTextContentForXmlPath(CLIENT_SIDE_ALLOW_SAVE).toBoolean()
         } catch (e: NoSuchElementException) {
-            Log.i(tag, "Tag $CLIENT_SIDE_ALLOW_SAVE not found")
+            Log.i(logTag, "Tag $CLIENT_SIDE_ALLOW_SAVE not found")
             true
         }
 
@@ -141,7 +141,7 @@ class EapConfigParser(eapConfigFilePath: String) {
     /**
      * Returns NonEapType for given [innerAuthMethodElt] block.
      *
-     * Mutual exclusive with [EapType] within InnerAuthentication block
+     * Mutual exclusive with EAP type within InnerAuthentication block
      */
     fun getNonEapAuthMethod(innerAuthMethodElt: Element): Int =
         innerAuthMethodElt.getTextContentForXmlPath(NON_EAP_METHOD, EAP_METHOD_TYPE).toInt()
@@ -149,7 +149,21 @@ class EapConfigParser(eapConfigFilePath: String) {
     /**
      * Returns specified SSID (eduroam in most cases) from the CredentialApplicability block
      */
-    fun getSsid(): String = getFromCredentialApplicability(SSID)
+    fun getSsidPairs(): List<Pair<String, String>> {
+        val ssidPairs = ArrayList<Pair<String, String>>()
+        eapConfig.getFirstElementByTag(CREDENTIAL_APPLICABILITY).getElementsByTagName(IEEE_80211)
+            .iterator().forEach {
+                val element = it as Element
+                try {
+                    val ssid = element.getTextContentForXmlPath(SSID)
+                    val securityProtocol = element.getTextContentForXmlPath(MIN_RSN_PROTO)
+                    ssidPairs.add(Pair(ssid, securityProtocol))
+                } catch (e: NoSuchElementException) {
+                } //do nothing, check the next element
+            }
+        return ssidPairs
+    }
+
 
     /**
      * Returns minimal RSN protocol (TKIP/CCMP) version from the CredentialApplicability block
@@ -194,7 +208,7 @@ class EapConfigParser(eapConfigFilePath: String) {
                     }
                     locationList.add(location)
                 } catch (e: NumberFormatException) {
-                    Log.e(tag, "COULD NOT PARSE LONGITUDE/LATITUDE TO DOUBLE")
+                    Log.e(logTag, "COULD NOT PARSE LONGITUDE/LATITUDE TO DOUBLE")
                 }
             }
         return locationList
@@ -278,3 +292,4 @@ class EapConfigParser(eapConfigFilePath: String) {
             else -> throw NoSuchElementException()
         }
 }
+
