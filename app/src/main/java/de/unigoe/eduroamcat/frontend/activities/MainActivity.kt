@@ -26,7 +26,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 
 class MainActivity : AppCompatActivity() {
-    private val tag = "MainActivity"
+    private val logTag = "MainActivity"
     private val profileApi = ProfileApi(this)
     private lateinit var identityProviderArrayAdapter: IdentityProviderArrayAdapter
     private lateinit var profileArrayAdapter: ProfileArrayAdapter
@@ -104,7 +104,8 @@ class MainActivity : AppCompatActivity() {
             val filename = getFilenameForProfile(selectedProfile)
             val onDownloadFinished: BroadcastReceiver = object : BroadcastReceiver() {
                 override fun onReceive(context: Context?, intent: Intent?) {
-                    val filenameWithPath = getExternalFilesDir(null).toString().plus("/").plus(filename)
+                    val filenameWithPath =
+                        getExternalFilesDir(null).toString().plus("/").plus(filename)
                     connectToWifi(filenameWithPath)
                 }
             }
@@ -133,7 +134,6 @@ class MainActivity : AppCompatActivity() {
         enterpriseConfig.password = passwordEditText.text.toString()
 
         val ssid = configParser.getSsidPairs()
-        val securityProtocol = configParser.getMinRsnProto()
 
         val wifiConfig = WifiConfig(this)
         wifiConfig.connectToEapNetwork(enterpriseConfig, ssid)

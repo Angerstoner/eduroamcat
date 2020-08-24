@@ -4,4 +4,4 @@ A tool to allow users to configure their device for eduroam wireless networks us
 Build: ![Eduroam CAT Android CI](https://github.com/Angerstoner/eduroamcat/workflows/Build/badge.svg)  
 Tests: ![Eduroam CAT Android CI](https://github.com/Angerstoner/eduroamcat/workflows/Tests/badge.svg)
 
-(Debug-)APK: (later)
+(Debug-)APK: can be downloaded as ![build artifact](https://github.com/Angerstoner/eduroamcat/actions?query=workflow%3AAPK)

@@ -104,7 +104,6 @@ internal class EapConfigParserTest {
         val ssidPairThree = Pair("foobarssidzusatzmitTKIP", "TKIP")
 
         assertEquals(arrayListOf(ssidPairOne, ssidPairTwo, ssidPairThree), eapConfigParser.getSsidPairs())
-        assertEquals("CCMP", eapConfigParser.getMinRsnProto())
         assertEquals("001bc50460", eapConfigParser.getConsortiumOID())
     }
 

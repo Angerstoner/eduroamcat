@@ -147,7 +147,11 @@ class EapConfigParser(eapConfigFilePath: String) {
         innerAuthMethodElt.getTextContentForXmlPath(NON_EAP_METHOD, EAP_METHOD_TYPE).toInt()
 
     /**
-     * Returns specified SSID (eduroam in most cases) from the CredentialApplicability block
+     * Returns Pair of Strings containing the SSID and the minRSNProto Content.
+     * 
+     * Every SSID has a corresponding minRSNProto Tag, which containts either CCMP or TKIP.
+     * Since CCMP/TKIP is a network specific setting, this is paired with the SSID
+     *
      */
     fun getSsidPairs(): List<Pair<String, String>> {
         val ssidPairs = ArrayList<Pair<String, String>>()
@@ -163,14 +167,6 @@ class EapConfigParser(eapConfigFilePath: String) {
             }
         return ssidPairs
     }
-
-
-    /**
-     * Returns minimal RSN protocol (TKIP/CCMP) version from the CredentialApplicability block
-     */
-    //TODO: remove, not needed anymore
-    @Deprecated("Not needed anymore")
-    fun getMinRsnProto(): String = getFromCredentialApplicability(MIN_RSN_PROTO)
 
     /**
      *  Returns Consortium OID (Hotspot 2.0)
