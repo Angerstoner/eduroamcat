@@ -104,8 +104,7 @@ class MainActivity : AppCompatActivity() {
             val filename = getFilenameForProfile(selectedProfile)
             val onDownloadFinished: BroadcastReceiver = object : BroadcastReceiver() {
                 override fun onReceive(context: Context?, intent: Intent?) {
-                    val filenameWithPath =
-                        getExternalFilesDir(null).toString().plus("/").plus(filename)
+                    val filenameWithPath = getExternalFilesDir(null).toString().plus("/").plus(filename)
                     connectToWifi(filenameWithPath)
                 }
             }
