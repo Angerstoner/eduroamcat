@@ -13,27 +13,30 @@ import android.view.View.GONE
 import android.view.View.VISIBLE
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
-import de.unigoe.eduroamcat.R
 import de.unigoe.eduroamcat.backend.ProfileApi
 import de.unigoe.eduroamcat.backend.WifiConfig
 import de.unigoe.eduroamcat.backend.models.IdentityProvider
 import de.unigoe.eduroamcat.backend.models.Profile
 import de.unigoe.eduroamcat.backend.util.EapConfigParser
 import de.unigoe.eduroamcat.backend.util.WifiEnterpriseConfigurator
+import de.unigoe.eduroamcat.databinding.ActivityMainBinding
 import de.unigoe.eduroamcat.frontend.adapters.IdentityProviderArrayAdapter
 import de.unigoe.eduroamcat.frontend.adapters.ProfileArrayAdapter
-import kotlinx.android.synthetic.main.activity_main.*
 
 
 class MainActivity : AppCompatActivity() {
     private val logTag = "MainActivity"
     private val profileApi = ProfileApi(this)
+    private lateinit var binding: ActivityMainBinding
     private lateinit var identityProviderArrayAdapter: IdentityProviderArrayAdapter
     private lateinit var profileArrayAdapter: ProfileArrayAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
 
         requestAppPermissions()
         initIdentityProviderListView()
@@ -64,9 +67,9 @@ class MainActivity : AppCompatActivity() {
         identityProviderArrayAdapter =
             IdentityProviderArrayAdapter(this, android.R.layout.simple_list_item_1)
 
-        identityProviderListView.adapter = identityProviderArrayAdapter
+        binding.identityProviderListView.adapter = identityProviderArrayAdapter
 
-        identityProviderListView.setOnItemClickListener { _, _, position, _ ->
+        binding.identityProviderListView.setOnItemClickListener { _, _, position, _ ->
             val item = identityProviderArrayAdapter.getItem(position)
             identityProviderArrayAdapter.filter.filter(item.toString())
             showProfilesForIdentityProvider(item)
@@ -79,7 +82,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initIdentityProviderSearchBox() {
-        identitySearchEditText.addTextChangedListener(object : TextWatcher {
+        binding.identitySearchEditText.addTextChangedListener(object : TextWatcher {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 identityProviderArrayAdapter.filter.filter(s)
             }
@@ -94,12 +97,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun initProfileSelectionSpinner() {
         profileArrayAdapter = ProfileArrayAdapter(this, android.R.layout.simple_spinner_item)
-        profileSpinner.adapter = profileArrayAdapter
+        binding.profileSpinner.adapter = profileArrayAdapter
     }
 
     private fun initConnectButton() {
-        connectButton.setOnClickListener {
-            val selectedProfile = profileSpinner.selectedItem as Profile
+        binding.connectButton.setOnClickListener {
+            val selectedProfile = binding.profileSpinner.selectedItem as Profile
 
             val filename = getFilenameForProfile(selectedProfile)
             val onDownloadFinished: BroadcastReceiver = object : BroadcastReceiver() {
@@ -116,9 +119,9 @@ class MainActivity : AppCompatActivity() {
         ProfileApi(this).getIdentityProviderProfiles(identityProvider)
             .observe(this, Observer { profiles ->
                 profileArrayAdapter.setProfiles(profiles)
-                profileSpinner.visibility = if (profileArrayAdapter.count == 0) GONE else VISIBLE
-                profileSpinner.isEnabled = (profileArrayAdapter.count > 1)
-                hiddenConstraintLayout.visibility =
+                binding.profileSpinner.visibility = if (profileArrayAdapter.count == 0) GONE else VISIBLE
+                binding.profileSpinner.isEnabled = (profileArrayAdapter.count > 1)
+                binding.hiddenConstraintLayout.visibility =
                     if (profileArrayAdapter.count == 0) GONE else VISIBLE
             })
     }
@@ -129,8 +132,8 @@ class MainActivity : AppCompatActivity() {
 
         val enterpriseConfig = wifiEnterpriseConfigurator.getConfigFromFile(configParser).first()
         if (enterpriseConfig.eapMethod != WifiEnterpriseConfig.Eap.PWD)
-            enterpriseConfig.identity = usernameEditText.text.toString()
-        enterpriseConfig.password = passwordEditText.text.toString()
+            enterpriseConfig.identity = binding.usernameEditText.text.toString()
+        enterpriseConfig.password = binding.passwordEditText.text.toString()
 
         val ssid = configParser.getSsidPairs()
 
