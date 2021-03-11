@@ -1,4 +1,4 @@
-package de.unigoe.eduroamcat.backend.util
+package de.gwdg.wifitool.backend.util
 
 import org.w3c.dom.Document
 import org.w3c.dom.Element

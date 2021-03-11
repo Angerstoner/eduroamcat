@@ -1,8 +1,8 @@
-package de.unigoe.eduroamcat.backend.models
+package de.gwdg.wifitool.backend.models
 
 import android.net.wifi.WifiEnterpriseConfig
 import android.os.Build
-import de.unigoe.eduroamcat.backend.util.WifiEnterpriseConfigurator
+import de.gwdg.wifitool.backend.util.WifiEnterpriseConfigurator
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import java.lang.reflect.Field

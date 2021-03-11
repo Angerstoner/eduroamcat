@@ -1,4 +1,4 @@
-package de.unigoe.eduroamcat.frontend.activities
+package de.gwdg.wifitool.frontend.activities
 
 import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.content.BroadcastReceiver
@@ -13,15 +13,15 @@ import android.view.View.GONE
 import android.view.View.VISIBLE
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
-import de.unigoe.eduroamcat.backend.ProfileApi
-import de.unigoe.eduroamcat.backend.WifiConfig
-import de.unigoe.eduroamcat.backend.models.IdentityProvider
-import de.unigoe.eduroamcat.backend.models.Profile
-import de.unigoe.eduroamcat.backend.util.EapConfigParser
-import de.unigoe.eduroamcat.backend.util.WifiEnterpriseConfigurator
-import de.unigoe.eduroamcat.databinding.ActivityMainBinding
-import de.unigoe.eduroamcat.frontend.adapters.IdentityProviderArrayAdapter
-import de.unigoe.eduroamcat.frontend.adapters.ProfileArrayAdapter
+import de.gwdg.wifitool.backend.ProfileApi
+import de.gwdg.wifitool.backend.WifiConfig
+import de.gwdg.wifitool.backend.models.IdentityProvider
+import de.gwdg.wifitool.backend.models.Profile
+import de.gwdg.wifitool.backend.util.EapConfigParser
+import de.gwdg.wifitool.backend.util.WifiEnterpriseConfigurator
+import de.gwdg.wifitool.databinding.ActivityMainBinding
+import de.gwdg.wifitool.frontend.adapters.IdentityProviderArrayAdapter
+import de.gwdg.wifitool.frontend.adapters.ProfileArrayAdapter
 
 
 class MainActivity : AppCompatActivity() {
@@ -65,7 +65,10 @@ class MainActivity : AppCompatActivity() {
      */
     private fun initIdentityProviderListView() {
         identityProviderArrayAdapter =
-            IdentityProviderArrayAdapter(this, android.R.layout.simple_list_item_1)
+            IdentityProviderArrayAdapter(
+                this,
+                android.R.layout.simple_list_item_1
+            )
 
         binding.identityProviderListView.adapter = identityProviderArrayAdapter
 
@@ -96,7 +99,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initProfileSelectionSpinner() {
-        profileArrayAdapter = ProfileArrayAdapter(this, android.R.layout.simple_spinner_item)
+        profileArrayAdapter = ProfileArrayAdapter(
+            this,
+            android.R.layout.simple_spinner_item
+        )
         binding.profileSpinner.adapter = profileArrayAdapter
     }
 

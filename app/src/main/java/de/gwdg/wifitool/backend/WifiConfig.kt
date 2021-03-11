@@ -1,4 +1,4 @@
-package de.unigoe.eduroamcat.backend
+package de.gwdg.wifitool.backend
 
 import android.Manifest
 import android.app.Activity

@@ -1,4 +1,4 @@
-package de.unigoe.eduroamcat.backend
+package de.gwdg.wifitool.backend
 
 import android.app.DownloadManager
 import android.content.BroadcastReceiver
@@ -13,8 +13,8 @@ import com.android.volley.Response
 import com.android.volley.toolbox.JsonArrayRequest
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
-import de.unigoe.eduroamcat.backend.models.IdentityProvider
-import de.unigoe.eduroamcat.backend.models.Profile
+import de.gwdg.wifitool.backend.models.IdentityProvider
+import de.gwdg.wifitool.backend.models.Profile
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.*
@@ -159,7 +159,13 @@ class ProfileApi(private val activityContext: Context) {
             val title = it.getString(JSON_TAG_IDENTITY_PROVIDER_TITLE)
 
             if (null !in listOf(entityId, country, title))
-                identityProviderList.add(IdentityProvider(entityId, country, title))
+                identityProviderList.add(
+                    IdentityProvider(
+                        entityId,
+                        country,
+                        title
+                    )
+                )
             else
                 Log.e(tag, LOG_MESSAGE_MISSING_DATA.format("IdentityProvider"))
         }
@@ -177,7 +183,13 @@ class ProfileApi(private val activityContext: Context) {
             val profileId = it.getLong(JSON_TAG_PROFILE_ID)
             val displayLabel = it.getString(JSON_TAG_PROFILE_LABEL)
             if (null !in listOf(profileId, displayLabel))
-                profileList.add(Profile(profileId, displayLabel, identityProvider))
+                profileList.add(
+                    Profile(
+                        profileId,
+                        displayLabel,
+                        identityProvider
+                    )
+                )
             else
                 Log.e(tag, LOG_MESSAGE_MISSING_DATA.format("Profile"))
         }

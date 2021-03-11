@@ -1,7 +1,7 @@
-package de.unigoe.eduroamcat.backend.models
+package de.gwdg.wifitool.backend.models
 
 import android.net.wifi.WifiEnterpriseConfig
-import de.unigoe.eduroamcat.backend.util.EapConfigParser
+import de.gwdg.wifitool.backend.util.EapConfigParser
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -17,7 +17,8 @@ import java.util.*
  * - Test for [EapConfigParser.getProviderLocations] depends on [android.location.Location]
  */
 internal class EapConfigParserTest {
-    private val eapConfigParser = EapConfigParser("src/test/res/XmlParserTestConfig.eap-config")
+    private val eapConfigParser =
+        EapConfigParser("src/test/res/XmlParserTestConfig.eap-config")
     private val eapConfigParserMissingFields =
         EapConfigParser("src/test/res/XmlParserTestConfigFull.eap-config")
     private val firstAuthMethodElement = eapConfigParser.getAuthenticationMethodElements()[0]
@@ -33,7 +34,8 @@ internal class EapConfigParserTest {
 
     @Test(expected = NoSuchElementException::class)
     fun exceptionTest() {
-        val eapParserWithExceptions = EapConfigParser("src/test/res/XmlParserTestConfigEmpty.eap-config")
+        val eapParserWithExceptions =
+            EapConfigParser("src/test/res/XmlParserTestConfigEmpty.eap-config")
         eapParserWithExceptions.getAuthenticationMethodElements() // this should raise a NoSuchElementException
     }
 

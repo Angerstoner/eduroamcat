@@ -1,4 +1,4 @@
-package de.unigoe.eduroamcat.backend.models
+package de.gwdg.wifitool.backend.models
 
 data class IdentityProvider(
     val entityId: Long,

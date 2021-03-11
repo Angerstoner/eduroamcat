@@ -1,4 +1,4 @@
-package de.unigoe.eduroamcat.frontend.adapters
+package de.gwdg.wifitool.frontend.adapters
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.Filter
 import android.widget.TextView
-import de.unigoe.eduroamcat.backend.models.IdentityProvider
+import de.gwdg.wifitool.backend.models.IdentityProvider
 
 class IdentityProviderArrayAdapter(context: Context, resource: Int) :
     ArrayAdapter<IdentityProvider>(context, resource) {

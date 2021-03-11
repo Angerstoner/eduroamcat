@@ -1,4 +1,4 @@
-package de.unigoe.eduroamcat.backend.util
+package de.gwdg.wifitool.backend.util
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -81,7 +81,10 @@ class EapConfigParser(eapConfigFilePath: String) {
      * Gives inner EapType, if called with innerAuthenticationMethod
      */
     fun getEapType(authenticationMethodElt: Element): Int {
-        val eapTypeIanaId = authenticationMethodElt.getTextContentForXmlPath(EAP_METHOD, EAP_METHOD_TYPE).toInt()
+        val eapTypeIanaId = authenticationMethodElt.getTextContentForXmlPath(
+            EAP_METHOD,
+            EAP_METHOD_TYPE
+        ).toInt()
         return getEapTypeFromIanaID(eapTypeIanaId)
 
     }
@@ -144,7 +147,10 @@ class EapConfigParser(eapConfigFilePath: String) {
      * Mutual exclusive with EAP type within InnerAuthentication block
      */
     fun getNonEapAuthMethod(innerAuthMethodElt: Element): Int =
-        innerAuthMethodElt.getTextContentForXmlPath(NON_EAP_METHOD, EAP_METHOD_TYPE).toInt()
+        innerAuthMethodElt.getTextContentForXmlPath(
+            NON_EAP_METHOD,
+            EAP_METHOD_TYPE
+        ).toInt()
 
     /**
      * Returns Pair of Strings containing the SSID and the minRSNProto Content.
@@ -155,7 +161,9 @@ class EapConfigParser(eapConfigFilePath: String) {
      */
     fun getSsidPairs(): List<Pair<String, String>> {
         val ssidPairs = ArrayList<Pair<String, String>>()
-        eapConfig.getFirstElementByTag(CREDENTIAL_APPLICABILITY).getElementsByTagName(IEEE_80211)
+        eapConfig.getFirstElementByTag(CREDENTIAL_APPLICABILITY).getElementsByTagName(
+            IEEE_80211
+        )
             .iterator().forEach {
                 val element = it as Element
                 try {
@@ -178,14 +186,20 @@ class EapConfigParser(eapConfigFilePath: String) {
      * Returns display name of the EAP provider
      */
     fun getProviderDisplayName(): String =
-        eapConfig.getTextContentForXmlPath(PROVIDER_INFO, PROVIDER_DISPLAY_NAME)
+        eapConfig.getTextContentForXmlPath(
+            PROVIDER_INFO,
+            PROVIDER_DISPLAY_NAME
+        )
 
 
     /**
      * Returns description of the EAP provider
      */
     fun getProviderDescription(): String =
-        eapConfig.getTextContentForXmlPath(PROVIDER_INFO, PROVIDER_DESCRIPTION)
+        eapConfig.getTextContentForXmlPath(
+            PROVIDER_INFO,
+            PROVIDER_DESCRIPTION
+        )
 
 
     /**
@@ -193,7 +207,9 @@ class EapConfigParser(eapConfigFilePath: String) {
      */
     fun getProviderLocations(): List<Location> {
         val locationStringList =
-            eapConfig.getFirstElementByTag(PROVIDER_INFO).getElementsByTagName(PROVIDER_LOCATION)
+            eapConfig.getFirstElementByTag(PROVIDER_INFO).getElementsByTagName(
+                PROVIDER_LOCATION
+            )
         val locationList = ArrayList<Location>()
         locationStringList.iterator().asSequence()
             .filter { it.nodeType == Node.ELEMENT_NODE }.map { it as Element }
@@ -216,7 +232,10 @@ class EapConfigParser(eapConfigFilePath: String) {
      * Returns logo of the EAP provider as Bitmap (decoded from Base64)
      */
     fun getProviderLogo(): Bitmap {
-        val base64LogoString = eapConfig.getTextContentForXmlPath(PROVIDER_INFO, PROVIDER_LOGO)
+        val base64LogoString = eapConfig.getTextContentForXmlPath(
+            PROVIDER_INFO,
+            PROVIDER_LOGO
+        )
         val base64Logo = Base64.decode(base64LogoString.toByteArray(), Base64.DEFAULT)
 
         return BitmapFactory.decodeByteArray(base64Logo, 0, base64Logo.size)
@@ -227,28 +246,43 @@ class EapConfigParser(eapConfigFilePath: String) {
      * Returns Terms of Use of the EAP provider
      */
     fun getTermsOfUse(): String =
-        eapConfig.getTextContentForXmlPath(PROVIDER_INFO, PROVIDER_TERMS_OF_USE)
+        eapConfig.getTextContentForXmlPath(
+            PROVIDER_INFO,
+            PROVIDER_TERMS_OF_USE
+        )
 
 
     /**
      * Returns helpdesk email address of the EAP provider
      */
     fun getHelpdeskEmailAddress(): String =
-        eapConfig.getTextContentForXmlPath(PROVIDER_INFO, PROVIDER_HELPDESK, PROVIDER_EMAIL)
+        eapConfig.getTextContentForXmlPath(
+            PROVIDER_INFO,
+            PROVIDER_HELPDESK,
+            PROVIDER_EMAIL
+        )
 
 
     /**
      * Returns helpdesk web address of the EAP provider
      */
     fun getHelpdeskWebAddress(): String =
-        eapConfig.getTextContentForXmlPath(PROVIDER_INFO, PROVIDER_HELPDESK, PROVIDER_WEB_ADDRESS)
+        eapConfig.getTextContentForXmlPath(
+            PROVIDER_INFO,
+            PROVIDER_HELPDESK,
+            PROVIDER_WEB_ADDRESS
+        )
 
 
     /**
      * Returns helpdesk phone number address of the EAP provider
      */
     fun getHelpdeskPhoneNumber(): String =
-        eapConfig.getTextContentForXmlPath(PROVIDER_INFO, PROVIDER_HELPDESK, PROVIDER_PHONE)
+        eapConfig.getTextContentForXmlPath(
+            PROVIDER_INFO,
+            PROVIDER_HELPDESK,
+            PROVIDER_PHONE
+        )
 
     /**
      * Returns content of the given [tag]
@@ -262,7 +296,9 @@ class EapConfigParser(eapConfigFilePath: String) {
      * If no such tag is to be found in any instance, a [NoSuchElementException] is raised.
      */
     private fun getFromCredentialApplicability(tag: String): String {
-        eapConfig.getFirstElementByTag(CREDENTIAL_APPLICABILITY).getElementsByTagName(IEEE_80211)
+        eapConfig.getFirstElementByTag(CREDENTIAL_APPLICABILITY).getElementsByTagName(
+            IEEE_80211
+        )
             .iterator().forEach {
                 try {
                     return (it as Element).getTextContentForXmlPath(tag)

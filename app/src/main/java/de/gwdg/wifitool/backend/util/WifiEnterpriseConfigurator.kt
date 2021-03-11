@@ -1,4 +1,4 @@
-package de.unigoe.eduroamcat.backend.util
+package de.gwdg.wifitool.backend.util
 
 import android.net.wifi.WifiEnterpriseConfig
 import android.os.Build
