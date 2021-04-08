@@ -24,7 +24,8 @@ import kotlin.collections.ArrayList
 const val API_URL_BASE = "https://cat.eduroam.org/user/API.php?action="
 const val API_ACTION_LIST_PROFILES = API_URL_BASE + "listProfiles&idp=%d&lang=%s"
 const val API_ACTION_LIST_IDENTITY_PROVIDERS = API_URL_BASE + "listAllIdentityProviders&lang=%s"
-const val API_ACTION_DOWNLOAD_CONFIG = API_URL_BASE + "downloadInstaller&id=%s&profile=%d&lang=%s"
+//const val API_ACTION_DOWNLOAD_CONFIG = API_URL_BASE + "downloadInstaller&id=%s&profile=%d&lang=%s"
+const val API_ACTION_DOWNLOAD_CONFIG = API_URL_BASE + "downloadInstaller&device=%s&profile=%d&lang=%s"
 
 const val JSON_TAG_PROFILE_LIST_DATA = "data"
 
@@ -116,7 +117,7 @@ class ProfileApi(private val activityContext: Context) {
      */
     fun downloadProfileConfig(profile: Profile, filename: String, onDownloadFinished: BroadcastReceiver) {
         val profileDownloadUri = Uri.parse(
-            API_ACTION_DOWNLOAD_CONFIG.format(AndroidId.getAndroidId(), profile.profileId, lang)
+            API_ACTION_DOWNLOAD_CONFIG.format(AndroidDeviceGroup.getAndroidDeviceGroup(), profile.profileId, lang)
         )
         downloadToAppData(profileDownloadUri, filename, onDownloadFinished)
     }

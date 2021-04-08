@@ -9,10 +9,12 @@ import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
+import de.gwdg.wifitool.backend.ADD_WIFI_NETWORK_SUGGESTION_REQUEST_CODE
 import de.gwdg.wifitool.backend.ProfileApi
 import de.gwdg.wifitool.backend.WifiConfig
 import de.gwdg.wifitool.backend.models.IdentityProvider
@@ -38,7 +40,7 @@ class MainActivity : AppCompatActivity() {
         val view = binding.root
         setContentView(view)
 
-        requestAppPermissions()
+//        requestAppPermissions()
         initIdentityProviderListView()
         initIdentityProviderSearchBox()
         initProfileSelectionSpinner()
@@ -147,7 +149,13 @@ class MainActivity : AppCompatActivity() {
         wifiConfig.connectToEapNetwork(enterpriseConfig, ssid)
     }
 
-
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == ADD_WIFI_NETWORK_SUGGESTION_REQUEST_CODE){
+            Log.i(logTag, "Result was $resultCode")
+        }
+        super.onActivityResult(requestCode, resultCode, data)
+    }
+    
     //TODO: move to util as this could be static
     private fun getFilenameForProfile(profile: Profile): String {
         return "eduroam-${profile.identityProvider}_${profile.profileId}_.eap-config"
