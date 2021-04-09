@@ -7,12 +7,16 @@ import android.content.Intent
 import android.net.wifi.WifiEnterpriseConfig
 import android.os.Build
 import android.os.Bundle
+import android.os.Parcelable
+import android.provider.Settings.EXTRA_WIFI_NETWORK_RESULT_LIST
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
+import de.gwdg.wifitool.backend.ADD_WIFI_NETWORK_SUGGESTION_REQUEST_CODE
 import de.gwdg.wifitool.backend.ProfileApi
 import de.gwdg.wifitool.backend.WifiConfig
 import de.gwdg.wifitool.backend.models.IdentityProvider
@@ -38,7 +42,7 @@ class MainActivity : AppCompatActivity() {
         val view = binding.root
         setContentView(view)
 
-        requestAppPermissions()
+//        requestAppPermissions()
         initIdentityProviderListView()
         initIdentityProviderSearchBox()
         initProfileSelectionSpinner()
@@ -147,6 +151,18 @@ class MainActivity : AppCompatActivity() {
         wifiConfig.connectToEapNetwork(enterpriseConfig, ssid)
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == ADD_WIFI_NETWORK_SUGGESTION_REQUEST_CODE && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            Log.i(logTag, "Result was $resultCode")
+            if (resultCode == RESULT_OK && data != null && data.hasExtra(EXTRA_WIFI_NETWORK_RESULT_LIST)) {
+                val addWifiNetworkResultList = data.getIntegerArrayListExtra(EXTRA_WIFI_NETWORK_RESULT_LIST)!!
+                addWifiNetworkResultList.forEachIndexed { i, it ->
+                    Log.i(logTag, "Network result for $i was $it")
+                }
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data)
+    }
 
     //TODO: move to util as this could be static
     private fun getFilenameForProfile(profile: Profile): String {

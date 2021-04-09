@@ -3,15 +3,22 @@ package de.gwdg.wifitool.backend
 import android.Manifest
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.wifi.WifiConfiguration
 import android.net.wifi.WifiEnterpriseConfig
 import android.net.wifi.WifiManager
 import android.net.wifi.WifiNetworkSuggestion
 import android.os.Build
+import android.provider.Settings
+import android.util.Log
 import androidx.annotation.RequiresApi
 
-class WifiConfig(val activity: Activity) {
+const val ADD_WIFI_NETWORK_SUGGESTION_REQUEST_CODE = 501
+
+class WifiConfig(private val activity: Activity) {
+    private val logTag = "WifiConfig"
+
     private val wifiManager: WifiManager =
         activity.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
 
@@ -21,22 +28,22 @@ class WifiConfig(val activity: Activity) {
             ssidPairList.forEach { ssidPair -> connectNetworkAndroidQ(enterpriseConfig, ssidPair.first) }
         } else {
             ssidPairList.forEach { ssidPair ->
-                removeOldEapConnectionsDeprecated(ssidPair.first)
+//                removeOldEapConnectionsDeprecated(ssidPair.first)
                 connectNetworkDeprecated(enterpriseConfig, ssidPair.first, ssidPair.second)
             }
         }
 
     }
 
-    @Deprecated("Deprecated for API >= Android Q")
-    private fun removeOldEapConnectionsDeprecated(ssid: String) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M ||
-            activity.checkSelfPermission(Manifest.permission.CHANGE_WIFI_STATE) == PackageManager.PERMISSION_GRANTED
-        ) {
-            wifiManager.configuredNetworks.filter { it.SSID == "\"$ssid\"" }
-                .forEach { wifiManager.removeNetwork(it.networkId) }
-        }
-    }
+//    @Deprecated("Deprecated for API >= Android Q")
+//    private fun removeOldEapConnectionsDeprecated(ssid: String) {
+//        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M ||
+//            activity.checkSelfPermission(Manifest.permission.CHANGE_WIFI_STATE) == PackageManager.PERMISSION_GRANTED
+//        ) {
+//            wifiManager.configuredNetworks.filter { it.SSID == "\"$ssid\"" }
+//                .forEach { wifiManager.removeNetwork(it.networkId) }
+//        }
+//    }
 
     @Deprecated("Deprecated for API >= Android Q", replaceWith = ReplaceWith("connectNetworkAndroidQ()"))
     private fun connectNetworkDeprecated(
@@ -71,9 +78,17 @@ class WifiConfig(val activity: Activity) {
             .setWpa2EnterpriseConfig(enterpriseConfig)
             .build()
         suggestions.add(suggestion)
-        // TODO: check if needed
-        wifiManager.removeNetworkSuggestions(suggestions)
-        wifiManager.addNetworkSuggestions(suggestions)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            val addNetworkIntent = Intent(Settings.ACTION_WIFI_ADD_NETWORKS)
+            addNetworkIntent.putParcelableArrayListExtra(Settings.EXTRA_WIFI_NETWORK_LIST, suggestions)
+            activity.startActivityForResult(addNetworkIntent, ADD_WIFI_NETWORK_SUGGESTION_REQUEST_CODE)
+        } else {
+            // TODO: check if needed
+            val removeStatus = wifiManager.removeNetworkSuggestions(suggestions)
+            val addStatus = wifiManager.addNetworkSuggestions(suggestions)
+            Log.d(logTag, "Remove status $removeStatus, Add status $addStatus")
+        }
     }
 
 }
