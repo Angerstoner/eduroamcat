@@ -62,6 +62,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Password"
+            android:inputType="textPassword"
             app:layout_constraintBottom_toTopOf="@id/connectButton"
             app:layout_constraintStart_toStartOf="parent" />
 
