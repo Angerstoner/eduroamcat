@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import de.gwdg.wifitool.backend.ProfileApi
 import de.gwdg.wifitool.databinding.FragmentProfileBinding
+import de.gwdg.wifitool.frontend.activities.MainActivity
 import de.gwdg.wifitool.frontend.adapters.IdentityProviderArrayAdapter
 
 class ProfileFragment : Fragment() {
@@ -20,6 +21,9 @@ class ProfileFragment : Fragment() {
         this.binding = FragmentProfileBinding.inflate(inflater, container, false)
 
 //        profileApi = ProfileApi(activity!!.applicationContext)
+        (activity as MainActivity).allowNext()
+
+
 
         return this.binding.root
     }

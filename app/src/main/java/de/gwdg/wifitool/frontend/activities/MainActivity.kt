@@ -58,7 +58,8 @@ class MainActivity : AppCompatActivity() {
         this.dotImageViews = arrayOf(
             binding.dot1ImageView,
             binding.dot2ImageView,
-            binding.dot3ImageView
+            binding.dot3ImageView,
+            binding.dot4ImageView
         )
         highlightDot(binding.viewPager.currentItem)
         binding.viewPager.registerOnPageChangeCallback(object : OnPageChangeCallback() {
@@ -111,9 +112,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun goNext() {
-        binding.viewPager.currentItem = 1
+        binding.viewPager.currentItem += 1
         allowBack()
-        blockNext()
+//        blockNext()
     }
 
     private fun goBack() {
@@ -121,9 +122,6 @@ class MainActivity : AppCompatActivity() {
             return
         }
         binding.viewPager.currentItem -= 1
-        if (binding.viewPager.currentItem <= 1) {
-            blockBack()
-        }
         allowNext()
     }
 
