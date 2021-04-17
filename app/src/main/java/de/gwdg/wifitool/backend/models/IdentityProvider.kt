@@ -6,6 +6,6 @@ data class IdentityProvider(
     val title: String
 ) {
     override fun toString(): String {
-        return "$title ($country, $entityId)"
+        return "$title ($country)"
     }
 }
