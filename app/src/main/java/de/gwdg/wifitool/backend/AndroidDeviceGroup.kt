@@ -21,9 +21,10 @@ enum class AndroidDeviceGroup(val androidId: String, vararg val applicableApiLev
         "android_8_10", Build.VERSION_CODES.O, Build.VERSION_CODES.O_MR1,
         Build.VERSION_CODES.P, Build.VERSION_CODES.Q
     ),
-
-    //    ANDROID_RECENT("android_recent", Build.VERSION_CODES.R), // TODO: the line below is needed for testing, replace with this line
-    ANDROID_RECENT("android_8_10", Build.VERSION_CODES.R);
+    //    ANDROID_RECENT("android_recent", Build.VERSION_CODES.R),
+    // TODO: the line above is inactive for testing,
+    // TODO: remove comment before release
+    ;
 
     companion object {
         fun getAndroidDeviceGroup() =
