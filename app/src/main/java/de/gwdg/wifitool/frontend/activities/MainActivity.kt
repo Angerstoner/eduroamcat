@@ -12,10 +12,6 @@ import de.gwdg.wifitool.databinding.ActivityMainBinding
 import de.gwdg.wifitool.frontend.adapters.MainPagerAdapter
 
 
-//    private lateinit var identityProviderArrayAdapter: IdentityProviderArrayAdapter
-//    private val profileApi = ProfileApi(this)
-//    private lateinit var profileArrayAdapter: ProfileArrayAdapter
-
 class MainActivity : AppCompatActivity() {
     private val logTag = "MainActivity"
     private lateinit var binding: ActivityMainBinding
@@ -34,12 +30,6 @@ class MainActivity : AppCompatActivity() {
         bindNavigationButtons()
 
 //        requestAppPermissions()
-//        initIdentityProviderListView()
-//        initIdentityProviderSearchBox()
-//        initProfileSelectionSpinner()
-//        initConnectButton()
-
-//        downloadAndParseTest()
     }
 
     private fun bindNavigationButtons() {
@@ -114,7 +104,7 @@ class MainActivity : AppCompatActivity() {
     private fun goNext() {
         binding.viewPager.currentItem += 1
         allowBack()
-//        blockNext()
+        blockNext()
     }
 
     private fun goBack() {
@@ -124,59 +114,6 @@ class MainActivity : AppCompatActivity() {
         binding.viewPager.currentItem -= 1
         allowNext()
     }
-
-
-//    private fun initConnectButton() {
-//        binding.connectButton.setOnClickListener {
-//            val selectedProfile = binding.profileSpinner.selectedItem as Profile
-//
-//            val filename = getFilenameForProfile(selectedProfile)
-//            val onDownloadFinished: BroadcastReceiver = object : BroadcastReceiver() {
-//                override fun onReceive(context: Context?, intent: Intent?) {
-//                    val filenameWithPath = getExternalFilesDir(null).toString().plus("/").plus(filename)
-//                    connectToWifi(filenameWithPath)
-//                }
-//            }
-//            profileApi.downloadProfileConfig(selectedProfile, filename, onDownloadFinished)
-//        }
-//    }
-//
-
-//
-//    private fun connectToWifi(configFilename: String) {
-//        val wifiEnterpriseConfigurator = WifiEnterpriseConfigurator()
-//        val configParser = EapConfigParser(configFilename)
-//
-//        val enterpriseConfig = wifiEnterpriseConfigurator.getConfigFromFile(configParser).first()
-//        if (enterpriseConfig.eapMethod != WifiEnterpriseConfig.Eap.PWD)
-//            enterpriseConfig.identity = binding.usernameEditText.text.toString()
-//        enterpriseConfig.password = binding.passwordEditText.text.toString()
-//
-//        val ssid = configParser.getSsidPairs()
-//
-//        val wifiConfig = WifiConfig(this)
-//        wifiConfig.connectToEapNetwork(enterpriseConfig, ssid)
-//    }
-//
-//    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-//        if (requestCode == ADD_WIFI_NETWORK_SUGGESTION_REQUEST_CODE && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-//            Log.i(logTag, "Result was $resultCode")
-//            if (resultCode == RESULT_OK && data != null && data.hasExtra(EXTRA_WIFI_NETWORK_RESULT_LIST)) {
-//                val addWifiNetworkResultList = data.getIntegerArrayListExtra(EXTRA_WIFI_NETWORK_RESULT_LIST)!!
-//                addWifiNetworkResultList.forEachIndexed { i, it ->
-//                    Log.i(logTag, "Network result for $i was $it")
-//                }
-//            }
-//        }
-//        super.onActivityResult(requestCode, resultCode, data)
-//    }
-//
-//    //TODO: move to util as this could be static
-//    private fun getFilenameForProfile(profile: Profile): String {
-//        return "eduroam-${profile.identityProvider}_${profile.profileId}_.eap-config"
-//            .replace("[<>:\"/\\\\|?*, ]".toRegex(), "_")
-//    }
-
 }
 
 
