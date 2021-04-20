@@ -11,4 +11,9 @@
     <string name="setup_second_step">Select User Group</string>
     <string name="setup_last_step">Enter Username and Password</string>
     <string name="setup_third_step">Feedback</string>
+
+
+    <!--Keys for SharedPreferences-->
+    <string name="preference_file_key">wifi_tool_preferences</string>
+    <string name="preference_identity_provider_id">wifi_tool_pref_identity_provider_id</string>
 </resources>

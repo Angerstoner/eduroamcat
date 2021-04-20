@@ -15,6 +15,7 @@ import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import de.gwdg.wifitool.backend.models.IdentityProvider
 import de.gwdg.wifitool.backend.models.Profile
+import de.gwdg.wifitool.backend.models.ProfileAttributes
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.*
@@ -24,6 +25,8 @@ import kotlin.collections.ArrayList
 const val API_URL_BASE = "https://cat.eduroam.org/user/API.php?action="
 const val API_ACTION_LIST_PROFILES = API_URL_BASE + "listProfiles&idp=%d&lang=%s"
 const val API_ACTION_LIST_IDENTITY_PROVIDERS = API_URL_BASE + "listAllIdentityProviders&lang=%s"
+const val API_ACTION_GET_PROFILE_ATTRIBUTES = API_URL_BASE + "profileAttributes&profile=%d&lang=%s"
+
 //const val API_ACTION_DOWNLOAD_CONFIG = API_URL_BASE + "downloadInstaller&id=%s&profile=%d&lang=%s"
 const val API_ACTION_DOWNLOAD_CONFIG = API_URL_BASE + "downloadInstaller&device=%s&profile=%d&lang=%s"
 
@@ -35,19 +38,19 @@ const val JSON_TAG_IDENTITY_PROVIDER_TITLE = "title"
 
 const val JSON_TAG_PROFILE_ID = "profile"
 const val JSON_TAG_PROFILE_LABEL = "display"
-
+const val JSON_TAG_PROFILE_IDENTITY_PROVIDER_NAME = "idp_name"
 
 const val LOG_MESSAGE_MISSING_DATA = "Could not add %s (missing data)"
 
 class ProfileApi(private val activityContext: Context) {
-    private val tag = "ProfileApi"
+    private val logTag = "ProfileApi"
     private val lang = Locale.getDefault().language
     private val identityProviderLiveData = MutableLiveData<ArrayList<IdentityProvider>>()
     private val profileLiveData = MutableLiveData<ArrayList<Profile>>()
-
+    private val profileAttributesLiveData = MutableLiveData<ProfileAttributes>()
 
     private val defaultErrorListener =
-        Response.ErrorListener { error -> Log.e(tag, error.toString()) }
+        Response.ErrorListener { error -> Log.e(logTag, error.toString()) }
 
 
     // JSONArray does not provide an iterator, so we add one
@@ -68,7 +71,7 @@ class ProfileApi(private val activityContext: Context) {
             onComplete, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
         )
 
-        Log.d(tag, "Downloading $filename from $uri")
+        Log.d(logTag, "Downloading $filename from $uri")
         downloadManager.enqueue(
             DownloadManager
                 .Request(uri)
@@ -135,17 +138,33 @@ class ProfileApi(private val activityContext: Context) {
     }
 
     /**
-     * Returns LiveData of Profile List for given [identityProvider]
+     * Returns LiveData of Profile List for given [identityProviderId]
      */
-    fun getIdentityProviderProfiles(identityProvider: IdentityProvider): LiveData<ArrayList<Profile>> {
-        val profileListUrl = API_ACTION_LIST_PROFILES.format(identityProvider.entityId, lang)
+    fun getIdentityProviderProfiles(identityProviderId: Long): LiveData<ArrayList<Profile>> {
+        val profileListUrl = API_ACTION_LIST_PROFILES.format(identityProviderId, lang)
 
         val responseListener = Response.Listener<JSONObject> { response ->
-            parseProfileListJsonArray(JSONArray(response.getString(JSON_TAG_PROFILE_LIST_DATA)), identityProvider)
+            parseProfileListJsonArray(JSONArray(response.getString(JSON_TAG_PROFILE_LIST_DATA)), identityProviderId)
         }
 
         downloadJsonObject(profileListUrl, responseListener)
         return profileLiveData
+    }
+
+    fun getProfileAttributes(profile: Profile): LiveData<ProfileAttributes> {
+        val profileAttributesUrl = API_ACTION_GET_PROFILE_ATTRIBUTES.format(profile.profileId, lang)
+
+        val responseListener = Response.Listener<JSONObject> { response ->
+            parseProfileAttributesJsonObject(response)
+        }
+
+        downloadJsonObject(profileAttributesUrl, responseListener)
+        return profileAttributesLiveData
+    }
+
+    private fun parseProfileAttributesJsonObject(profileAttributeJsonObject: JSONObject) {
+        Log.i(logTag, profileAttributeJsonObject.toString())
+        //TODO: data, data -> local_email, data -> local_phone, data -> local_url, data -> desc
     }
 
 
@@ -160,15 +179,9 @@ class ProfileApi(private val activityContext: Context) {
             val title = it.getString(JSON_TAG_IDENTITY_PROVIDER_TITLE)
 
             if (null !in listOf(entityId, country, title))
-                identityProviderList.add(
-                    IdentityProvider(
-                        entityId,
-                        country,
-                        title
-                    )
-                )
+                identityProviderList.add(IdentityProvider(entityId, country, title))
             else
-                Log.e(tag, LOG_MESSAGE_MISSING_DATA.format("IdentityProvider"))
+                Log.e(logTag, LOG_MESSAGE_MISSING_DATA.format("IdentityProvider"))
         }
         identityProviderLiveData.postValue(identityProviderList)
     }
@@ -176,23 +189,19 @@ class ProfileApi(private val activityContext: Context) {
 
     /**
      * Parses [profileListJsonArray] into List of [Profile] as LiveData.
-     * [identityProvider] is stored as [Profile] information
+     * [identityProviderId] is stored as [Profile] information
      */
-    private fun parseProfileListJsonArray(profileListJsonArray: JSONArray, identityProvider: IdentityProvider) {
+    private fun parseProfileListJsonArray(profileListJsonArray: JSONArray, identityProviderId: Long) {
         val profileList = ArrayList<Profile>()
         profileListJsonArray.iterator().forEach {
             val profileId = it.getLong(JSON_TAG_PROFILE_ID)
             val displayLabel = it.getString(JSON_TAG_PROFILE_LABEL)
+            val identityProviderName = it.getString(JSON_TAG_PROFILE_IDENTITY_PROVIDER_NAME)
+
             if (null !in listOf(profileId, displayLabel))
-                profileList.add(
-                    Profile(
-                        profileId,
-                        displayLabel,
-                        identityProvider
-                    )
-                )
+                profileList.add(Profile(profileId, displayLabel, identityProviderId, identityProviderName))
             else
-                Log.e(tag, LOG_MESSAGE_MISSING_DATA.format("Profile"))
+                Log.e(logTag, LOG_MESSAGE_MISSING_DATA.format("Profile"))
         }
         profileLiveData.postValue(profileList)
     }
