@@ -40,6 +40,12 @@ const val JSON_TAG_PROFILE_ID = "profile"
 const val JSON_TAG_PROFILE_LABEL = "display"
 const val JSON_TAG_PROFILE_IDENTITY_PROVIDER_NAME = "idp_name"
 
+const val JSON_TAG_PROFILE_ATTR_DATA = "data"
+const val JSON_TAG_PROFILE_ATTR_MAIL = "local_email"
+const val JSON_TAG_PROFILE_ATTR_PHONE = "local_phone"
+const val JSON_TAG_PROFILE_ATTR_URL = "local_url"
+const val JSON_TAG_PROFILE_ATTR_DESCRIPTION = "description"
+
 const val LOG_MESSAGE_MISSING_DATA = "Could not add %s (missing data)"
 
 class ProfileApi(private val activityContext: Context) {
@@ -151,20 +157,39 @@ class ProfileApi(private val activityContext: Context) {
         return profileLiveData
     }
 
+    fun updateProfileAttributes(profile: Profile) {
+        getProfileAttributes(profile)
+    }
+
     fun getProfileAttributes(profile: Profile): LiveData<ProfileAttributes> {
         val profileAttributesUrl = API_ACTION_GET_PROFILE_ATTRIBUTES.format(profile.profileId, lang)
 
         val responseListener = Response.Listener<JSONObject> { response ->
-            parseProfileAttributesJsonObject(response)
+            parseProfileAttributesJsonObject(response, profile)
         }
 
         downloadJsonObject(profileAttributesUrl, responseListener)
         return profileAttributesLiveData
     }
 
-    private fun parseProfileAttributesJsonObject(profileAttributeJsonObject: JSONObject) {
-        Log.i(logTag, profileAttributeJsonObject.toString())
-        //TODO: data, data -> local_email, data -> local_phone, data -> local_url, data -> desc
+    private fun parseProfileAttributesJsonObject(profileAttributeJsonObject: JSONObject, profile: Profile) {
+        if (profileAttributeJsonObject.has(JSON_TAG_PROFILE_ATTR_DATA)) {
+            with(profileAttributeJsonObject.getJSONObject(JSON_TAG_PROFILE_ATTR_DATA)) {
+                val identityProviderMail =
+                    if (has(JSON_TAG_PROFILE_ATTR_MAIL)) getString(JSON_TAG_PROFILE_ATTR_MAIL) else ""
+                val identityProviderPhone =
+                    if (has(JSON_TAG_PROFILE_ATTR_PHONE)) getString(JSON_TAG_PROFILE_ATTR_PHONE) else ""
+                val identityProviderUrl =
+                    if (has(JSON_TAG_PROFILE_ATTR_URL)) getString(JSON_TAG_PROFILE_ATTR_URL) else ""
+                val identityProviderDesc =
+                    if (has(JSON_TAG_PROFILE_ATTR_DESCRIPTION)) getString(JSON_TAG_PROFILE_ATTR_DESCRIPTION) else ""
+                val profileAttributes = ProfileAttributes(
+                    profile.profileId, profile.identityProviderName,
+                    identityProviderMail, identityProviderPhone, identityProviderUrl, identityProviderDesc
+                )
+                profileAttributesLiveData.postValue(profileAttributes)
+            }
+        }
     }
 
 

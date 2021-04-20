@@ -26,7 +26,7 @@ class ProfileFragment : Fragment() {
     private lateinit var profileArrayAdapter: ProfileArrayAdapter
     private var identityProviderId = -1L
 
-
+    //TODO: move this somewhere it is called everytime the fragment is (re)opened
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         this.binding = FragmentProfileBinding.inflate(inflater, container, false)
 
@@ -35,8 +35,8 @@ class ProfileFragment : Fragment() {
             profileApi = ProfileApi(parentActivity.applicationContext)
             identityProviderId = loadIdentityProviderId()
             if (identityProviderId != -1L) {
-                initProfileInfoBox()
                 initProfileSelectionSpinner()
+                initProfileInfoBox()
             } else {
                 Log.e(logTag, "Invalid Identity Provider. Cannot continue.")
             }
@@ -56,7 +56,8 @@ class ProfileFragment : Fragment() {
         binding.profileSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 val selectedProfile = profileArrayAdapter.getItem(position)
-                updateProfileInfoBox(selectedProfile)
+                binding.profilePreviewLabel.text = getString(R.string.profile_preview_label_refreshing_text)
+                profileApi.updateProfileAttributes(selectedProfile)
             }
 
             // do nothing
@@ -65,7 +66,15 @@ class ProfileFragment : Fragment() {
     }
 
     private fun updateProfileInfoBox(profile: Profile) {
-        profileApi.getProfileAttributes(profile)
+        profileApi.getProfileAttributes(profile).observe(this, Observer { profileAttributes ->
+            with(profileAttributes) {
+                binding.profilePreviewLabel.text = getString(R.string.profile_preview_label_text)
+                binding.displayNameTextView.text = identityProviderName
+                binding.helpdeskMailTextView.text = identityProviderMail
+                binding.helpdeskPhoneTextView.text = identityProviderPhone
+                binding.helpdeskWebTextView.text = identityProviderUrl
+            }
+        })
     }
 
     private fun initProfileSelectionSpinner() {
@@ -75,6 +84,9 @@ class ProfileFragment : Fragment() {
         ProfileApi(activity!!).getIdentityProviderProfiles(identityProviderId)
             .observe(this, Observer { profiles ->
                 profileArrayAdapter.setProfiles(profiles)
+
+                // populate infobox with first item and add observer to liveData used for profile preview
+                updateProfileInfoBox(profileArrayAdapter.getItem(0))
             })
     }
 }
