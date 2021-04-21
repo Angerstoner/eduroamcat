@@ -26,7 +26,6 @@ class ProfileFragment : Fragment() {
     private lateinit var profileArrayAdapter: ProfileArrayAdapter
     private var identityProviderId = -1L
 
-    //TODO: move this somewhere it is called everytime the fragment is (re)opened
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         this.binding = FragmentProfileBinding.inflate(inflater, container, false)
         try {
@@ -36,11 +35,12 @@ class ProfileFragment : Fragment() {
             if (identityProviderId != -1L) {
                 initProfileSelectionSpinner()
                 initProfileInfoBox()
+                parentActivity.allowNext()
             } else {
                 Log.e(logTag, "Invalid Identity Provider. Cannot continue.")
             }
         } catch (e: NullPointerException) {
-            Log.e(logTag, "Context/Activity missing, could not init Fragment. \n${e.stackTrace}")
+            Log.e(logTag, "Context/Activity missing, could not init Fragment.\n ${e.stackTrace}")
         }
         return this.binding.root
     }
@@ -49,18 +49,13 @@ class ProfileFragment : Fragment() {
         identityProviderId = loadIdentityProviderId()
         if (identityProviderId != -1L) {
             binding.profilePreviewLabel.text = getString(R.string.profile_preview_label_refreshing_text)
+            //TODO: only call update methods here. do not re-init the fields
             initProfileSelectionSpinner()
             initProfileInfoBox()
         } else {
             Log.e(logTag, "Invalid Identity Provider. Cannot continue.")
         }
         super.onResume()
-    }
-
-    private fun loadIdentityProviderId(): Long {
-        val sharedPref =
-            parentActivity.getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
-        return sharedPref.getLong(getString(R.string.preference_identity_provider_id), -1L)
     }
 
     private fun initProfileInfoBox() {
@@ -100,6 +95,12 @@ class ProfileFragment : Fragment() {
                 // populate infobox with first item and add observer to liveData used for profile preview
                 updateProfileInfoBox(profileArrayAdapter.getItem(0))
             })
+    }
+
+    private fun loadIdentityProviderId(): Long {
+        val sharedPref =
+            parentActivity.getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
+        return sharedPref.getLong(getString(R.string.preference_identity_provider_id), -1L)
     }
 
 

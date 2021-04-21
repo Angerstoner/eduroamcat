@@ -104,7 +104,7 @@ class MainActivity : AppCompatActivity() {
     private fun goNext() {
         binding.viewPager.currentItem += 1
         allowBack()
-        blockNext()
+//        blockNext()
     }
 
     private fun goBack() {

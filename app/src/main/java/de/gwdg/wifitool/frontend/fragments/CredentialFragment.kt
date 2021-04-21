@@ -13,8 +13,12 @@ class CredentialFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         this.binding = FragmentCredentialsBinding.inflate(inflater, container, false)
-        (activity as MainActivity).allowNext()
         return this.binding.root
+    }
+
+    override fun onResume() {
+        (activity as MainActivity).allowNext()
+        super.onResume()
     }
 
     //TODO: download eap-config for profile to device
