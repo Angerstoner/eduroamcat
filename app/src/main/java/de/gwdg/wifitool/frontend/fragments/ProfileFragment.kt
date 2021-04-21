@@ -88,4 +88,7 @@ class ProfileFragment : Fragment() {
                 updateProfileInfoBox(profileArrayAdapter.getItem(0))
             })
     }
+
+    //TODO: save selected profile to preferences
+    //TODO: download eap-config for profile to device
 }
