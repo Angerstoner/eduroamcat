@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import de.gwdg.wifitool.R
 import de.gwdg.wifitool.backend.ProfileApi
+import de.gwdg.wifitool.backend.models.IdentityProvider
 import de.gwdg.wifitool.backend.models.Profile
 import de.gwdg.wifitool.databinding.FragmentProfileBinding
 import de.gwdg.wifitool.frontend.activities.MainActivity
@@ -28,7 +29,6 @@ class ProfileFragment : Fragment() {
     //TODO: move this somewhere it is called everytime the fragment is (re)opened
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         this.binding = FragmentProfileBinding.inflate(inflater, container, false)
-
         try {
             parentActivity = activity as MainActivity
             profileApi = ProfileApi(parentActivity.applicationContext)
@@ -45,6 +45,18 @@ class ProfileFragment : Fragment() {
         return this.binding.root
     }
 
+    override fun onResume() {
+        identityProviderId = loadIdentityProviderId()
+        if (identityProviderId != -1L) {
+            binding.profilePreviewLabel.text = getString(R.string.profile_preview_label_refreshing_text)
+            initProfileSelectionSpinner()
+            initProfileInfoBox()
+        } else {
+            Log.e(logTag, "Invalid Identity Provider. Cannot continue.")
+        }
+        super.onResume()
+    }
+
     private fun loadIdentityProviderId(): Long {
         val sharedPref =
             parentActivity.getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
@@ -57,6 +69,7 @@ class ProfileFragment : Fragment() {
                 val selectedProfile = profileArrayAdapter.getItem(position)
                 binding.profilePreviewLabel.text = getString(R.string.profile_preview_label_refreshing_text)
                 profileApi.updateProfileAttributes(selectedProfile)
+                saveProfileId(selectedProfile)
             }
 
             // do nothing
@@ -89,6 +102,18 @@ class ProfileFragment : Fragment() {
             })
     }
 
-    //TODO: save selected profile to preferences
-    //TODO: download eap-config for profile to device
+
+    /**
+     * Stores selected Profile to app preferences.
+     *
+     * Value used in [CredentialFragment]
+     */
+    private fun saveProfileId(profile: Profile) {
+        val sharedPref =
+            parentActivity.getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
+        with(sharedPref.edit()) {
+            putLong(getString(R.string.preference_identity_provider_id), profile.profileId)
+            apply()
+        }
+    }
 }

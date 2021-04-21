@@ -27,7 +27,6 @@ const val API_ACTION_LIST_PROFILES = API_URL_BASE + "listProfiles&idp=%d&lang=%s
 const val API_ACTION_LIST_IDENTITY_PROVIDERS = API_URL_BASE + "listAllIdentityProviders&lang=%s"
 const val API_ACTION_GET_PROFILE_ATTRIBUTES = API_URL_BASE + "profileAttributes&profile=%d&lang=%s"
 
-//const val API_ACTION_DOWNLOAD_CONFIG = API_URL_BASE + "downloadInstaller&id=%s&profile=%d&lang=%s"
 const val API_ACTION_DOWNLOAD_CONFIG = API_URL_BASE + "downloadInstaller&device=%s&profile=%d&lang=%s"
 
 const val JSON_TAG_PROFILE_LIST_DATA = "data"
@@ -35,6 +34,7 @@ const val JSON_TAG_PROFILE_LIST_DATA = "data"
 const val JSON_TAG_IDENTITY_PROVIDER_ID = "entityID"
 const val JSON_TAG_IDENTITY_PROVIDER_COUNTRY = "country"
 const val JSON_TAG_IDENTITY_PROVIDER_TITLE = "title"
+const val JSON_TAG_IDENTITY_PROVIDER_KEYWORDS = "keywords"
 
 const val JSON_TAG_PROFILE_ID = "profile"
 const val JSON_TAG_PROFILE_LABEL = "display"
@@ -62,6 +62,15 @@ class ProfileApi(private val activityContext: Context) {
     // JSONArray does not provide an iterator, so we add one
     operator fun JSONArray.iterator(): Iterator<JSONObject> =
         (0 until length()).asSequence().map { get(it) as JSONObject }.iterator()
+
+    //needed when there is a nested JSONArray in the JSONArray
+    private fun JSONArray.jsonArrayIterator(): Iterator<JSONArray> =
+        (0 until length()).asSequence().map { get(it) as JSONArray }.iterator()
+
+    //needed when there are only Strings in the JSONArray
+    private fun JSONArray.stringIterator(): Iterator<String> =
+        (0 until length()).asSequence().map { get(it) as String }.iterator()
+
 
     /**
      * Downloads file from [uri] to [filename] and calls [onComplete] afterwards using the [DownloadManager]
@@ -198,15 +207,29 @@ class ProfileApi(private val activityContext: Context) {
      */
     private fun parseIdentityProviderListJsonArray(identityProviderJsonArray: JSONArray) {
         val identityProviderList = ArrayList<IdentityProvider>()
-        identityProviderJsonArray.iterator().forEach {
-            val entityId = it.getLong(JSON_TAG_IDENTITY_PROVIDER_ID)
-            val country = it.getString(JSON_TAG_IDENTITY_PROVIDER_COUNTRY)
-            val title = it.getString(JSON_TAG_IDENTITY_PROVIDER_TITLE)
+        identityProviderJsonArray.iterator().forEach { identityProviderJsonItem ->
+            with(identityProviderJsonItem) {
+                val entityId =
+                    if (has(JSON_TAG_IDENTITY_PROVIDER_ID)) getLong(JSON_TAG_IDENTITY_PROVIDER_ID) else -1
+                val country =
+                    if (has(JSON_TAG_IDENTITY_PROVIDER_COUNTRY)) getString(JSON_TAG_IDENTITY_PROVIDER_COUNTRY) else ""
+                val title =
+                    if (has(JSON_TAG_IDENTITY_PROVIDER_TITLE)) getString(JSON_TAG_IDENTITY_PROVIDER_TITLE) else ""
 
-            if (null !in listOf(entityId, country, title))
-                identityProviderList.add(IdentityProvider(entityId, country, title))
-            else
-                Log.e(logTag, LOG_MESSAGE_MISSING_DATA.format("IdentityProvider"))
+                if (entityId != -1L) {
+                    val identityProvider = IdentityProvider(entityId, country, title)
+                    if (identityProviderJsonItem.has(JSON_TAG_IDENTITY_PROVIDER_KEYWORDS)) {
+                        identityProviderJsonItem.getJSONArray(JSON_TAG_IDENTITY_PROVIDER_KEYWORDS)
+                            .jsonArrayIterator().forEach { keywordArray ->
+                                keywordArray.stringIterator()
+                                    .forEach { keyword -> identityProvider.addKeywords(keyword) }
+                            }
+                    }
+                    identityProviderList.add(identityProvider)
+                } else {
+                    Log.e(logTag, LOG_MESSAGE_MISSING_DATA.format("IdentityProvider"))
+                }
+            }
         }
         identityProviderLiveData.postValue(identityProviderList)
     }

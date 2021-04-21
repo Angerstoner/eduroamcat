@@ -16,4 +16,6 @@ class CredentialFragment : Fragment() {
         (activity as MainActivity).allowNext()
         return this.binding.root
     }
+
+    //TODO: download eap-config for profile to device
 }

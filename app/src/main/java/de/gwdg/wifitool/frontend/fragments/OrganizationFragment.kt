@@ -89,7 +89,7 @@ class OrganizationFragment : Fragment() {
     /**
      * Stores selected Identity Provider to app preferences.
      *
-     * Value used in profileSelectionFragment
+     * Value used in [ProfileFragment]
      * TODO: implement checking and loading of previously saved IdPs when loading the OrganizationFragment
      */
     private fun saveIdentityProviderId(idp: IdentityProvider) {
@@ -99,6 +99,5 @@ class OrganizationFragment : Fragment() {
             putLong(getString(R.string.preference_identity_provider_id), idp.entityId)
             apply()
         }
-
     }
 }

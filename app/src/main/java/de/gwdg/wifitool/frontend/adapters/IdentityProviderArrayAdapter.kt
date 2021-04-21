@@ -40,7 +40,7 @@ class IdentityProviderArrayAdapter(context: Context, resource: Int) :
 
                 filterResults.values = if (searchText.contains("\\S".toRegex()))
                     identityProviderList.filter {
-                        it.toString().contains(searchText, ignoreCase = true)
+                        it.hasKeyword(searchText)
                     }
                 else
                     identityProviderList

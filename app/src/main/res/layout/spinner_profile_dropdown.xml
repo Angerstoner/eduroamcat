@@ -5,5 +5,5 @@
     android:layout_height="wrap_content"
     android:ellipsize="marquee"
     android:paddingHorizontal="10dp"
-    android:paddingVertical="5dp"
+    android:paddingVertical="10dp"
     android:singleLine="true" />
