@@ -11,7 +11,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import de.gwdg.wifitool.R
 import de.gwdg.wifitool.backend.ProfileApi
-import de.gwdg.wifitool.backend.models.IdentityProvider
 import de.gwdg.wifitool.backend.models.Profile
 import de.gwdg.wifitool.databinding.FragmentProfileBinding
 import de.gwdg.wifitool.frontend.activities.MainActivity
@@ -78,7 +77,7 @@ class ProfileFragment : Fragment() {
     }
 
     private fun initProfileSelectionSpinner() {
-        profileArrayAdapter = ProfileArrayAdapter(activity!!, android.R.layout.simple_spinner_item)
+        profileArrayAdapter = ProfileArrayAdapter(activity!!, R.layout.spinner_profile_dropdown)
         binding.profileSpinner.adapter = profileArrayAdapter
 
         ProfileApi(activity!!).getIdentityProviderProfiles(identityProviderId)
