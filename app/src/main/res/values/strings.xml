@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">GWDG Wi-Fi Tool</string>
     <string name="next_button">Next</string>
+    <string name="next_button_connect">Connect</string>
     <string name="back_button">Back</string>
 
     <string name="logo_content_desc">GWDG Wi-Fi Tool Logo</string>
@@ -16,6 +17,7 @@
     <!--Keys for SharedPreferences-->
     <string name="preference_file_key">wifi_tool_preferences</string>
     <string name="preference_identity_provider_id">wifi_tool_pref_identity_provider_id</string>
+    <string name="preference_identity_provider_name">wifi_tool_pref_identity_provider_name</string>
     <string name="preference_profile_id">wifi_tool_pref_profile_id</string>
     <string name="profile_preview_label_text">Selected profile:</string>
     <string name="profile_preview_label_refreshing_text">Selected profile: (refreshing)</string>

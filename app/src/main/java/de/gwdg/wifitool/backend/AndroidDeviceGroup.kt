@@ -33,7 +33,7 @@ enum class AndroidDeviceGroup(val androidId: String, vararg val applicableApiLev
             } catch (e: NoSuchElementException) {
                 val default = values().last()
                 Log.i("AndroidId", "Android Version not found in enum, defaulting to $default")
-                default
+                default.androidId
             }
     }
 }

@@ -55,6 +55,7 @@ class ProfileFragment : Fragment() {
         } else {
             Log.e(logTag, "Invalid Identity Provider. Cannot continue.")
         }
+        parentActivity.allowNext()
         super.onResume()
     }
 
@@ -113,7 +114,7 @@ class ProfileFragment : Fragment() {
         val sharedPref =
             parentActivity.getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
         with(sharedPref.edit()) {
-            putLong(getString(R.string.preference_identity_provider_id), profile.profileId)
+            putLong(getString(R.string.preference_profile_id), profile.profileId)
             apply()
         }
     }

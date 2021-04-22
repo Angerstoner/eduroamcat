@@ -76,7 +76,6 @@ class ProfileApi(private val activityContext: Context) {
      * Downloads file from [uri] to [filename] and calls [onComplete] afterwards using the [DownloadManager]
      */
     private fun downloadToAppData(uri: Uri, filename: String, onComplete: BroadcastReceiver?) {
-        // TODO: maybe use Volley and request simple strings
         val downloadManager =
             activityContext.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
 
@@ -133,9 +132,9 @@ class ProfileApi(private val activityContext: Context) {
      *
      * see [ProfileApi.getAllIdentityProviders]
      */
-    fun downloadProfileConfig(profile: Profile, filename: String, onDownloadFinished: BroadcastReceiver) {
+    fun downloadProfileConfig(profileId: Long, filename: String, onDownloadFinished: BroadcastReceiver) {
         val profileDownloadUri = Uri.parse(
-            API_ACTION_DOWNLOAD_CONFIG.format(AndroidDeviceGroup.getAndroidDeviceGroup(), profile.profileId, lang)
+            API_ACTION_DOWNLOAD_CONFIG.format(AndroidDeviceGroup.getAndroidDeviceGroup(), profileId, lang)
         )
         downloadToAppData(profileDownloadUri, filename, onDownloadFinished)
     }
@@ -166,10 +165,9 @@ class ProfileApi(private val activityContext: Context) {
         return profileLiveData
     }
 
-    fun updateProfileAttributes(profile: Profile) {
-        getProfileAttributes(profile)
-    }
-
+    /**
+     * Returns LiveData holding [ProfileAttributes] (e.g. Name, Url, Phone Number, Mail) for given [profile]
+     */
     fun getProfileAttributes(profile: Profile): LiveData<ProfileAttributes> {
         val profileAttributesUrl = API_ACTION_GET_PROFILE_ATTRIBUTES.format(profile.profileId, lang)
 
@@ -179,6 +177,15 @@ class ProfileApi(private val activityContext: Context) {
 
         downloadJsonObject(profileAttributesUrl, responseListener)
         return profileAttributesLiveData
+    }
+
+    /**
+     * Triggers updating of LiveData holding [ProfileAttributes] (e.g. Name, Url, Phone Number, Mail) for given [profile]
+     *
+     * see [getProfileAttributes]
+     */
+    fun updateProfileAttributes(profile: Profile) {
+        getProfileAttributes(profile)
     }
 
     private fun parseProfileAttributesJsonObject(profileAttributeJsonObject: JSONObject, profile: Profile) {
@@ -218,6 +225,8 @@ class ProfileApi(private val activityContext: Context) {
 
                 if (entityId != -1L) {
                     val identityProvider = IdentityProvider(entityId, country, title)
+
+                    // check for keywords and add to IdP object
                     if (identityProviderJsonItem.has(JSON_TAG_IDENTITY_PROVIDER_KEYWORDS)) {
                         identityProviderJsonItem.getJSONArray(JSON_TAG_IDENTITY_PROVIDER_KEYWORDS)
                             .jsonArrayIterator().forEach { keywordArray ->

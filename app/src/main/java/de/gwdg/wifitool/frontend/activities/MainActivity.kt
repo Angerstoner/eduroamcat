@@ -106,7 +106,10 @@ class MainActivity : AppCompatActivity() {
         allowBack()
         blockNext()
         if (binding.viewPager.currentItem == pagerAdapter.itemCount - 2) {
-            binding.nextButton.text = "Connect"
+            binding.nextButton.text = getString(R.string.next_button_connect)
+        }
+        else {
+            binding.nextButton.text = getString(R.string.next_button)
         }
     }
 

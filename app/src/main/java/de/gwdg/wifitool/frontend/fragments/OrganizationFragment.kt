@@ -97,6 +97,7 @@ class OrganizationFragment : Fragment() {
             parentActivity.getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
         with(sharedPref.edit()) {
             putLong(getString(R.string.preference_identity_provider_id), idp.entityId)
+            putString(getString(R.string.preference_identity_provider_name), idp.title)
             apply()
         }
     }
