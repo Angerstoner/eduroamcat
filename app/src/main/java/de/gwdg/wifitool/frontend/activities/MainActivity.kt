@@ -104,7 +104,10 @@ class MainActivity : AppCompatActivity() {
     private fun goNext() {
         binding.viewPager.currentItem += 1
         allowBack()
-//        blockNext()
+        blockNext()
+        if (binding.viewPager.currentItem == pagerAdapter.itemCount - 2) {
+            binding.nextButton.text = "Connect"
+        }
     }
 
     private fun goBack() {
