@@ -1,6 +1,7 @@
 package de.gwdg.wifitool.frontend.adapters
 
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -61,5 +62,12 @@ class IdentityProviderArrayAdapter(context: Context, resource: Int) :
         originalIdentityProviderList = (identityProviderList.clone() as List<*>)
             .filterIsInstance<IdentityProvider>() as ArrayList<IdentityProvider>
         notifyDataSetChanged()
+    }
+
+    fun moveIdentityProviderWithIdToTop(identityProviderId: Long) {
+        // this uses a trick for moving the desired identity to the first position
+        // False results to 0 and True to 1, that's why the Identity Provider with
+        // the given Id will be moved to the front when sortByDescending is used.
+        identityProviderList.sortByDescending { it.entityId == identityProviderId }
     }
 }

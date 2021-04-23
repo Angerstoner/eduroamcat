@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ListView
 import de.gwdg.wifitool.R
 import de.gwdg.wifitool.backend.ProfileApi
 import de.gwdg.wifitool.backend.models.IdentityProvider
@@ -56,12 +57,13 @@ class OrganizationFragment : Fragment() {
         profileApi.getAllIdentityProviders()
             .observe(this, { identityProviders ->
                 identityProviderArrayAdapter.setIdentityProviders(identityProviders)
+                initSavedIdentityProvider(loadIdentityProviderId())
             })
     }
 
+
     /**
      * Initializes EditText which can search the Identity Provider list
-     * TODO: use idp list keywords for fuzzy search
      */
     private fun initIdentityProviderSearchBox() {
         binding.identitySearchEditText.addTextChangedListener(object : TextWatcher {
@@ -77,13 +79,32 @@ class OrganizationFragment : Fragment() {
         })
     }
 
+    private fun initSavedIdentityProvider(identityProviderId: Long) {
+        if (identityProviderId != -1L) {
+            identityProviderArrayAdapter.moveIdentityProviderWithIdToTop(identityProviderId)
+            // TODO: highlight/select first item of list
+        } else {
+            Log.i(logTag, "No saved Identity Provider found. Starting App for first use.")
+        }
+
+
+    }
+
+
     /**
      * Called when clicking on an Identity Provider from the list
      */
     private fun onIdentityProviderClick(pos: Int) {
         val idp = identityProviderArrayAdapter.getItem(pos)
-        saveIdentityProviderId(idp)
+        saveIdentityProvider(idp)
         parentActivity.allowNext()
+    }
+
+
+    private fun loadIdentityProviderId(): Long {
+        val sharedPref =
+            parentActivity.getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
+        return sharedPref.getLong(getString(R.string.preference_identity_provider_id), -1L)
     }
 
     /**
@@ -92,7 +113,7 @@ class OrganizationFragment : Fragment() {
      * Value used in [ProfileFragment]
      * TODO: implement checking and loading of previously saved IdPs when loading the OrganizationFragment
      */
-    private fun saveIdentityProviderId(idp: IdentityProvider) {
+    private fun saveIdentityProvider(idp: IdentityProvider) {
         val sharedPref =
             parentActivity.getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
         with(sharedPref.edit()) {
