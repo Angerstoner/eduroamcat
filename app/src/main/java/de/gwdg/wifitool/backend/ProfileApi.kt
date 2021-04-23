@@ -240,6 +240,7 @@ class ProfileApi(private val activityContext: Context) {
                 }
             }
         }
+        identityProviderList.filter { it.hasKeyword("Schmalkalden") }
         identityProviderLiveData.postValue(identityProviderList)
     }
 

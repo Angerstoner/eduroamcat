@@ -3,6 +3,7 @@ package de.gwdg.wifitool.frontend.fragments
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.net.wifi.WifiEnterpriseConfig
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -14,7 +15,10 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import de.gwdg.wifitool.R
 import de.gwdg.wifitool.backend.ProfileApi
+import de.gwdg.wifitool.backend.WifiConfig
 import de.gwdg.wifitool.backend.models.Profile
+import de.gwdg.wifitool.backend.util.EapConfigParser
+import de.gwdg.wifitool.backend.util.WifiEnterpriseConfigurator
 import de.gwdg.wifitool.databinding.FragmentCredentialsBinding
 import de.gwdg.wifitool.databinding.FragmentProfileBinding
 import de.gwdg.wifitool.frontend.activities.MainActivity
@@ -85,6 +89,7 @@ class CredentialFragment : Fragment() {
 
     private fun updateNextButton() {
         if (isConnectAllowed()) {
+            parentActivity.addActionToNext { connectToWifi(profileDownloadPath) }
             parentActivity.allowNext()
         } else {
             if (binding.usernameEditText.text.toString() != ""
@@ -117,4 +122,19 @@ class CredentialFragment : Fragment() {
             .replace("[<>:\"/\\\\|?*, ]".toRegex(), "_")
     }
 
+
+    private fun connectToWifi(configFilename: String) {
+        val wifiEnterpriseConfigurator = WifiEnterpriseConfigurator()
+        val configParser = EapConfigParser(configFilename)
+
+        val enterpriseConfig = wifiEnterpriseConfigurator.getConfigFromFile(configParser).first()
+        if (enterpriseConfig.eapMethod != WifiEnterpriseConfig.Eap.PWD)
+            enterpriseConfig.identity = binding.usernameEditText.text.toString()
+        enterpriseConfig.password = binding.passwordEditText.text.toString()
+
+        val ssid = configParser.getSsidPairs()
+
+        val wifiConfig = WifiConfig(parentActivity)
+        wifiConfig.connectToEapNetwork(enterpriseConfig, ssid)
+    }
 }

@@ -107,10 +107,10 @@ class MainActivity : AppCompatActivity() {
         blockNext()
         if (binding.viewPager.currentItem == pagerAdapter.itemCount - 2) {
             binding.nextButton.text = getString(R.string.next_button_connect)
-        }
-        else {
+        } else {
             binding.nextButton.text = getString(R.string.next_button)
         }
+        resetNextButtonAction()
     }
 
     private fun goBack() {
@@ -119,6 +119,15 @@ class MainActivity : AppCompatActivity() {
         }
         binding.viewPager.currentItem -= 1
         allowNext()
+        resetNextButtonAction()
+    }
+
+    fun addActionToNext(action: () -> Unit) {
+        binding.nextButton.setOnClickListener { action(); goNext() }
+    }
+
+    fun resetNextButtonAction() {
+        binding.nextButton.setOnClickListener { goNext() }
     }
 }
 
