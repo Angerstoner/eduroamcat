@@ -90,8 +90,11 @@ class ProfileFragment : Fragment() {
         binding.profileSpinner.adapter = profileArrayAdapter
 
         ProfileApi(activity!!).getIdentityProviderProfiles(identityProviderId)
-            .observe(this, Observer { profiles ->
+            .observe(this, { profiles ->
                 profileArrayAdapter.setProfiles(profiles)
+                // hide spinner/dropdown and label if there is nothing to select
+                binding.profileSpinnerLabel.visibility = if (profiles.size == 1) View.GONE else View.VISIBLE
+                binding.profileSpinner.visibility = if (profiles.size == 1) View.GONE else View.VISIBLE
 
                 // populate infobox with first item and add observer to liveData used for profile preview
                 updateProfileInfoBox(profileArrayAdapter.getItem(0))
