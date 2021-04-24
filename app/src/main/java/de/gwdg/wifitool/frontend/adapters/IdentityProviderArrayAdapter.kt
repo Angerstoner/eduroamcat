@@ -32,8 +32,8 @@ class IdentityProviderArrayAdapter(context: Context, resource: Int) :
 
     override fun getFilter(): Filter {
         return object : Filter() {
-            override fun performFiltering(constraint: CharSequence): FilterResults {
-                val searchText = constraint.toString()
+            override fun performFiltering(constraint: CharSequence?): FilterResults {
+                val searchText = constraint?.toString() ?: ""
                 val filterResults = FilterResults()
 
                 identityProviderList = (originalIdentityProviderList.clone() as List<*>)
@@ -49,10 +49,11 @@ class IdentityProviderArrayAdapter(context: Context, resource: Int) :
                 return filterResults
             }
 
-            override fun publishResults(constraint: CharSequence, results: FilterResults) {
+            override fun publishResults(constraint: CharSequence?, results: FilterResults) {
                 identityProviderList = (results.values as List<*>)
                     .filterIsInstance<IdentityProvider>() as ArrayList<IdentityProvider>
                 notifyDataSetChanged()
+
             }
         }
     }

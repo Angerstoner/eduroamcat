@@ -5,24 +5,35 @@
     android:layout_height="match_parent"
     android:padding="16dp">
 
-    <EditText
-        android:id="@+id/identitySearchEditText"
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/identityProviderTextInputLayout"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense.ExposedDropdownMenu"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/org_search_content_desc"
-        android:importantForAutofill="no"
-        android:inputType="text"
-        android:lines="1"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:endIconDrawable="@drawable/ic_search"
+        app:layout_constraintTop_toTopOf="parent">
 
-    <ListView
-        android:id="@+id/identityProviderListView"
-        android:layout_width="match_parent"
-        android:layout_height="300dp"
-        android:choiceMode="singleChoice"
-        android:listSelector="@color/colorSelected"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/identitySearchEditText" />
+        <AutoCompleteTextView
+            android:id="@+id/identitySearchEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:dropDownHeight="0dp"
+            android:hint="@string/org_search_content_desc"
+            android:importantForAutofill="no"
+            android:inputType="text"
+            android:lines="1"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!--    <ListView-->
+    <!--        android:id="@+id/identityProviderListView"-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="300dp"-->
+    <!--        android:choiceMode="singleChoice"-->
+    <!--        android:listSelector="@color/colorSelected"-->
+    <!--        app:layout_constraintStart_toStartOf="parent"-->
+    <!--        app:layout_constraintTop_toBottomOf="@id/identityProviderTextInputLayout" />-->
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
