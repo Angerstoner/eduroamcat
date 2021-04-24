@@ -19,6 +19,7 @@
     <string name="preference_identity_provider_id">wifi_tool_pref_identity_provider_id</string>
     <string name="preference_identity_provider_name">wifi_tool_pref_identity_provider_name</string>
     <string name="preference_profile_id">wifi_tool_pref_profile_id</string>
+    <string name="preference_profile_name">wifi_tool_pref_profile_name</string>
     <string name="profile_preview_label_text">Selected profile:</string>
     <string name="profile_preview_label_refreshing_text">Selected profile: (refreshing)</string>
 </resources>

@@ -11,7 +11,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import de.gwdg.wifitool.R
 import de.gwdg.wifitool.backend.ProfileApi
-import de.gwdg.wifitool.backend.models.IdentityProvider
 import de.gwdg.wifitool.backend.models.Profile
 import de.gwdg.wifitool.databinding.FragmentProfileBinding
 import de.gwdg.wifitool.frontend.activities.MainActivity
@@ -65,7 +64,7 @@ class ProfileFragment : Fragment() {
                 val selectedProfile = profileArrayAdapter.getItem(position)
                 binding.profilePreviewLabel.text = getString(R.string.profile_preview_label_refreshing_text)
                 profileApi.updateProfileAttributes(selectedProfile)
-                saveProfileId(selectedProfile)
+                saveProfile(selectedProfile)
             }
 
             // do nothing
@@ -113,11 +112,12 @@ class ProfileFragment : Fragment() {
      *
      * Value used in [CredentialFragment]
      */
-    private fun saveProfileId(profile: Profile) {
+    private fun saveProfile(profile: Profile) {
         val sharedPref =
             parentActivity.getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
         with(sharedPref.edit()) {
             putLong(getString(R.string.preference_profile_id), profile.profileId)
+            putString(getString(R.string.preference_profile_name), profile.displayLabel)
             apply()
         }
     }

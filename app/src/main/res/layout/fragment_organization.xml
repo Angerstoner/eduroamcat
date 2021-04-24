@@ -18,7 +18,7 @@
     <ListView
         android:id="@+id/identityProviderListView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="300dp"
         android:choiceMode="singleChoice"
         android:listSelector="@color/colorSelected"
         app:layout_constraintStart_toStartOf="parent"

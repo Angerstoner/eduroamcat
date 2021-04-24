@@ -13,6 +13,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import de.gwdg.wifitool.R
 import de.gwdg.wifitool.backend.ProfileApi
 import de.gwdg.wifitool.backend.WifiConfig
@@ -29,7 +30,7 @@ class CredentialFragment : Fragment() {
     private lateinit var parentActivity: MainActivity
     private lateinit var profileApi: ProfileApi
     private lateinit var binding: FragmentCredentialsBinding
-    private var profileId = -1L
+    private var profile: Profile? = null
     private var profileDownloadFinished = false
     private var profileDownloadPath = ""
 
@@ -47,18 +48,18 @@ class CredentialFragment : Fragment() {
     }
 
     override fun onResume() {
-        profileId = loadProfileId()
-        if (profileId != -1L) {
-            Log.i(logTag, "Downloading profile $profileId")
-            // TODO: download eap-config for profile to device
-            startProfileConfigDownload()
+        profile = getStoredProfile()
+        if (profile != null) {
+            Log.i(logTag, "Downloading profile $profile")
+            startProfileConfigDownload(profile!!.profileId)
+            updateProfileInfoBox(profile!!)
         } else {
             Log.e(logTag, "Invalid Profile. Cannot continue.")
         }
         super.onResume()
     }
 
-    private fun startProfileConfigDownload() {
+    private fun startProfileConfigDownload(profileId: Long) {
         val filename = getConfigFilename(profileId)
         val onDownloadFinished: BroadcastReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
@@ -102,10 +103,45 @@ class CredentialFragment : Fragment() {
         }
     }
 
+    private fun updateProfileInfoBox(profile: Profile) {
+        profileApi.getProfileAttributes(profile).observe(this, Observer { profileAttributes ->
+            with(profileAttributes) {
+                binding.profilePreviewLabel.text = getString(R.string.profile_preview_label_text)
+                binding.displayNameTextView.text = identityProviderName
+                binding.helpdeskMailTextView.text = identityProviderMail
+                binding.helpdeskPhoneTextView.text = identityProviderPhone
+                binding.helpdeskWebTextView.text = identityProviderUrl
+            }
+        })
+    }
+
+
     private fun isConnectAllowed(): Boolean {
         return binding.usernameEditText.text.toString() != ""
                 && binding.passwordEditText.text.toString() != ""
                 && profileDownloadFinished
+    }
+
+    private fun getStoredProfile(): Profile? {
+        val sharedPref =
+            parentActivity.getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
+        with(sharedPref) {
+            val identityProviderName = this.getString(getString(R.string.preference_identity_provider_name), null)
+            val identityProviderId = this.getLong(getString(R.string.preference_identity_provider_id), -1L)
+            val profileName = this.getString(getString(R.string.preference_profile_name), null)
+            val profileId = this.getLong(getString(R.string.preference_profile_id), -1L)
+
+            if (identityProviderId != -1L && profileId != -1L && profileName != null && identityProviderName != null) {
+                return Profile(profileId, profileName, identityProviderId, identityProviderName)
+            }
+        }
+        return null
+    }
+
+    private fun loadIdentityProviderId(): Long {
+        val sharedPref =
+            parentActivity.getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
+        return sharedPref.getLong(getString(R.string.preference_identity_provider_id), -1L)
     }
 
     private fun loadProfileId(): Long {
