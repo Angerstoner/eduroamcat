@@ -1,7 +1,6 @@
 package de.gwdg.wifitool.frontend.adapters
 
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -39,26 +38,29 @@ class IdentityProviderArrayAdapter(context: Context, resource: Int) :
             override fun performFiltering(constraint: CharSequence?): FilterResults {
                 val searchText = constraint?.toString() ?: ""
                 val filterResults = FilterResults()
-                previousIdentityProviderList = (identityProviderList.clone() as List<*>)
-                    .filterIsInstance<IdentityProvider>() as ArrayList<IdentityProvider>
-                identityProviderList = (originalIdentityProviderList.clone() as List<*>)
-                    .filterIsInstance<IdentityProvider>() as ArrayList<IdentityProvider>
+                previousIdentityProviderList = ArrayList(identityProviderList)
+                identityProviderList = ArrayList(originalIdentityProviderList)
 
-                filterResults.values = if (searchText.contains("\\S".toRegex()))
+                val newValues = if (searchText.contains("\\S".toRegex()))
                     identityProviderList.filter {
                         it.hasKeyword(searchText)
                     }
                 else
                     identityProviderList
 
+                filterResults.values = newValues
+                filterResults.count = newValues.size
                 return filterResults
             }
 
             override fun publishResults(constraint: CharSequence?, results: FilterResults) {
                 identityProviderList = (results.values as List<*>)
                     .filterIsInstance<IdentityProvider>() as ArrayList<IdentityProvider>
-                notifyDataSetChanged()
-
+                if (results.count > 0) {
+                    notifyDataSetChanged()
+                } else {
+                    notifyDataSetInvalidated()
+                }
             }
         }
     }
