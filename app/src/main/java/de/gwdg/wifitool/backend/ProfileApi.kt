@@ -48,6 +48,8 @@ const val JSON_TAG_PROFILE_ATTR_DESCRIPTION = "description"
 
 const val LOG_MESSAGE_MISSING_DATA = "Could not add %s (missing data)"
 
+//TODO: add caching/check for existing data before download
+
 class ProfileApi(private val activityContext: Context) {
     private val logTag = "ProfileApi"
     private val lang = Locale.getDefault().language
@@ -170,12 +172,15 @@ class ProfileApi(private val activityContext: Context) {
      */
     fun getProfileAttributes(profile: Profile): LiveData<ProfileAttributes> {
         val profileAttributesUrl = API_ACTION_GET_PROFILE_ATTRIBUTES.format(profile.profileId, lang)
+        val useCachedAttributes = profileAttributesLiveData.value?.profileId == profile.profileId
 
-        val responseListener = Response.Listener<JSONObject> { response ->
-            parseProfileAttributesJsonObject(response, profile)
+        if (!useCachedAttributes) {
+            val responseListener = Response.Listener<JSONObject> { response ->
+                parseProfileAttributesJsonObject(response, profile)
+            }
+            downloadJsonObject(profileAttributesUrl, responseListener)
         }
 
-        downloadJsonObject(profileAttributesUrl, responseListener)
         return profileAttributesLiveData
     }
 
