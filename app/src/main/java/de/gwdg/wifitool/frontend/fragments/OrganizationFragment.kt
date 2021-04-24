@@ -22,8 +22,6 @@ import java.lang.NullPointerException
 
 const val SEARCH_INPUT_THRESHOLD = 2
 const val SEARCH_DROPDOWN_HEIGHT_HIDDEN = 0
-const val SEARCH_DROPDOWN_HEIGHT_VISIBLE_MAX = 400
-const val SEARCH_DROPDOWN_HEIGHT_VISIBLE_ITEM = 105
 
 class OrganizationFragment : Fragment() {
     private val logTag = "OrganizationFragment"
@@ -54,10 +52,12 @@ class OrganizationFragment : Fragment() {
             IdentityProviderArrayAdapter(parentActivity.baseContext, android.R.layout.simple_list_item_1)
         binding.identitySearchEditText.setAdapter(identityProviderArrayAdapter)
 
-        binding.identitySearchEditText.setOnItemClickListener { _, _, position, _ ->
-            Log.i(logTag, "Click on $position")
+
+        binding.identitySearchEditText.setOnItemClickListener { parent, view, position, id ->
+            Log.i(logTag, "Click on $position with id $id")
             onIdentityProviderClick(position)
         }
+
         profileApi.getAllIdentityProviders().observe(this, { identityProviders ->
             identityProviderArrayAdapter.setIdentityProviders(identityProviders)
             initSavedIdentityProvider(loadIdentityProviderId())
@@ -87,25 +87,6 @@ class OrganizationFragment : Fragment() {
 
     }
 
-//
-//
-//    /**
-//     * Initializes EditText which can search the Identity Provider list
-//     */
-//    private fun initIdentityProviderSearchBox() {
-//        binding.identitySearchEditText.addTextChangedListener(object : TextWatcher {
-//            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-//                identityProviderArrayAdapter.filter.filter(s)
-//            }
-//
-//            // do nothing
-//            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-//
-//            // do nothing
-//            override fun afterTextChanged(s: Editable?) {}
-//        })
-//    }
-
     private fun initSavedIdentityProvider(identityProviderId: Long) {
         if (identityProviderId != -1L) {
             identityProviderArrayAdapter.moveIdentityProviderWithIdToTop(identityProviderId)
@@ -120,7 +101,7 @@ class OrganizationFragment : Fragment() {
      * Called when clicking on an Identity Provider from the list
      */
     private fun onIdentityProviderClick(pos: Int) {
-        val idp = identityProviderArrayAdapter.getItem(pos)
+        val idp = identityProviderArrayAdapter.getClickedItem(pos)
         saveIdentityProvider(idp)
         parentActivity.allowNext()
     }
@@ -136,7 +117,6 @@ class OrganizationFragment : Fragment() {
      * Stores selected Identity Provider to app preferences.
      *
      * Value used in [ProfileFragment]
-     * TODO: implement checking and loading of previously saved IdPs when loading the OrganizationFragment
      */
     private fun saveIdentityProvider(idp: IdentityProvider) {
         val sharedPref =

@@ -13,10 +13,14 @@ import de.gwdg.wifitool.backend.models.IdentityProvider
 class IdentityProviderArrayAdapter(context: Context, resource: Int) :
     ArrayAdapter<IdentityProvider>(context, resource) {
     private var identityProviderList: ArrayList<IdentityProvider> = ArrayList()
+    private var previousIdentityProviderList: ArrayList<IdentityProvider> = ArrayList()
     private var originalIdentityProviderList: ArrayList<IdentityProvider> = ArrayList()
+
 
     override fun getCount(): Int = identityProviderList.size
     override fun getItem(position: Int): IdentityProvider = identityProviderList[position]
+
+
     override fun getPosition(item: IdentityProvider?): Int = identityProviderList.indexOf(item)
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
@@ -35,7 +39,8 @@ class IdentityProviderArrayAdapter(context: Context, resource: Int) :
             override fun performFiltering(constraint: CharSequence?): FilterResults {
                 val searchText = constraint?.toString() ?: ""
                 val filterResults = FilterResults()
-
+                previousIdentityProviderList = (identityProviderList.clone() as List<*>)
+                    .filterIsInstance<IdentityProvider>() as ArrayList<IdentityProvider>
                 identityProviderList = (originalIdentityProviderList.clone() as List<*>)
                     .filterIsInstance<IdentityProvider>() as ArrayList<IdentityProvider>
 
@@ -57,6 +62,16 @@ class IdentityProviderArrayAdapter(context: Context, resource: Int) :
             }
         }
     }
+
+    /**
+     * This method has to use the version of the list prior to the last filtering
+     *
+     * This method should only be called when a item from the dropdown is clicked because clicking on such
+     * an item will change the filter and therefore reset the positions of the list. So the previous version
+     * of the list has to be used, so that the item on the provided [position] is the correct [IdentityProvider]
+     */
+    fun getClickedItem(position: Int): IdentityProvider = previousIdentityProviderList[position]
+
 
     fun setIdentityProviders(identityProviders: ArrayList<IdentityProvider>) {
         identityProviderList = identityProviders
