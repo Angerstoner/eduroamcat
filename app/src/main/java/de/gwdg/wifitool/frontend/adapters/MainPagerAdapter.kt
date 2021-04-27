@@ -3,12 +3,10 @@ package de.gwdg.wifitool.frontend.adapters
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
-import de.gwdg.wifitool.frontend.fragments.CredentialFragment
-import de.gwdg.wifitool.frontend.fragments.FeedbackFragment
-import de.gwdg.wifitool.frontend.fragments.OrganizationFragment
-import de.gwdg.wifitool.frontend.fragments.ProfileFragment
+import de.gwdg.wifitool.frontend.fragments.*
 
 class MainPagerAdapter(fragmentActivity: FragmentActivity) : FragmentStateAdapter(fragmentActivity) {
+    private val welcomeFragment = WelcomeFragment()
     private val organizationFragment = OrganizationFragment()
     private val profileFragment = ProfileFragment()
     private val credentialFragment = CredentialFragment()
@@ -16,15 +14,16 @@ class MainPagerAdapter(fragmentActivity: FragmentActivity) : FragmentStateAdapte
 
 
     override fun getItemCount(): Int {
-        return 4
+        return 5
     }
 
     override fun createFragment(position: Int): Fragment {
         return when (position) {
-            0 -> organizationFragment
-            1 -> profileFragment
-            2 -> credentialFragment
-            3 -> feedbackFragment
+            0 -> welcomeFragment
+            1 -> organizationFragment
+            2 -> profileFragment
+            3 -> credentialFragment
+            4 -> feedbackFragment
             else -> throw IllegalStateException("Position $position is not supported.");
         }
     }
