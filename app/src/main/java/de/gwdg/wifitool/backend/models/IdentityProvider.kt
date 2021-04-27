@@ -7,17 +7,11 @@ data class IdentityProvider(
 ) {
 
     private val keywords = arrayListOf<String>()
-    override fun toString(): String {
-        return "$title ($country)"
-    }
+    override fun toString(): String = if (country != "") "$title ($country)" else title
 
-    public fun addKeywords(vararg keywords: String) {
+    fun addKeywords(vararg keywords: String) {
         this.keywords.addAll(keywords)
     }
 
-    public fun hasKeyword(keyword: String): Boolean {
-        return keywords.any { it.contains(keyword, ignoreCase = true) }
-    }
-
-
+    fun hasKeyword(keyword: String): Boolean = keywords.any { it.contains(keyword, ignoreCase = true) }
 }

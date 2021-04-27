@@ -9,9 +9,6 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
-import android.widget.AutoCompleteTextView
-import android.widget.ListView
 import de.gwdg.wifitool.R
 import de.gwdg.wifitool.backend.ProfileApi
 import de.gwdg.wifitool.backend.models.IdentityProvider
@@ -30,6 +27,7 @@ class OrganizationFragment : Fragment() {
     private lateinit var parentActivity: MainActivity
     private lateinit var identityProviderArrayAdapter: IdentityProviderArrayAdapter
     private lateinit var profileApi: ProfileApi
+    private var savedIdentityProvider: IdentityProvider? = null
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -46,6 +44,12 @@ class OrganizationFragment : Fragment() {
         return this.binding.root
     }
 
+    override fun onResume() {
+        savedIdentityProvider = loadIdentityProvider()
+        savedIdentityProvider?.let { initSavedIdentityProvider(it) }
+        super.onResume()
+    }
+
     // TODO: move to custom search view class
     private fun initAutoCompleteSearch() {
         identityProviderArrayAdapter =
@@ -60,7 +64,6 @@ class OrganizationFragment : Fragment() {
 
         profileApi.getAllIdentityProviders().observe(this, { identityProviders ->
             identityProviderArrayAdapter.setIdentityProviders(identityProviders)
-            initSavedIdentityProvider(loadIdentityProviderId())
         })
 
         with(binding.identitySearchEditText) {
@@ -87,13 +90,9 @@ class OrganizationFragment : Fragment() {
 
     }
 
-    private fun initSavedIdentityProvider(identityProviderId: Long) {
-        if (identityProviderId != -1L) {
-            identityProviderArrayAdapter.moveIdentityProviderWithIdToTop(identityProviderId)
-            // TODO: highlight/select first item of list
-        } else {
-            Log.i(logTag, "No saved Identity Provider found. Starting App for first use.")
-        }
+    private fun initSavedIdentityProvider(identityProvider: IdentityProvider) {
+        binding.identitySearchEditText.setText(identityProvider.toString())
+        parentActivity.allowNext()
     }
 
 
@@ -107,10 +106,19 @@ class OrganizationFragment : Fragment() {
     }
 
 
-    private fun loadIdentityProviderId(): Long {
+    private fun loadIdentityProvider(): IdentityProvider? {
         val sharedPref =
             parentActivity.getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
-        return sharedPref.getLong(getString(R.string.preference_identity_provider_id), -1L)
+        with(sharedPref) {
+            val id = getLong(getString(R.string.preference_identity_provider_id), -1L)
+            val title = getString(getString(R.string.preference_identity_provider_name), null) ?: ""
+            val country = getString(getString(R.string.preference_identity_provider_country), null) ?: ""
+            if (id != -1L && title != "") {
+                return IdentityProvider(id, country, title)
+            }
+        }
+        Log.i(logTag, "No saved Identity Provider found. Starting App for first use.")
+        return null
     }
 
     /**
@@ -124,6 +132,7 @@ class OrganizationFragment : Fragment() {
         with(sharedPref.edit()) {
             putLong(getString(R.string.preference_identity_provider_id), idp.entityId)
             putString(getString(R.string.preference_identity_provider_name), idp.title)
+            putString(getString(R.string.preference_identity_provider_country), idp.country)
             apply()
         }
     }
