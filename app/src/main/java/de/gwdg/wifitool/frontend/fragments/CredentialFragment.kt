@@ -21,7 +21,6 @@ import de.gwdg.wifitool.backend.models.Profile
 import de.gwdg.wifitool.backend.util.EapConfigParser
 import de.gwdg.wifitool.backend.util.WifiEnterpriseConfigurator
 import de.gwdg.wifitool.databinding.FragmentCredentialsBinding
-import de.gwdg.wifitool.databinding.FragmentProfileBinding
 import de.gwdg.wifitool.frontend.activities.MainActivity
 import java.lang.NullPointerException
 
@@ -90,7 +89,8 @@ class CredentialFragment : Fragment() {
 
     private fun updateNextButton() {
         if (isConnectAllowed()) {
-            parentActivity.addActionToNext { connectToWifi(profileDownloadPath) }
+            parentActivity.addNextButtonAction { connectToWifi(profileDownloadPath) }
+            parentActivity.changeNextButtonText(getString(R.string.next_button_connect))
             parentActivity.allowNext()
         } else {
             if (binding.usernameEditText.text.toString() != ""
@@ -164,6 +164,7 @@ class CredentialFragment : Fragment() {
         val configParser = EapConfigParser(configFilename)
 
         val enterpriseConfig = wifiEnterpriseConfigurator.getConfigFromFile(configParser).first()
+        // TODO: remove trailing/leading whitespaces
         if (enterpriseConfig.eapMethod != WifiEnterpriseConfig.Eap.PWD)
             enterpriseConfig.identity = binding.usernameEditText.text.toString()
         enterpriseConfig.password = binding.passwordEditText.text.toString()

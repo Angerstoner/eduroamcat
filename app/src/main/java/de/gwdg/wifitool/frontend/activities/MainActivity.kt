@@ -87,6 +87,9 @@ class MainActivity : AppCompatActivity() {
         binding.backButton.visibility = View.GONE
     }
 
+    fun backAllowed(): Boolean = binding.backButton.visibility == View.VISIBLE
+    fun nextAllowed(): Boolean = binding.nextButton.visibility == View.VISIBLE
+    fun getCurrentPage(): Int = binding.viewPager.currentItem
 
     /**
      * Requests needed permissions if Android M or higher is used
@@ -105,29 +108,42 @@ class MainActivity : AppCompatActivity() {
         binding.viewPager.currentItem += 1
         allowBack()
         blockNext()
-        if (binding.viewPager.currentItem == pagerAdapter.itemCount - 2) {
-            binding.nextButton.text = getString(R.string.next_button_connect)
-        } else {
-            binding.nextButton.text = getString(R.string.next_button)
-        }
-        resetNextButtonAction()
+        resetNextButton()
     }
 
     private fun goBack() {
-        if (binding.viewPager.currentItem == 0) {
+        if (getCurrentPage() == 0) {
             return
+        } else if (getCurrentPage() == 1) {
+            blockBack()
         }
         binding.viewPager.currentItem -= 1
         allowNext()
-        resetNextButtonAction()
+        resetNextButton()
     }
 
-    fun addActionToNext(action: () -> Unit) {
+    fun addNextButtonAction(action: () -> Unit) {
         binding.nextButton.setOnClickListener { action(); goNext() }
     }
 
-    fun resetNextButtonAction() {
+    fun changeNextButtonText(newText: String) {
+        binding.nextButton.text = newText
+    }
+
+    fun resetNextButton() {
         binding.nextButton.setOnClickListener { goNext() }
+        binding.nextButton.text = getString(R.string.next_button)
+    }
+
+    override fun onBackPressed() {
+        if (getCurrentPage() == 0)
+            // close app with back on first page
+            super.onBackPressed()
+        else if (backAllowed()) {
+            // back on all other pages if allowed
+            goBack()
+        }
+
     }
 }
 
