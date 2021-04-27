@@ -11,11 +11,12 @@ import androidx.fragment.app.Fragment
 import de.gwdg.wifitool.backend.WifiConfig
 import de.gwdg.wifitool.databinding.FragmentWelcomeBinding
 import de.gwdg.wifitool.frontend.activities.MainActivity
+import de.gwdg.wifitool.frontend.components.WifiSettingsDialog
 
 const val REQUEST_CODE_LOCATION_PERMISSION = 101
 val PERMISSION_ARRAY_LOCATION = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
 
-
+//TODO: check for Android 10 and ask user remove eduroam
 class WelcomeFragment : Fragment() {
     private lateinit var binding: FragmentWelcomeBinding
     private lateinit var parentActivity: MainActivity
@@ -63,7 +64,7 @@ class WelcomeFragment : Fragment() {
         if (requestCode == REQUEST_CODE_LOCATION_PERMISSION && permissions.contentEquals(PERMISSION_ARRAY_LOCATION)) {
             if (grantResults.size == 1 && grantResults.contains(-1)) {
                 Log.i(logTag, "Location permission not granted. User has to delete eduroam network.")
-                //TODO: show dialog to user with options to open wifi settings
+                WifiSettingsDialog().show(childFragmentManager, null)
             }
         }
     }
