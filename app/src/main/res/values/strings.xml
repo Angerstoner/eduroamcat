@@ -6,12 +6,15 @@
 
     <string name="logo_content_desc">GWDG Wi-Fi Tool Logo</string>
     <string name="org_search_content_desc">Search organization</string>
+    <string name="welcome_screen_greeter_text">Hello, I gwdg wifi tool, you user, pls next</string>
+    <string name="welcome_screen_location_info_text">In order to delete the old eduroam configuration, this application needs location permissions due to some Android restrictions. Please grant the required permissions in the in the dialog or delete old eduroam configurations from the settings by yourself.</string>
 
     <!--Fragment descriptions-->
+    <string name="setup_welcome_screen">Welcome to the GWDG Wi-Fi Tool</string>
     <string name="setup_first_step">Select Organization</string>
     <string name="setup_second_step">Select User Group</string>
-    <string name="setup_last_step">Enter Username and Password</string>
-    <string name="setup_third_step">Feedback</string>
+    <string name="setup_last_step">Feedback</string>
+    <string name="setup_third_step">Enter Username and Password</string>
 
 
     <!--Keys for SharedPreferences-->

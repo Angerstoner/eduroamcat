@@ -7,11 +7,23 @@
     android:padding="16dp">
 
     <TextView
+        android:id="@+id/greeterTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="WELCOME PAGE"
+        android:text="@string/welcome_screen_greeter_text"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:paddingBottom="32dp"/>
+
+    <TextView
+        android:id="@+id/locationInfoTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/welcome_screen_location_info_text"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/greeterTextView" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

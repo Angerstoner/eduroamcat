@@ -23,33 +23,60 @@ class WifiConfig(private val activity: Activity) {
         activity.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
 
 
+    /**
+     * Method checks if an eduroam network is already set up on the system by fake-adding a
+     * new eduroam connection and obtaining the return of [WifiManager.addNetwork]
+     *
+     * The fake connection is removed after a successful check
+     */
+    @Deprecated("Deprecated for API >= Android Q")
+    fun hasEduroamConfiguration(): Boolean {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            return false
+        }
+
+        val fakeEnterpriseConfig = WifiEnterpriseConfig()
+        val fakeWifiConfig = WifiConfiguration()
+        fakeWifiConfig.SSID = "\"eduroam\""
+        fakeWifiConfig.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_EAP)
+        fakeWifiConfig.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.IEEE8021X)
+        fakeWifiConfig.enterpriseConfig = fakeEnterpriseConfig
+        val networkId = wifiManager.addNetwork(fakeWifiConfig)
+
+        return if (networkId != -1) {
+            wifiManager.removeNetwork(networkId)
+            false
+        } else true
+    }
+
     internal fun connectToEapNetwork(enterpriseConfig: WifiEnterpriseConfig, ssidPairList: List<Pair<String, String>>) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             ssidPairList.forEach { ssidPair -> connectNetworkAndroidQ(enterpriseConfig, ssidPair.first) }
         } else {
             ssidPairList.forEach { ssidPair ->
-//                removeOldEapConnectionsDeprecated(ssidPair.first)
+                if (hasEduroamConfiguration()) {
+                    // TODO: check if old config was successfully removed for feedback screen
+                    removeOldEapConnectionsDeprecated(ssidPair.first)
+                }
                 connectNetworkDeprecated(enterpriseConfig, ssidPair.first, ssidPair.second)
             }
         }
 
     }
 
-//    @Deprecated("Deprecated for API >= Android Q")
-//    private fun removeOldEapConnectionsDeprecated(ssid: String) {
-//        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M ||
-//            activity.checkSelfPermission(Manifest.permission.CHANGE_WIFI_STATE) == PackageManager.PERMISSION_GRANTED
-//        ) {
-//            wifiManager.configuredNetworks.filter { it.SSID == "\"$ssid\"" }
-//                .forEach { wifiManager.removeNetwork(it.networkId) }
-//        }
-//    }
+    @Deprecated("Deprecated for API >= Android Q")
+    private fun removeOldEapConnectionsDeprecated(ssid: String) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M ||
+            activity.checkSelfPermission(Manifest.permission.CHANGE_WIFI_STATE) == PackageManager.PERMISSION_GRANTED
+        ) {
+            wifiManager.configuredNetworks.filter { it.SSID == "\"$ssid\"" }
+                .forEach { wifiManager.removeNetwork(it.networkId) }
+        }
+    }
 
     @Deprecated("Deprecated for API >= Android Q", replaceWith = ReplaceWith("connectNetworkAndroidQ()"))
     private fun connectNetworkDeprecated(
-        enterpriseConfig: WifiEnterpriseConfig,
-        ssid: String,
-        securityProtocol: String
+        enterpriseConfig: WifiEnterpriseConfig, ssid: String, securityProtocol: String
     ) {
         val wifiConfig = WifiConfiguration()
         wifiConfig.SSID = "\"$ssid\""

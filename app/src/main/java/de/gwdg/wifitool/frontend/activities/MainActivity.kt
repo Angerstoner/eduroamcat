@@ -28,8 +28,6 @@ class MainActivity : AppCompatActivity() {
         initPager()
         bindDots()
         bindNavigationButtons()
-
-//        requestAppPermissions()
     }
 
     private fun bindNavigationButtons() {
@@ -45,18 +43,21 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun bindDots() {
-        this.dotImageViews = arrayOf(
-            binding.dot1ImageView,
-            binding.dot2ImageView,
-            binding.dot3ImageView,
-            binding.dot4ImageView
-        )
-        highlightDot(binding.viewPager.currentItem)
-        binding.viewPager.registerOnPageChangeCallback(object : OnPageChangeCallback() {
-            override fun onPageSelected(position: Int) {
-                highlightDot(position)
-            }
-        })
+        with(binding) {
+            this@MainActivity.dotImageViews = arrayOf(
+                dot1ImageView,
+                dot2ImageView,
+                dot3ImageView,
+                dot4ImageView,
+                dot5ImageView
+            )
+            highlightDot(viewPager.currentItem)
+            viewPager.registerOnPageChangeCallback(object : OnPageChangeCallback() {
+                override fun onPageSelected(position: Int) {
+                    highlightDot(position)
+                }
+            })
+        }
     }
 
     private fun highlightDot(position: Int) {
@@ -91,19 +92,6 @@ class MainActivity : AppCompatActivity() {
     fun nextAllowed(): Boolean = binding.nextButton.visibility == View.VISIBLE
     fun getCurrentPage(): Int = binding.viewPager.currentItem
 
-    /**
-     * Requests needed permissions if Android M or higher is used
-     * Android L and lower use only the AndroidManifest to grant permissions
-     */
-    private fun requestAppPermissions() {
-        val permissionsNeeded = arrayOf(ACCESS_FINE_LOCATION)
-        val permissionsRequestCode = 1
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            requestPermissions(permissionsNeeded, permissionsRequestCode)
-        }
-    }
-
     private fun goNext() {
         binding.viewPager.currentItem += 1
         allowBack()
@@ -137,7 +125,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onBackPressed() {
         if (getCurrentPage() == 0)
-            // close app with back on first page
+        // close app with back on first page
             super.onBackPressed()
         else if (backAllowed()) {
             // back on all other pages if allowed
