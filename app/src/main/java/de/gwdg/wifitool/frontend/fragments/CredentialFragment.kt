@@ -36,27 +36,25 @@ class CredentialFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         this.binding = FragmentCredentialsBinding.inflate(inflater, container, false)
+        try {
+            parentActivity = activity as MainActivity
+            profileApi = parentActivity.profileApi
+        } catch (e: NullPointerException) {
+            Log.e(logTag, "Context/Activity missing, could not init Fragment.\n ${e.stackTrace}")
+        }
         return this.binding.root
     }
 
     override fun onResume() {
-        try {
-            parentActivity = activity as MainActivity
-            profileApi = parentActivity.profileApi
-
-            initEditTexts()
-            profile = getStoredProfile()
-            if (profile != null) {
-                Log.i(logTag, "Downloading profile $profile")
-                startProfileConfigDownload(profile!!.profileId)
-                initProfileInfoBox()
-            } else {
-                Log.e(logTag, "Invalid Profile. Cannot continue.")
-            }
-        } catch (e: NullPointerException) {
-            Log.e(logTag, "Context/Activity missing, could not init Fragment.\n ${e.stackTrace}")
+        initEditTexts()
+        profile = getStoredProfile()
+        if (profile != null) {
+            Log.i(logTag, "Downloading profile $profile")
+            startProfileConfigDownload(profile!!.profileId)
+            initProfileInfoBox()
+        } else {
+            Log.e(logTag, "Invalid Profile. Cannot continue.")
         }
-
         super.onResume()
     }
 
@@ -107,6 +105,11 @@ class CredentialFragment : Fragment() {
 
     private fun initProfileInfoBox() {
         binding.profileInformationCard.observeProfileAttributes(this, profileApi)
+        binding.profileInformationCard.setOnClickListener {
+            binding.profileInformationCard.openProfileInformationDialog(
+                childFragmentManager
+            )
+        }
     }
 
 
