@@ -144,11 +144,11 @@ class ProfileApi(private val activityContext: Context) {
     /**
      * Returns LiveData of Identity Provider List
      */
-    fun getAllIdentityProviders(): LiveData<ArrayList<IdentityProvider>> {
+    fun getAllIdentityProviders(errorListener: Response.ErrorListener = defaultErrorListener): LiveData<ArrayList<IdentityProvider>> {
         val identityProviderListUrl = API_ACTION_LIST_IDENTITY_PROVIDERS.format(lang)
 
         val responseListener = Response.Listener<JSONArray> { response -> parseIdentityProviderListJsonArray(response) }
-        downloadJsonArray(identityProviderListUrl, responseListener)
+        downloadJsonArray(identityProviderListUrl, responseListener, errorListener)
 
         return identityProviderLiveData
     }
@@ -166,6 +166,8 @@ class ProfileApi(private val activityContext: Context) {
         downloadJsonObject(profileListUrl, responseListener)
         return profileLiveData
     }
+
+    fun getProfileAttributesLiveData(): LiveData<ProfileAttributes> = profileAttributesLiveData
 
     /**
      * Returns LiveData holding [ProfileAttributes] (e.g. Name, Url, Phone Number, Mail) for given [profile]

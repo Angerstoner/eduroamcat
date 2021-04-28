@@ -27,6 +27,8 @@
     <string name="profile_preview_label_text">Selected profile:</string>
     <string name="profile_preview_label_refreshing_text">Selected profile: (refreshing)</string>
     <string name="dialog_remove_old_eduroam">Open wifi settings to remove old eduroam?</string>
-    <string name="open_wifi_settings">Wi-Fi Settings</string>
-    <string name="cancel">Cancel</string>
+    <string name="dialog_identity_provider_download_failed">Could not retrieve list of organizations. Please check internet connection and restart application.</string>
+    <string name="dialog_button_open_wifi_settings">Wi-Fi Settings</string>
+    <string name="dialog_button_cancel">Cancel</string>
+    <string name="dialog_button_okay">Okay</string>
 </resources>

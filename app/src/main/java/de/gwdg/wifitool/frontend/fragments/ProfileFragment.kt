@@ -8,7 +8,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import de.gwdg.wifitool.R
 import de.gwdg.wifitool.backend.ProfileApi
 import de.gwdg.wifitool.backend.models.Profile
@@ -27,13 +26,18 @@ class ProfileFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         this.binding = FragmentProfileBinding.inflate(inflater, container, false)
+        return this.binding.root
+    }
+
+
+    override fun onResume() {
         try {
             parentActivity = activity as MainActivity
-            profileApi = ProfileApi(parentActivity.applicationContext)
+            profileApi = parentActivity.profileApi
             identityProviderId = loadIdentityProviderId()
             if (identityProviderId != -1L) {
-                initProfileSelectionSpinner()
                 initProfileInfoBox()
+                initProfileSelectionSpinner()
                 parentActivity.allowNext()
             } else {
                 Log.e(logTag, "Invalid Identity Provider. Cannot continue.")
@@ -41,28 +45,22 @@ class ProfileFragment : Fragment() {
         } catch (e: NullPointerException) {
             Log.e(logTag, "Context/Activity missing, could not init Fragment.\n ${e.stackTrace}")
         }
-        return this.binding.root
-    }
-
-    override fun onResume() {
-        identityProviderId = loadIdentityProviderId()
-        if (identityProviderId != -1L) {
-            binding.profilePreviewLabel.text = getString(R.string.profile_preview_label_refreshing_text)
-            //TODO: only call update methods here. do not re-init the fields
-            initProfileSelectionSpinner()
-            initProfileInfoBox()
-        } else {
-            Log.e(logTag, "Invalid Identity Provider. Cannot continue.")
-        }
-        parentActivity.allowNext()
         super.onResume()
     }
 
     private fun initProfileInfoBox() {
+        binding.profileInformationCard.observeProfileAttributes(this, profileApi)
+    }
+
+    private fun initProfileSelectionSpinner() {
+        profileArrayAdapter = ProfileArrayAdapter(activity!!, R.layout.spinner_profile_dropdown)
+        binding.profileSpinner.adapter = profileArrayAdapter
+
+
         binding.profileSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 val selectedProfile = profileArrayAdapter.getItem(position)
-                binding.profilePreviewLabel.text = getString(R.string.profile_preview_label_refreshing_text)
+                binding.profileInformationCard.setTitleRefresh(this@ProfileFragment)
                 profileApi.updateProfileAttributes(selectedProfile)
                 saveProfile(selectedProfile)
             }
@@ -70,23 +68,6 @@ class ProfileFragment : Fragment() {
             // do nothing
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
-    }
-
-    private fun updateProfileInfoBox(profile: Profile) {
-        profileApi.getProfileAttributes(profile).observe(this, Observer { profileAttributes ->
-            with(profileAttributes) {
-                binding.profilePreviewLabel.text = getString(R.string.profile_preview_label_text)
-                binding.displayNameTextView.text = identityProviderName
-                binding.helpdeskMailTextView.text = identityProviderMail
-                binding.helpdeskPhoneTextView.text = identityProviderPhone
-                binding.helpdeskWebTextView.text = identityProviderUrl
-            }
-        })
-    }
-
-    private fun initProfileSelectionSpinner() {
-        profileArrayAdapter = ProfileArrayAdapter(activity!!, R.layout.spinner_profile_dropdown)
-        binding.profileSpinner.adapter = profileArrayAdapter
 
         ProfileApi(activity!!).getIdentityProviderProfiles(identityProviderId)
             .observe(this, { profiles ->
@@ -96,7 +77,7 @@ class ProfileFragment : Fragment() {
                 binding.profileSpinner.visibility = if (profiles.size == 1) View.GONE else View.VISIBLE
 
                 // populate infobox with first item and add observer to liveData used for profile preview
-                updateProfileInfoBox(profileArrayAdapter.getItem(0))
+                profileApi.updateProfileAttributes(profileArrayAdapter.getItem(0))
             })
     }
 

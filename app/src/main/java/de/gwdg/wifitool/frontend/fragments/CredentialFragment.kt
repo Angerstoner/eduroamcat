@@ -36,25 +36,27 @@ class CredentialFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         this.binding = FragmentCredentialsBinding.inflate(inflater, container, false)
-        try {
-            parentActivity = activity as MainActivity
-            profileApi = ProfileApi(parentActivity.applicationContext)
-            initEditTexts()
-        } catch (e: NullPointerException) {
-            Log.e(logTag, "Context/Activity missing, could not init Fragment.\n ${e.stackTrace}")
-        }
         return this.binding.root
     }
 
     override fun onResume() {
-        profile = getStoredProfile()
-        if (profile != null) {
-            Log.i(logTag, "Downloading profile $profile")
-            startProfileConfigDownload(profile!!.profileId)
-            updateProfileInfoBox(profile!!)
-        } else {
-            Log.e(logTag, "Invalid Profile. Cannot continue.")
+        try {
+            parentActivity = activity as MainActivity
+            profileApi = parentActivity.profileApi
+
+            initEditTexts()
+            profile = getStoredProfile()
+            if (profile != null) {
+                Log.i(logTag, "Downloading profile $profile")
+                startProfileConfigDownload(profile!!.profileId)
+                initProfileInfoBox()
+            } else {
+                Log.e(logTag, "Invalid Profile. Cannot continue.")
+            }
+        } catch (e: NullPointerException) {
+            Log.e(logTag, "Context/Activity missing, could not init Fragment.\n ${e.stackTrace}")
         }
+
         super.onResume()
     }
 
@@ -103,16 +105,8 @@ class CredentialFragment : Fragment() {
         }
     }
 
-    private fun updateProfileInfoBox(profile: Profile) {
-        profileApi.getProfileAttributes(profile).observe(this, Observer { profileAttributes ->
-            with(profileAttributes) {
-                binding.profilePreviewLabel.text = getString(R.string.profile_preview_label_text)
-                binding.displayNameTextView.text = identityProviderName
-                binding.helpdeskMailTextView.text = identityProviderMail
-                binding.helpdeskPhoneTextView.text = identityProviderPhone
-                binding.helpdeskWebTextView.text = identityProviderUrl
-            }
-        })
+    private fun initProfileInfoBox() {
+        binding.profileInformationCard.observeProfileAttributes(this, profileApi)
     }
 
 
@@ -136,18 +130,6 @@ class CredentialFragment : Fragment() {
             }
         }
         return null
-    }
-
-    private fun loadIdentityProviderId(): Long {
-        val sharedPref =
-            parentActivity.getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
-        return sharedPref.getLong(getString(R.string.preference_identity_provider_id), -1L)
-    }
-
-    private fun loadProfileId(): Long {
-        val sharedPref =
-            parentActivity.getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
-        return sharedPref.getLong(getString(R.string.preference_profile_id), -1L)
     }
 
     private fun getConfigFilename(profileId: Long): String {

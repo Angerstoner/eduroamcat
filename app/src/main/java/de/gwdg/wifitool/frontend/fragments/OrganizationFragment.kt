@@ -9,12 +9,14 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.android.volley.Response
 import de.gwdg.wifitool.R
 import de.gwdg.wifitool.backend.ProfileApi
 import de.gwdg.wifitool.backend.models.IdentityProvider
 import de.gwdg.wifitool.databinding.FragmentOrganizationBinding
 import de.gwdg.wifitool.frontend.activities.MainActivity
 import de.gwdg.wifitool.frontend.adapters.IdentityProviderArrayAdapter
+import de.gwdg.wifitool.frontend.components.IdentityProviderDownloadErrorDialog
 import java.lang.NullPointerException
 
 const val SEARCH_INPUT_THRESHOLD = 2
@@ -35,7 +37,7 @@ class OrganizationFragment : Fragment() {
 
         try {
             parentActivity = activity as MainActivity
-            profileApi = ProfileApi(parentActivity.applicationContext)
+            profileApi = parentActivity.profileApi
             initAutoCompleteSearch()
         } catch (e: NullPointerException) {
             Log.e(logTag, "Context/Activity missing, could not init Fragment. \n${e.stackTrace}")
@@ -57,12 +59,13 @@ class OrganizationFragment : Fragment() {
         binding.identitySearchEditText.setAdapter(identityProviderArrayAdapter)
 
 
-        binding.identitySearchEditText.setOnItemClickListener { parent, view, position, id ->
+        binding.identitySearchEditText.setOnItemClickListener { _, _, position, id ->
             Log.i(logTag, "Click on $position with id $id")
             onIdentityProviderClick(position)
         }
 
-        profileApi.getAllIdentityProviders().observe(this, { identityProviders ->
+        //TODO: move download to welcome fragment
+        profileApi.getAllIdentityProviders(onIdentityProviderListDownloadError).observe(this, { identityProviders ->
             identityProviderArrayAdapter.setIdentityProviders(identityProviders)
         })
 
@@ -77,6 +80,7 @@ class OrganizationFragment : Fragment() {
                     } else {
                         SEARCH_DROPDOWN_HEIGHT_HIDDEN
                     }
+                    parentActivity.blockNext()
                 }
 
 
@@ -136,4 +140,7 @@ class OrganizationFragment : Fragment() {
             apply()
         }
     }
+
+    private val onIdentityProviderListDownloadError =
+        Response.ErrorListener { IdentityProviderDownloadErrorDialog().show(childFragmentManager, null) }
 }

@@ -8,6 +8,7 @@ import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback
 import de.gwdg.wifitool.R
+import de.gwdg.wifitool.backend.ProfileApi
 import de.gwdg.wifitool.databinding.ActivityMainBinding
 import de.gwdg.wifitool.frontend.adapters.MainPagerAdapter
 
@@ -18,6 +19,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var pagerAdapter: MainPagerAdapter
     private lateinit var dotImageViews: Array<ImageView>
 
+    lateinit var profileApi: ProfileApi
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,6 +30,7 @@ class MainActivity : AppCompatActivity() {
         initPager()
         bindDots()
         bindNavigationButtons()
+        profileApi = ProfileApi(this)
     }
 
     private fun bindNavigationButtons() {
