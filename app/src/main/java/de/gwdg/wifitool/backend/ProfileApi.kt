@@ -54,11 +54,14 @@ class ProfileApi(private val activityContext: Context) {
     private val logTag = "ProfileApi"
     private val lang = Locale.getDefault().language
     private val identityProviderLiveData = MutableLiveData<ArrayList<IdentityProvider>>()
-    private val profileLiveData = MutableLiveData<ArrayList<Profile>>()
+    private val identityProviderProfilesLiveData = MutableLiveData<ArrayList<Profile>>()
     private val profileAttributesLiveData = MutableLiveData<ProfileAttributes>()
 
     private val defaultErrorListener =
         Response.ErrorListener { error -> Log.e(logTag, error.toString()) }
+
+    fun getProfileAttributesLiveData(): LiveData<ProfileAttributes> = profileAttributesLiveData
+    fun getIdentityProviderProfilesLiveData(): LiveData<ArrayList<Profile>> = identityProviderProfilesLiveData
 
 
     // JSONArray does not provide an iterator, so we add one
@@ -154,45 +157,34 @@ class ProfileApi(private val activityContext: Context) {
     }
 
     /**
-     * Returns LiveData of Profile List for given [identityProviderId]
+     * Updates LiveData of Profile List for given [identityProviderId]
      */
-    fun getIdentityProviderProfiles(identityProviderId: Long): LiveData<ArrayList<Profile>> {
+    fun updateIdentityProviderProfiles(identityProviderId: Long, forceRefresh: Boolean = false) {
         val profileListUrl = API_ACTION_LIST_PROFILES.format(identityProviderId, lang)
+        val useCachedProfileList =
+            identityProviderProfilesLiveData.value?.get(0)?.identityProviderId == identityProviderId
 
-        val responseListener = Response.Listener<JSONObject> { response ->
-            parseProfileListJsonArray(JSONArray(response.getString(JSON_TAG_PROFILE_LIST_DATA)), identityProviderId)
+        if (!useCachedProfileList || forceRefresh) {
+            val responseListener = Response.Listener<JSONObject> { response ->
+                parseProfileListJsonArray(JSONArray(response.getString(JSON_TAG_PROFILE_LIST_DATA)), identityProviderId)
+            }
+            downloadJsonObject(profileListUrl, responseListener)
         }
-
-        downloadJsonObject(profileListUrl, responseListener)
-        return profileLiveData
     }
-
-    fun getProfileAttributesLiveData(): LiveData<ProfileAttributes> = profileAttributesLiveData
 
     /**
      * Returns LiveData holding [ProfileAttributes] (e.g. Name, Url, Phone Number, Mail) for given [profile]
      */
-    fun getProfileAttributes(profile: Profile): LiveData<ProfileAttributes> {
+    fun updateProfileAttributes(profile: Profile, forceRefresh: Boolean = false) {
         val profileAttributesUrl = API_ACTION_GET_PROFILE_ATTRIBUTES.format(profile.profileId, lang)
         val useCachedAttributes = profileAttributesLiveData.value?.profileId == profile.profileId
 
-        if (!useCachedAttributes) {
+        if (!useCachedAttributes || forceRefresh) {
             val responseListener = Response.Listener<JSONObject> { response ->
                 parseProfileAttributesJsonObject(response, profile)
             }
             downloadJsonObject(profileAttributesUrl, responseListener)
         }
-
-        return profileAttributesLiveData
-    }
-
-    /**
-     * Triggers updating of LiveData holding [ProfileAttributes] (e.g. Name, Url, Phone Number, Mail) for given [profile]
-     *
-     * see [getProfileAttributes]
-     */
-    fun updateProfileAttributes(profile: Profile) {
-        getProfileAttributes(profile)
     }
 
     private fun parseProfileAttributesJsonObject(profileAttributeJsonObject: JSONObject, profile: Profile) {
@@ -268,7 +260,7 @@ class ProfileApi(private val activityContext: Context) {
             else
                 Log.e(logTag, LOG_MESSAGE_MISSING_DATA.format("Profile"))
         }
-        profileLiveData.postValue(profileList)
+        identityProviderProfilesLiveData.postValue(profileList)
     }
 
 

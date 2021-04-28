@@ -26,41 +26,48 @@ class ProfileFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         this.binding = FragmentProfileBinding.inflate(inflater, container, false)
+        parentActivity = activity as MainActivity
+        profileApi = parentActivity.profileApi
+        try {
+            initProfileInfoBox()
+            initProfileSelectionSpinner()
+        } catch (e: NullPointerException) {
+            Log.e(logTag, "Context/Activity missing, could not init Fragment.\n ${e.stackTrace}")
+        }
+
         return this.binding.root
     }
 
 
     override fun onResume() {
-        try {
-            parentActivity = activity as MainActivity
-            profileApi = parentActivity.profileApi
-            identityProviderId = loadIdentityProviderId()
-            if (identityProviderId != -1L) {
-                initProfileInfoBox()
-                initProfileSelectionSpinner()
-                parentActivity.allowNext()
-            } else {
-                Log.e(logTag, "Invalid Identity Provider. Cannot continue.")
-            }
-        } catch (e: NullPointerException) {
-            Log.e(logTag, "Context/Activity missing, could not init Fragment.\n ${e.stackTrace}")
+        identityProviderId = loadIdentityProviderId()
+        if (identityProviderId != -1L) {
+            profileApi.updateIdentityProviderProfiles(identityProviderId)
+            parentActivity.allowNext()
+        } else {
+            Log.e(logTag, "Invalid Identity Provider. Cannot continue.")
         }
+
         super.onResume()
     }
 
     private fun initProfileInfoBox() {
         binding.profileInformationCard.observeProfileAttributes(this, profileApi)
+        binding.profileInformationCard.setOnClickListener {
+            binding.profileInformationCard.openProfileInformationDialog(
+                childFragmentManager
+            )
+        }
     }
 
     private fun initProfileSelectionSpinner() {
         profileArrayAdapter = ProfileArrayAdapter(activity!!, R.layout.spinner_profile_dropdown)
         binding.profileSpinner.adapter = profileArrayAdapter
 
-
         binding.profileSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 val selectedProfile = profileArrayAdapter.getItem(position)
-                binding.profileInformationCard.setTitleRefresh(this@ProfileFragment)
+                binding.profileInformationCard.setTitleRefresh()
                 profileApi.updateProfileAttributes(selectedProfile)
                 saveProfile(selectedProfile)
             }
@@ -69,7 +76,7 @@ class ProfileFragment : Fragment() {
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
 
-        ProfileApi(activity!!).getIdentityProviderProfiles(identityProviderId)
+        profileApi.getIdentityProviderProfilesLiveData()
             .observe(this, { profiles ->
                 profileArrayAdapter.setProfiles(profiles)
                 // hide spinner/dropdown and label if there is nothing to select

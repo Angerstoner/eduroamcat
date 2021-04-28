@@ -37,7 +37,7 @@
                     android:id="@+id/profilePreviewLabel"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/profile_preview_label_refreshing_text"
+                    android:text="@string/profile_preview_label_text"
                     android:textStyle="bold"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -50,20 +50,21 @@
                     app:layout_constraintTop_toBottomOf="@id/profilePreviewLabel" />
 
                 <TextView
-                    android:id="@+id/helpdeskMailTextView"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:autoLink="email"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/displayNameTextView" />
-
-                <TextView
                     android:id="@+id/helpdeskWebTextView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:autoLink="web"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/helpdeskMailTextView" />
+                    app:layout_constraintTop_toBottomOf="@id/displayNameTextView" />
+
+                <TextView
+                    android:id="@+id/helpdeskMailTextView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:autoLink="email"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/helpdeskWebTextView" />
+
 
                 <TextView
                     android:id="@+id/helpdeskPhoneTextView"
@@ -71,7 +72,7 @@
                     android:layout_height="wrap_content"
                     android:autoLink="phone"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/helpdeskWebTextView" />
+                    app:layout_constraintTop_toBottomOf="@id/helpdeskMailTextView" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <ImageView
