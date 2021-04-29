@@ -67,7 +67,7 @@ class FeedbackFragment : Fragment() {
             // no connection feedback possible, only check WifiConfig feedback
             binding.connectionStatusFeedbackTextView.text =
                 getString(R.string.feedback_connection_missing_permission_text)
-            TODO("NOT YET IMPLEMENTED")
+            //TODO: check if connection was added successfully
         }
 
         super.onResume()
@@ -90,17 +90,32 @@ class FeedbackFragment : Fragment() {
     }
 
     fun displayConnectionStatus(connectionInfo: WifiInfo) {
-        if (connectionInfo.supplicantState == SupplicantState.COMPLETED &&
-            connectionInfo.ssid == "eduroam"
-        ) {
-            Log.i(logTag, "eduroam connection established")
+        if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
+            // user has to click notification and then android 10 will decide if
+            // eduroam is the best available network
             binding.connectionStatusFeedbackTextView.text =
-                getString(R.string.feedback_connection_status_connected_text)
-            binding.uninstallInfoTextView.visibility = View.VISIBLE
-        } else if (connectionInfo.supplicantState == SupplicantState.DISCONNECTED) {
-            Log.i(logTag, "eduroam connection failed. Please check availability and user data")
-            binding.connectionStatusFeedbackTextView.text =
-                getString(R.string.feedback_connection_status_disconnected_text)
+                getString(R.string.feedback_connection_status_android_10_text)
+        } else {
+            if (connectionInfo.supplicantState == SupplicantState.COMPLETED) {
+                if (connectionInfo.ssid == "\"eduroam\"") {
+                    // connection successful
+                    Log.i(logTag, "eduroam connection established")
+                    binding.connectionStatusFeedbackTextView.text =
+                        getString(R.string.feedback_connection_status_connected_text)
+                    binding.uninstallInfoTextView.visibility = View.VISIBLE
+                    parentActivity.unregisterReceiver(feedbackReceiver)
+                } else {
+                    // connected to different wifi
+                    Log.i(logTag, "eduroam connection failed. Please check availability and user data")
+                    binding.connectionStatusFeedbackTextView.text =
+                        getString(R.string.feedback_connection_status_disconnected_text)
+                }
+            } else if (connectionInfo.supplicantState == SupplicantState.DISCONNECTED) {
+                // connection failed
+                Log.i(logTag, "eduroam connection failed. Please check availability and user data")
+                binding.connectionStatusFeedbackTextView.text =
+                    getString(R.string.feedback_connection_status_disconnected_text)
+            }
         }
     }
 
