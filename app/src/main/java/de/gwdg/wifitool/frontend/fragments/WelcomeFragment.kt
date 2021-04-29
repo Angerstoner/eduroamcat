@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import de.gwdg.wifitool.R
 import de.gwdg.wifitool.backend.WifiConfig
 import de.gwdg.wifitool.databinding.FragmentWelcomeBinding
 import de.gwdg.wifitool.frontend.activities.MainActivity
@@ -16,7 +17,6 @@ import de.gwdg.wifitool.frontend.components.WifiSettingsDialog
 const val REQUEST_CODE_LOCATION_PERMISSION = 101
 val PERMISSION_ARRAY_LOCATION = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
 
-//TODO: check for Android 10 and ask user remove eduroam
 class WelcomeFragment : Fragment() {
     private lateinit var binding: FragmentWelcomeBinding
     private lateinit var parentActivity: MainActivity
@@ -30,9 +30,26 @@ class WelcomeFragment : Fragment() {
     }
 
     override fun onResume() {
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
-            if (hasPreviousEduroamConfig()) {
-                binding.locationInfoTextView.visibility = View.VISIBLE
+        when {
+            Build.VERSION.SDK_INT <= Build.VERSION_CODES.P -> {
+                // on Android 9 and below the app can delete old eduroam configs if user grants location permission
+                if (hasPreviousEduroamConfig()) {
+                    binding.oldConfigInfoText.visibility = View.VISIBLE
+                }
+                parentActivity.addNextButtonAction { requestAppPermissions() }
+            }
+            Build.VERSION.SDK_INT == Build.VERSION_CODES.Q -> {
+                // on Android 10 the user has to delete old eduroam configs by themselves
+                binding.oldConfigInfoText.text = getString(R.string.welcome_screen_delete_old_config_text_android_10)
+                binding.oldConfigInfoText.visibility = View.VISIBLE
+                parentActivity.addNextButtonAction {
+                    requestAppPermissions()
+                    WifiSettingsDialog().show(childFragmentManager, null)
+                }
+            }
+            else -> {
+                // on Android 11 the app can overwrite existing eduroam connections
+                // location permission is still needed to provide connection feedback
                 parentActivity.addNextButtonAction { requestAppPermissions() }
             }
         }
@@ -62,9 +79,11 @@ class WelcomeFragment : Fragment() {
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         if (requestCode == REQUEST_CODE_LOCATION_PERMISSION && permissions.contentEquals(PERMISSION_ARRAY_LOCATION)) {
-            if (grantResults.size == 1 && grantResults.contains(-1)) {
-                Log.i(logTag, "Location permission not granted. User has to delete eduroam network.")
-                WifiSettingsDialog().show(childFragmentManager, null)
+            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+                if (grantResults.size == 1 && grantResults.contains(-1)) {
+                    Log.i(logTag, "Location permission not granted. User has to delete eduroam network.")
+                    WifiSettingsDialog().show(childFragmentManager, null)
+                }
             }
         }
     }

@@ -6,8 +6,10 @@
 
     <string name="logo_content_desc">GWDG Wi-Fi Tool Logo</string>
     <string name="org_search_content_desc">Search organization</string>
-    <string name="welcome_screen_greeter_text">Hello, I gwdg wifi tool, you user, pls next</string>
-    <string name="welcome_screen_location_info_text">In order to delete the old eduroam configuration, this application needs location permissions due to some Android restrictions. Please grant the required permissions in the in the dialog or delete old eduroam configurations from the settings by yourself.</string>
+    <string name="welcome_screen_greeter_text">Welcome to the GWDG Wi-Fi Tool. This app will guide you through the process of setting up eduroam on your device.</string>
+    <string name="welcome_screen_location_info_text">In order to give a user feedback, if the connection to the eduroam network was successful, this app needs location permissions due to Android restrictions. Please grant the required permissions in the following dialog.</string>
+    <string name="welcome_screen_delete_old_config_text">Additionally this app can delete your old eduroam config on Android 9 and below, if you grant location permissions. If you deny the location permission, the app will take you to the Wi-Fi settings so that you can delete old configurations by yourself.</string>
+    <string name="welcome_screen_delete_old_config_text_android_10">Due to additional Android 10 restrictions, this app can not delete old eduroam configurations. If you have any old eduroam connections, please use the following popup to open the Wi-Fi settings and delete them.</string>
 
     <!--Fragment descriptions-->
     <string name="setup_welcome_screen">Welcome to the GWDG Wi-Fi Tool</string>
