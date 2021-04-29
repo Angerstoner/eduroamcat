@@ -18,10 +18,10 @@
     <string name="feedback_connection_add_error_text">The eduroam network could not be added to Wi-Fi networks. Please check for existing eduroam connections and restart app.</string>
     <string name="feedback_connection_missing_permission_text">The connection could not be checked due to missing location permissions. Please check status in Android Wi-Fi settings.</string>
     <string name="feedback_connection_status_checking_text">Trying to establish connection. Please wait.</string>
-    <string name="feedback_connection_status_connected_text">Connected to eduroam. You can close this app now.</string>
+    <string name="feedback_connection_status_connected_text">Connected to eduroam.</string>
     <string name="feedback_connection_status_disconnected_text">Could not establish connection to eduroam network. Please check eduroam availability and entered data.</string>
     <string name="feedback_connection_status_android_10_text">A notification should appear and ask if eduroam should be added to Wi-Fi networks. After confirming, Android will decide when the eduroam connection is the best choice. To force an eduroam connection, please remove the current connected Wi-Fi network.</string>
-    <string name="feedback_uninstall_info_text">Please do not uninstall this application, as this will also remove the configured networks due to Android restrictions.</string>
+    <string name="feedback_uninstall_info_text">Please do not uninstall this application, as this will also remove the configured networks due to Android restrictions. You can close this app now.</string>
 
     <!--Fragment descriptions-->
     <string name="setup_welcome_screen">Welcome to the GWDG Wi-Fi Tool</string>
