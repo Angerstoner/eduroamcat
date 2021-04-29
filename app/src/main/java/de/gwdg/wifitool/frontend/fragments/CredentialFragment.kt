@@ -13,7 +13,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import de.gwdg.wifitool.R
 import de.gwdg.wifitool.backend.ProfileApi
 import de.gwdg.wifitool.backend.WifiConfig
@@ -22,7 +21,6 @@ import de.gwdg.wifitool.backend.util.EapConfigParser
 import de.gwdg.wifitool.backend.util.WifiEnterpriseConfigurator
 import de.gwdg.wifitool.databinding.FragmentCredentialsBinding
 import de.gwdg.wifitool.frontend.activities.MainActivity
-import java.lang.NullPointerException
 
 class CredentialFragment : Fragment() {
     private val logTag = "CredentialFragment"
@@ -52,6 +50,7 @@ class CredentialFragment : Fragment() {
             Log.i(logTag, "Downloading profile $profile")
             startProfileConfigDownload(profile!!.profileId)
             initProfileInfoBox()
+            updateNextButton()
         } else {
             Log.e(logTag, "Invalid Profile. Cannot continue.")
         }

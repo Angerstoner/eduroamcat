@@ -5,10 +5,10 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import com.android.volley.Response
 import de.gwdg.wifitool.R
 import de.gwdg.wifitool.backend.ProfileApi
@@ -17,7 +17,6 @@ import de.gwdg.wifitool.databinding.FragmentOrganizationBinding
 import de.gwdg.wifitool.frontend.activities.MainActivity
 import de.gwdg.wifitool.frontend.adapters.IdentityProviderArrayAdapter
 import de.gwdg.wifitool.frontend.components.IdentityProviderDownloadErrorDialog
-import java.lang.NullPointerException
 
 const val SEARCH_INPUT_THRESHOLD = 2
 const val SEARCH_DROPDOWN_HEIGHT_HIDDEN = 0
@@ -142,5 +141,8 @@ class OrganizationFragment : Fragment() {
     }
 
     private val onIdentityProviderListDownloadError =
-        Response.ErrorListener { IdentityProviderDownloadErrorDialog().show(childFragmentManager, null) }
+        Response.ErrorListener {
+            IdentityProviderDownloadErrorDialog().show(childFragmentManager, null)
+            parentActivity.blockNext()
+        }
 }

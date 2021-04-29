@@ -6,12 +6,34 @@
     android:padding="16dp">
 
     <TextView
+        android:id="@+id/connectionAddFeedbackTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="FEEDBACK PAGE"
+        android:paddingBottom="32dp"
+        android:text="@string/feedback_connection_add_success_text"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <TextView
+        android:id="@+id/connectionStatusFeedbackTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingBottom="32dp"
+        android:text="@string/feedback_connection_status_checking_text"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/connectionAddFeedbackTextView" />
+
+    <TextView
+        android:id="@+id/uninstallInfoTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingBottom="32dp"
+        android:text="@string/feedback_uninstall_info_text"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/connectionStatusFeedbackTextView" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
