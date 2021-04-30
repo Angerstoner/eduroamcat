@@ -84,7 +84,9 @@ class ProfileFragment : Fragment() {
                 binding.profileSpinner.visibility = if (profiles.size == 1) View.GONE else View.VISIBLE
 
                 // populate infobox with first item and add observer to liveData used for profile preview
-                profileApi.updateProfileAttributes(profileArrayAdapter.getItem(0))
+                val defaultProfile = profileArrayAdapter.getItem(0)
+                profileApi.updateProfileAttributes(defaultProfile)
+                saveProfile(defaultProfile)
             })
     }
 
