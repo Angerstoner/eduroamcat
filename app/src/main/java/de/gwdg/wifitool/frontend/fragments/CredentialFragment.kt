@@ -148,14 +148,16 @@ class CredentialFragment : Fragment() {
         val configParser = EapConfigParser(configFilename)
 
         val enterpriseConfig = wifiEnterpriseConfigurator.getConfigFromFile(configParser).first()
-        // TODO: remove trailing/leading whitespaces
         if (enterpriseConfig.eapMethod != WifiEnterpriseConfig.Eap.PWD)
-            enterpriseConfig.identity = binding.usernameEditText.text.toString()
+            enterpriseConfig.identity = binding.usernameEditText.text.toString().replace(" ", "")
         enterpriseConfig.password = binding.passwordEditText.text.toString()
 
         val ssid = configParser.getSsidPairs()
 
         val wifiConfig = WifiConfig(parentActivity)
-        wifiConfig.connectToEapNetwork(enterpriseConfig, ssid)
+
+        // TODO: this value is used for communication and is only implemented as a temporary solution
+        // TODO: do communication in a proper way
+        parentActivity.wifiConfigResults = wifiConfig.connectToEapNetwork(enterpriseConfig, ssid)
     }
 }

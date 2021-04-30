@@ -32,14 +32,24 @@ class WelcomeFragment : Fragment() {
     override fun onResume() {
         when {
             Build.VERSION.SDK_INT <= Build.VERSION_CODES.P -> {
-                // on Android 9 and below the app can delete old eduroam configs if user grants location permission
+                // warn user if an existing eduroam connection was detected
+                // users has to delete this existing config by themselves
                 if (hasPreviousEduroamConfig()) {
                     binding.oldConfigInfoText.visibility = View.VISIBLE
+                    parentActivity.addNextButtonAction {
+                        requestAppPermissions()
+                        WifiSettingsDialog().show(childFragmentManager, null)
+                    }
+                } else {
+                    // ask only for location permission to obtain feedback in the end
+                    parentActivity.addNextButtonAction {
+                        requestAppPermissions()
+                    }
                 }
-                parentActivity.addNextButtonAction { requestAppPermissions() }
             }
             Build.VERSION.SDK_INT == Build.VERSION_CODES.Q -> {
-                // on Android 10 the user has to delete old eduroam configs by themselves
+                // on Android 10 the users have to delete old eduroam configs by themselves
+                // the app can not detect if an eduroam config exists and therefore needs to show this to every user
                 binding.oldConfigInfoText.text = getString(R.string.welcome_screen_delete_old_config_text_android_10)
                 binding.oldConfigInfoText.visibility = View.VISIBLE
                 parentActivity.addNextButtonAction {

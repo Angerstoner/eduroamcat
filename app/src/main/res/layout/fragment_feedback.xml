@@ -10,8 +10,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingBottom="32dp"
-        android:text="@string/feedback_connection_add_success_text"
-        android:visibility="gone"
+        android:text="@string/feedback_connection_add_no_result_text"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

@@ -1,7 +1,5 @@
 package de.gwdg.wifitool.frontend.activities
 
-import android.Manifest.permission.ACCESS_FINE_LOCATION
-import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
@@ -9,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback
 import de.gwdg.wifitool.R
 import de.gwdg.wifitool.backend.ProfileApi
+import de.gwdg.wifitool.backend.WifiConfig
 import de.gwdg.wifitool.databinding.ActivityMainBinding
 import de.gwdg.wifitool.frontend.adapters.MainPagerAdapter
 
@@ -18,8 +17,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var pagerAdapter: MainPagerAdapter
     private lateinit var dotImageViews: Array<ImageView>
-
     lateinit var profileApi: ProfileApi
+
+    var wifiConfigResults: List<WifiConfig.WifiConfigResult> = ArrayList()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
