@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.Filter
 import android.widget.TextView
+import de.gwdg.wifitool.R
 import de.gwdg.wifitool.backend.models.IdentityProvider
 
 class IdentityProviderArrayAdapter(context: Context, resource: Int) :
@@ -25,10 +26,9 @@ class IdentityProviderArrayAdapter(context: Context, resource: Int) :
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         val listItem = convertView
             ?: LayoutInflater.from(context)
-                .inflate(android.R.layout.simple_list_item_1, parent, false)
+                .inflate(R.layout.search_dropdown_item, parent, false)
 
-        listItem.findViewById<TextView>(android.R.id.text1).text =
-            identityProviderList[position].toString()
+        listItem.findViewById<TextView>(R.id.identityProviderTextView).text = identityProviderList[position].toString()
 
         return listItem
     }
