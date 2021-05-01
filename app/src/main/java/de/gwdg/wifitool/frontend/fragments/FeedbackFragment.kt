@@ -77,7 +77,7 @@ class FeedbackFragment : Fragment() {
             // no connection feedback possible, only check WifiConfig feedback
             if (listOf(ANDROID_BELOW_Q_FAIL, ANDROID_Q_FAIL).contains(configAddResult)) {
                 binding.connectionAddFeedbackTextView.text =
-                    getString(R.string.feedback_connection_add_success_text)
+                    getString(R.string.feedback_connection_add_error_text)
                 binding.connectionStatusFeedbackTextView.visibility = View.GONE
             } else {
                 binding.connectionStatusFeedbackTextView.text =

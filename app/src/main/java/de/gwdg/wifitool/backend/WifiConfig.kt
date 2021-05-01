@@ -22,10 +22,12 @@ class WifiConfig(private val activity: Activity) {
     private val wifiManager: WifiManager =
         activity.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
 
+    fun isWifiEnabled() = wifiManager.isWifiEnabled
 
     /**
      * Method checks if an eduroam network is already set up on the system by fake-adding a
-     * new eduroam connection and obtaining the return of [WifiManager.addNetwork]
+     * new eduroam connection and obtaining the return of [WifiManager.addNetwork]. This only
+     * works, if Wi-Fi is enabled. With disabled Wi-Fi this defaults to false.
      *
      * The fake connection is removed after a successful check
      */
@@ -34,24 +36,29 @@ class WifiConfig(private val activity: Activity) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             return false
         }
+        if (wifiManager.setWifiEnabled(true)) {
+            val fakeEnterpriseConfig = WifiEnterpriseConfig()
+            val fakeWifiConfig = WifiConfiguration()
+            fakeWifiConfig.SSID = "\"eduroam\""
+            fakeWifiConfig.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_EAP)
+            fakeWifiConfig.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.IEEE8021X)
+            fakeWifiConfig.enterpriseConfig = fakeEnterpriseConfig
+            val networkId = wifiManager.addNetwork(fakeWifiConfig)
 
-        val fakeEnterpriseConfig = WifiEnterpriseConfig()
-        val fakeWifiConfig = WifiConfiguration()
-        fakeWifiConfig.SSID = "\"eduroam\""
-        fakeWifiConfig.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_EAP)
-        fakeWifiConfig.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.IEEE8021X)
-        fakeWifiConfig.enterpriseConfig = fakeEnterpriseConfig
-        val networkId = wifiManager.addNetwork(fakeWifiConfig)
-
-        return if (networkId != -1) {
-            wifiManager.removeNetwork(networkId)
-            false
-        } else true
+            return if (wifiManager.isWifiEnabled) {
+                //
+                if (networkId != -1) {
+                    wifiManager.removeNetwork(networkId)
+                    false
+                } else true
+            } else false
+        }
+        return false
     }
 
     internal fun connectToEapNetwork(
         enterpriseConfig: WifiEnterpriseConfig,
-        ssidPairList: List<Pair<String, String>>
+        ssidPairList: List<Pair<String, String>>,
     ): ArrayList<WifiConfigResult> {
 
         val results = ArrayList<WifiConfigResult>()
@@ -93,7 +100,7 @@ class WifiConfig(private val activity: Activity) {
     @Deprecated("Deprecated for API >= Android Q", replaceWith = ReplaceWith("connectNetworkAndroidQ()"))
     private fun connectNetworkBelowQ(
         enterpriseConfig: WifiEnterpriseConfig, ssid: String, securityProtocol: String,
-        update: Boolean = false, existingNetworkId: Int = -1
+        update: Boolean = false, existingNetworkId: Int = -1,
     ): WifiConfigResult {
         val wifiConfig = WifiConfiguration()
         wifiConfig.SSID = "\"$ssid\""

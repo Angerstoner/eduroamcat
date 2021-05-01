@@ -8,7 +8,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import de.gwdg.wifitool.R
 import de.gwdg.wifitool.backend.WifiConfig
 import de.gwdg.wifitool.databinding.FragmentWelcomeBinding
 import de.gwdg.wifitool.frontend.activities.MainActivity
@@ -20,51 +19,58 @@ val PERMISSION_ARRAY_LOCATION = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION
 class WelcomeFragment : Fragment() {
     private lateinit var binding: FragmentWelcomeBinding
     private lateinit var parentActivity: MainActivity
+    private lateinit var wifiConfig: WifiConfig
     private val logTag = "WelcomeFragment"
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         this.binding = FragmentWelcomeBinding.inflate(inflater, container, false)
         parentActivity = activity as MainActivity
+        wifiConfig = WifiConfig(parentActivity)
         parentActivity.allowNext()
         return this.binding.root
     }
 
+    //TODO: test this
     override fun onResume() {
-        when {
+        binding.oldConfigInfoText.visibility = if (hasPreviousEduroamConfig()) View.VISIBLE else View.GONE
+        val nextAction = {
+            if (userHasToDeleteConfig()) {
+                // users has to delete this existing config by themselves
+                requestAppPermissions()
+                WifiSettingsDialog().show(childFragmentManager, null)
+            } else {
+                // ask only for location permission to obtain feedback in the end
+                requestAppPermissions()
+            }
+        }
+        parentActivity.addNextButtonAction(nextAction)
+        super.onResume()
+    }
+
+
+    private fun userHasToDeleteConfig(): Boolean {
+        return when {
             Build.VERSION.SDK_INT <= Build.VERSION_CODES.P -> {
                 // warn user if an existing eduroam connection was detected
                 // users has to delete this existing config by themselves
                 if (hasPreviousEduroamConfig()) {
-                    binding.oldConfigInfoText.visibility = View.VISIBLE
-                    parentActivity.addNextButtonAction {
-                        requestAppPermissions()
-                        WifiSettingsDialog().show(childFragmentManager, null)
-                    }
+                    true
                 } else {
-                    // ask only for location permission to obtain feedback in the end
-                    parentActivity.addNextButtonAction {
-                        requestAppPermissions()
-                    }
+                    return !wifiConfig.isWifiEnabled()
                 }
             }
             Build.VERSION.SDK_INT == Build.VERSION_CODES.Q -> {
-                // on Android 10 the users have to delete old eduroam configs by themselves
-                // the app can not detect if an eduroam config exists and therefore needs to show this to every user
-                binding.oldConfigInfoText.text = getString(R.string.welcome_screen_delete_old_config_text_android_10)
-                binding.oldConfigInfoText.visibility = View.VISIBLE
-                parentActivity.addNextButtonAction {
-                    requestAppPermissions()
-                    WifiSettingsDialog().show(childFragmentManager, null)
-                }
+                // on Android 10 the app can not detect if an eduroam config exists and
+                // therefore needs to show this to every user
+                true
             }
             else -> {
                 // on Android 11 the app can overwrite existing eduroam connections
-                // location permission is still needed to provide connection feedback
-                parentActivity.addNextButtonAction { requestAppPermissions() }
+                false
             }
         }
-        super.onResume()
     }
+
 
     /**
      * Checks if an eduroam connection was already added in the past
@@ -72,7 +78,7 @@ class WelcomeFragment : Fragment() {
      * see [WifiConfig.hasEduroamConfiguration]
      */
     private fun hasPreviousEduroamConfig(): Boolean {
-        return WifiConfig(parentActivity).hasEduroamConfiguration()
+        return wifiConfig.hasEduroamConfiguration()
     }
 
 
