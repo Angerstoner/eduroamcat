@@ -17,12 +17,12 @@
             android:id="@+id/identitySearchEditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:dropDownHeight="0dp"
             android:hint="@string/org_search_content_desc"
             android:importantForAutofill="no"
             android:inputType="text"
             android:lines="1"
             app:layout_constraintTop_toTopOf="parent" />
-        <!--            android:dropDownHeight="0dp"-->
 
     </com.google.android.material.textfield.TextInputLayout>
 

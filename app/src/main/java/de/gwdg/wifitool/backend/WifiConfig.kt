@@ -45,12 +45,9 @@ class WifiConfig(private val activity: Activity) {
             fakeWifiConfig.enterpriseConfig = fakeEnterpriseConfig
             val networkId = wifiManager.addNetwork(fakeWifiConfig)
 
+            // network id will be -1 if network could not be added
             return if (wifiManager.isWifiEnabled) {
-                //
-                if (networkId != -1) {
-                    wifiManager.removeNetwork(networkId)
-                    false
-                } else true
+                networkId == -1
             } else false
         }
         return false
@@ -72,7 +69,7 @@ class WifiConfig(private val activity: Activity) {
                         val networkId = getNetworkIdForSsid(ssidPair.first)
                         connectNetworkBelowQ(
                             enterpriseConfig, ssidPair.first, ssidPair.second,
-                            update = true, networkId
+//                            update = true, networkId
                         )
                     } else {
                         connectNetworkBelowQ(enterpriseConfig, ssidPair.first, ssidPair.second)

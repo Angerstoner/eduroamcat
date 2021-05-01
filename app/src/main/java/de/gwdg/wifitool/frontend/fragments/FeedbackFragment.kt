@@ -68,9 +68,12 @@ class FeedbackFragment : Fragment() {
             listOf(ANDROID_BELOW_Q_SUCCESS, ANDROID_Q_SUCCESS, ANDROID_R_NO_RESULT).contains(configAddResult)
         ) {
             if (configAddResult == ANDROID_R_NO_RESULT) {
+                // connection feedback has to be set by [onActivityResult] on Android 11+
                 binding.connectionAddFeedbackTextView.text = getString(R.string.feedback_connection_add_no_result_text)
+            } else {
+                // connection feedback possible
+                binding.connectionAddFeedbackTextView.text = getString(R.string.feedback_connection_add_success_text)
             }
-            // connection feedback possible
             // register receivers for connection status updates
             initBroadcastReceiver()
         } else {
