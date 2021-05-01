@@ -38,7 +38,6 @@ class OrganizationFragment : Fragment() {
             parentActivity = activity as MainActivity
             profileApi = parentActivity.profileApi
             initAutoCompleteSearch()
-//            initTestSearch()
         } catch (e: NullPointerException) {
             Log.e(logTag, "Context/Activity missing, could not init Fragment. \n${e.stackTrace}")
         }
@@ -52,12 +51,6 @@ class OrganizationFragment : Fragment() {
         super.onResume()
     }
 
-//    private fun initTestSearch() {
-//        val testEntries = arrayListOf("Option 1", "abc 2", "Option 3", "def 4", "Option 5", "hij 6")
-//        (0 until 10000).forEach { testEntries.add("Option $it") }
-//        val testAdapter = ArrayAdapter(parentActivity.baseContext, R.layout.spinner_profile_dropdown, testEntries)
-//        binding.identitySearchEditText.setAdapter(testAdapter)
-//    }
 
     // TODO: move to custom search view class
     private fun initAutoCompleteSearch() {
