@@ -1,3 +1,55 @@
 <resources>
     <string name="app_name">GWDG Wi-Fi Tool</string>
+    <string name="next_button">Next</string>
+    <string name="next_button_connect">Connect</string>
+    <string name="back_button">Back</string>
+
+    <string name="logo_content_desc">GWDG Wi-Fi Tool Logo</string>
+    <string name="org_search_content_desc">Search organization</string>
+
+    <!-- Welcome fragment texts   -->
+    <string name="welcome_screen_greeter_text">Welcome to the GWDG Wi-Fi Tool. This app will guide you through the process of setting up an eduroam connection on your device.</string>
+    <string name="welcome_screen_location_info_text">In order to give a user feedback about the connection status, this app needs location permissions due to Android restrictions. Please grant the required permissions in the following dialog.</string>
+    <string name="welcome_screen_delete_old_config_text">An existing eduroam configuration was detected on your device. Please use the following popup to open the Wi-Fi settings and delete the old configuration.</string>
+    <string name="welcome_screen_delete_old_config_text_android_10">Due to additional Android 10 restrictions, this app can not detect or delete old eduroam configurations. If you have an old eduroam connection, please use the following popup to open the Wi-Fi settings and delete the old configuration.</string>
+
+    <!-- Feedback fragment texts   -->
+    <string name="feedback_connection_add_no_result_text"> </string>
+    <string name="feedback_connection_add_success_text">The eduroam network has successfully been added to Wi-Fi networks.</string>
+    <string name="feedback_connection_add_error_text">The eduroam network could not be added to Wi-Fi networks. Please check for existing eduroam connections and restart app.</string>
+    <string name="feedback_connection_add_user_canceled_text">The eduroam network could not be added to Wi-Fi networks as it was rejected by the user.</string>
+    <string name="feedback_connection_missing_permission_text">The connection could not be checked due to missing location permissions. Please check status in Android Wi-Fi settings.</string>
+    <string name="feedback_connection_status_checking_text">Trying to establish connection. Please wait.</string>
+    <string name="feedback_connection_status_connected_text">Connected to eduroam.</string>
+    <string name="feedback_connection_status_disconnected_text">Could not establish connection to eduroam network. Please check eduroam availability and entered data.</string>
+    <string name="feedback_connection_status_android_10_text">A notification should appear and ask if eduroam should be added to Wi-Fi networks. After confirming, Android will decide when the eduroam connection is the best choice. To force an eduroam connection, please remove the current connected Wi-Fi network.</string>
+    <string name="feedback_uninstall_info_text">Please do not uninstall this application, as this will also remove the configured networks due to Android restrictions. You can close this app now.</string>
+
+    <!--Fragment descriptions-->
+    <string name="setup_welcome_screen">Welcome to the GWDG Wi-Fi Tool</string>
+    <string name="setup_first_step">Select Organization</string>
+    <string name="setup_second_step">Select User Group</string>
+    <string name="setup_last_step">Feedback</string>
+    <string name="setup_third_step">Enter Username and Password</string>
+
+
+    <!--Keys for SharedPreferences-->
+    <string name="preference_file_key">wifi_tool_preferences</string>
+    <string name="preference_identity_provider_id">wifi_tool_pref_identity_provider_id</string>
+    <string name="preference_identity_provider_name">wifi_tool_pref_identity_provider_name</string>
+    <string name="preference_identity_provider_country">wifi_tool_pref_identity_provider_country</string>
+    <string name="preference_profile_id">wifi_tool_pref_profile_id</string>
+    <string name="preference_profile_name">wifi_tool_pref_profile_name</string>
+    <string name="profile_preview_label_text">Selected profile:</string>
+    <string name="profile_preview_label_refreshing_text">Selected profile: (refreshing)</string>
+
+    <!--Dialog texts-->
+    <string name="dialog_remove_old_eduroam">Please delete previously configured eduroam networks via Wi-Fi settings. Usually this can be done by opening the network for editing and selecting \'Forget\'</string>
+    <string name="dialog_identity_provider_download_failed">Could not retrieve list of organizations. Please check internet connection and restart application.</string>
+    <string name="dialog_button_open_wifi_settings">Wi-Fi Settings</string>
+    <string name="dialog_button_cancel">Cancel</string>
+    <string name="dialog_button_okay">Okay</string>
+    <string name="profile_spinner_label">Select your user group:</string>
+
+
 </resources>

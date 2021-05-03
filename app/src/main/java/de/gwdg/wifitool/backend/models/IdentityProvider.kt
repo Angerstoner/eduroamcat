@@ -3,9 +3,15 @@ package de.gwdg.wifitool.backend.models
 data class IdentityProvider(
     val entityId: Long,
     val country: String,
-    val title: String
+    val title: String,
 ) {
-    override fun toString(): String {
-        return "$title ($country, $entityId)"
+
+    private val keywords = arrayListOf<String>()
+    override fun toString(): String = title
+
+    fun addKeywords(vararg keywords: String) {
+        this.keywords.addAll(keywords)
     }
+
+    fun hasKeyword(keyword: String): Boolean = keywords.any { it.contains(keyword, ignoreCase = true) }
 }

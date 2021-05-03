@@ -1,39 +1,26 @@
 package de.gwdg.wifitool.frontend.activities
 
-import android.Manifest.permission.ACCESS_FINE_LOCATION
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.net.wifi.WifiEnterpriseConfig
-import android.os.Build
 import android.os.Bundle
-import android.os.Parcelable
-import android.provider.Settings.EXTRA_WIFI_NETWORK_RESULT_LIST
-import android.text.Editable
-import android.text.TextWatcher
-import android.util.Log
-import android.view.View.GONE
-import android.view.View.VISIBLE
+import android.view.View
+import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
-import de.gwdg.wifitool.backend.ADD_WIFI_NETWORK_SUGGESTION_REQUEST_CODE
+import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback
+import de.gwdg.wifitool.R
 import de.gwdg.wifitool.backend.ProfileApi
 import de.gwdg.wifitool.backend.WifiConfig
-import de.gwdg.wifitool.backend.models.IdentityProvider
-import de.gwdg.wifitool.backend.models.Profile
-import de.gwdg.wifitool.backend.util.EapConfigParser
-import de.gwdg.wifitool.backend.util.WifiEnterpriseConfigurator
 import de.gwdg.wifitool.databinding.ActivityMainBinding
-import de.gwdg.wifitool.frontend.adapters.IdentityProviderArrayAdapter
-import de.gwdg.wifitool.frontend.adapters.ProfileArrayAdapter
+import de.gwdg.wifitool.frontend.adapters.MainPagerAdapter
 
 
 class MainActivity : AppCompatActivity() {
     private val logTag = "MainActivity"
-    private val profileApi = ProfileApi(this)
     private lateinit var binding: ActivityMainBinding
-    private lateinit var identityProviderArrayAdapter: IdentityProviderArrayAdapter
-    private lateinit var profileArrayAdapter: ProfileArrayAdapter
+    private lateinit var pagerAdapter: MainPagerAdapter
+    private lateinit var dotImageViews: Array<ImageView>
+    lateinit var profileApi: ProfileApi
+
+    var wifiConfigResults: List<WifiConfig.WifiConfigResult> = ArrayList()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,135 +28,115 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
-
-//        requestAppPermissions()
-        initIdentityProviderListView()
-        initIdentityProviderSearchBox()
-        initProfileSelectionSpinner()
-        initConnectButton()
-
-//        downloadAndParseTest()
+        initPager()
+        bindDots()
+        bindNavigationButtons()
+        profileApi = ProfileApi(this)
     }
 
-    /**
-     * Requests needed permissions if Android M or higher is used
-     * Android L and lower use only the AndroidManifest to grant permissions
-     */
-    private fun requestAppPermissions() {
-        val permissionsNeeded = arrayOf(ACCESS_FINE_LOCATION)
-        val permissionsRequestCode = 1
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            requestPermissions(permissionsNeeded, permissionsRequestCode)
-        }
+    private fun bindNavigationButtons() {
+        binding.nextButton.setOnClickListener { goNext() }
+        binding.backButton.setOnClickListener { goBack() }
     }
 
-    /**
-     * Initializes list of all identity providers obtained by the [ProfileApi]
-     */
-    private fun initIdentityProviderListView() {
-        identityProviderArrayAdapter =
-            IdentityProviderArrayAdapter(
-                this,
-                android.R.layout.simple_list_item_1
+    private fun initPager() {
+        pagerAdapter = MainPagerAdapter(this)
+        binding.viewPager.adapter = pagerAdapter
+        binding.viewPager.isUserInputEnabled = false
+    }
+
+
+    private fun bindDots() {
+        with(binding) {
+            this@MainActivity.dotImageViews = arrayOf(
+                dot1ImageView,
+                dot2ImageView,
+                dot3ImageView,
+                dot4ImageView,
+                dot5ImageView
             )
-
-        binding.identityProviderListView.adapter = identityProviderArrayAdapter
-
-        binding.identityProviderListView.setOnItemClickListener { _, _, position, _ ->
-            val item = identityProviderArrayAdapter.getItem(position)
-            identityProviderArrayAdapter.filter.filter(item.toString())
-            showProfilesForIdentityProvider(item)
-        }
-
-        ProfileApi(this).getAllIdentityProviders()
-            .observe(this, Observer { identityProviders ->
-                identityProviderArrayAdapter.setIdentityProviders(identityProviders)
-            })
-    }
-
-    private fun initIdentityProviderSearchBox() {
-        binding.identitySearchEditText.addTextChangedListener(object : TextWatcher {
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                identityProviderArrayAdapter.filter.filter(s)
-            }
-
-            // do nothing
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-
-            // do nothing
-            override fun afterTextChanged(s: Editable?) {}
-        })
-    }
-
-    private fun initProfileSelectionSpinner() {
-        profileArrayAdapter = ProfileArrayAdapter(
-            this,
-            android.R.layout.simple_spinner_item
-        )
-        binding.profileSpinner.adapter = profileArrayAdapter
-    }
-
-    private fun initConnectButton() {
-        binding.connectButton.setOnClickListener {
-            val selectedProfile = binding.profileSpinner.selectedItem as Profile
-
-            val filename = getFilenameForProfile(selectedProfile)
-            val onDownloadFinished: BroadcastReceiver = object : BroadcastReceiver() {
-                override fun onReceive(context: Context?, intent: Intent?) {
-                    val filenameWithPath = getExternalFilesDir(null).toString().plus("/").plus(filename)
-                    connectToWifi(filenameWithPath)
+            highlightDot(viewPager.currentItem)
+            viewPager.registerOnPageChangeCallback(object : OnPageChangeCallback() {
+                override fun onPageSelected(position: Int) {
+                    highlightDot(position)
                 }
-            }
-            profileApi.downloadProfileConfig(selectedProfile, filename, onDownloadFinished)
-        }
-    }
-
-    private fun showProfilesForIdentityProvider(identityProvider: IdentityProvider) {
-        ProfileApi(this).getIdentityProviderProfiles(identityProvider)
-            .observe(this, Observer { profiles ->
-                profileArrayAdapter.setProfiles(profiles)
-                binding.profileSpinner.visibility = if (profileArrayAdapter.count == 0) GONE else VISIBLE
-                binding.profileSpinner.isEnabled = (profileArrayAdapter.count > 1)
-                binding.hiddenConstraintLayout.visibility =
-                    if (profileArrayAdapter.count == 0) GONE else VISIBLE
             })
+        }
     }
 
-    private fun connectToWifi(configFilename: String) {
-        val wifiEnterpriseConfigurator = WifiEnterpriseConfigurator()
-        val configParser = EapConfigParser(configFilename)
-
-        val enterpriseConfig = wifiEnterpriseConfigurator.getConfigFromFile(configParser).first()
-        if (enterpriseConfig.eapMethod != WifiEnterpriseConfig.Eap.PWD)
-            enterpriseConfig.identity = binding.usernameEditText.text.toString()
-        enterpriseConfig.password = binding.passwordEditText.text.toString()
-
-        val ssid = configParser.getSsidPairs()
-
-        val wifiConfig = WifiConfig(this)
-        wifiConfig.connectToEapNetwork(enterpriseConfig, ssid)
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode == ADD_WIFI_NETWORK_SUGGESTION_REQUEST_CODE && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            Log.i(logTag, "Result was $resultCode")
-            if (resultCode == RESULT_OK && data != null && data.hasExtra(EXTRA_WIFI_NETWORK_RESULT_LIST)) {
-                val addWifiNetworkResultList = data.getIntegerArrayListExtra(EXTRA_WIFI_NETWORK_RESULT_LIST)!!
-                addWifiNetworkResultList.forEachIndexed { i, it ->
-                    Log.i(logTag, "Network result for $i was $it")
-                }
+    private fun highlightDot(position: Int) {
+        for (index in dotImageViews.indices) {
+            if (index == position) {
+                dotImageViews[index].setImageResource(R.drawable.dot)
+                dotImageViews[index].animate().alpha(0.7f).scaleX(1.2f).scaleY(1.2f)
+            } else {
+                dotImageViews[index].setImageResource(R.drawable.dot_outline)
+                dotImageViews[index].animate().alpha(0.5f).scaleX(1f).scaleY(1f)
             }
         }
-        super.onActivityResult(requestCode, resultCode, data)
     }
 
-    //TODO: move to util as this could be static
-    private fun getFilenameForProfile(profile: Profile): String {
-        return "eduroam-${profile.identityProvider}_${profile.profileId}_.eap-config"
-            .replace("[<>:\"/\\\\|?*, ]".toRegex(), "_")
+    fun allowNext() {
+        binding.nextButton.visibility = View.VISIBLE
     }
 
+    fun blockNext() {
+        binding.nextButton.visibility = View.GONE
+    }
+
+    fun allowBack() {
+        binding.backButton.visibility = View.VISIBLE
+    }
+
+    fun blockBack() {
+        binding.backButton.visibility = View.GONE
+    }
+
+    fun backAllowed(): Boolean = binding.backButton.visibility == View.VISIBLE
+    fun nextAllowed(): Boolean = binding.nextButton.visibility == View.VISIBLE
+    fun getCurrentPage(): Int = binding.viewPager.currentItem
+
+    private fun goNext() {
+        binding.viewPager.currentItem += 1
+        allowBack()
+        blockNext()
+        resetNextButton()
+    }
+
+    private fun goBack() {
+        if (getCurrentPage() == 0) {
+            return
+        } else if (getCurrentPage() == 1) {
+            blockBack()
+        }
+        binding.viewPager.currentItem -= 1
+        allowNext()
+        resetNextButton()
+    }
+
+    fun addNextButtonAction(action: () -> Unit) {
+        binding.nextButton.setOnClickListener { action(); goNext() }
+    }
+
+    fun changeNextButtonText(newText: String) {
+        binding.nextButton.text = newText
+    }
+
+    fun resetNextButton() {
+        binding.nextButton.setOnClickListener { goNext() }
+        binding.nextButton.text = getString(R.string.next_button)
+    }
+
+    override fun onBackPressed() {
+        if (getCurrentPage() == 0)
+        // close app with back on first page
+            super.onBackPressed()
+        else if (backAllowed()) {
+            // back on all other pages if allowed
+            goBack()
+        }
+
+    }
 }
 
 

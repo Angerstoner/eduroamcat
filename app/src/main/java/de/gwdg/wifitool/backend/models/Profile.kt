@@ -3,9 +3,10 @@ package de.gwdg.wifitool.backend.models
 class Profile(
     val profileId: Long,
     val displayLabel: String,
-    val identityProvider: IdentityProvider
+    val identityProviderId: Long,
+    val identityProviderName: String
 ) {
     override fun toString(): String {
-        return "$displayLabel (${identityProvider.title}, $profileId)"
+        return displayLabel
     }
 }
