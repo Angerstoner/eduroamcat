@@ -66,6 +66,7 @@ class WifiConfig(private val activity: Activity) {
             ssidPairList.forEach { ssidPair ->
                 val result =
                     if (hasEduroamConfiguration()) {
+                        // TODO: check for removal
                         val networkId = getNetworkIdForSsid(ssidPair.first)
                         connectNetworkBelowQ(
                             enterpriseConfig, ssidPair.first, ssidPair.second,
@@ -94,6 +95,7 @@ class WifiConfig(private val activity: Activity) {
         return -1
     }
 
+
     @Deprecated("Deprecated for API >= Android Q", replaceWith = ReplaceWith("connectNetworkAndroidQ()"))
     private fun connectNetworkBelowQ(
         enterpriseConfig: WifiEnterpriseConfig, ssid: String, securityProtocol: String,
@@ -115,6 +117,7 @@ class WifiConfig(private val activity: Activity) {
         }
 
         val networkId = if (update) {
+            // TODO: check for removal
             // update existing network, identified by networkId
             // only works, if existing network has been created by this application
             wifiConfig.networkId = existingNetworkId
@@ -131,6 +134,7 @@ class WifiConfig(private val activity: Activity) {
 
     @RequiresApi(api = Build.VERSION_CODES.Q)
     private fun connectNetworkAndroidQ(enterpriseConfig: WifiEnterpriseConfig, ssid: String): WifiConfigResult {
+        // TODO: check for renaming to connectNetwork(..)
 
         val suggestions: ArrayList<WifiNetworkSuggestion> = ArrayList()
         val suggestion = WifiNetworkSuggestion.Builder()
