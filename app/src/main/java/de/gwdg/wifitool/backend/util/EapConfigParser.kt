@@ -21,8 +21,8 @@ import javax.xml.parsers.DocumentBuilderFactory
  * Some methods throw NoSuchElementExceptions if the user tries to access an Element not given in the eap-config.
  * The calling method must catch those exceptions and provide feedback to the user and the debug log
  *
- * Used tags can be found in [de.unigoe.eduroamcat.backend.models.EapConfigTags.kt]
- * Used util helpers can be found in [de.unigoe.eduroamcat.backend.util.XmlExtensions.kt]
+ * Used tags can be found in [de.gwdg.wifitool.backend.util.EapConfigTags.kt]
+ * Used util helpers can be found in [de.gwdg.wifitool.backend.util.XmlExtensions.kt]
  */
 class EapConfigParser(eapConfigFilePath: String) {
     private val logTag = "EAPConfigParser"

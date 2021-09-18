@@ -13,13 +13,10 @@ import de.gwdg.wifitool.backend.models.IdentityProvider
 class IdentityProviderArrayAdapter(context: Context, resource: Int) :
     ArrayAdapter<IdentityProvider>(context, resource) {
     private var identityProviderList: ArrayList<IdentityProvider> = ArrayList()
-    private var previousIdentityProviderList: ArrayList<IdentityProvider> = ArrayList()
     private var originalIdentityProviderList: ArrayList<IdentityProvider> = ArrayList()
-
 
     override fun getCount(): Int = identityProviderList.size
     override fun getItem(position: Int): IdentityProvider = identityProviderList[position]
-
 
     override fun getPosition(item: IdentityProvider?): Int = identityProviderList.indexOf(item)
 
@@ -38,7 +35,6 @@ class IdentityProviderArrayAdapter(context: Context, resource: Int) :
             override fun performFiltering(constraint: CharSequence?): FilterResults {
                 val searchText = constraint?.toString() ?: ""
                 val filterResults = FilterResults()
-                previousIdentityProviderList = ArrayList(identityProviderList)
                 identityProviderList = ArrayList(originalIdentityProviderList)
 
                 val newValues = if (searchText.contains("\\S".toRegex()))
@@ -65,27 +61,10 @@ class IdentityProviderArrayAdapter(context: Context, resource: Int) :
         }
     }
 
-    /**
-     * This method has to use the version of the list prior to the last filtering
-     *
-     * This method should only be called when a item from the dropdown is clicked because clicking on such
-     * an item will change the filter and therefore reset the positions of the list. So the previous version
-     * of the list has to be used, so that the item on the provided [position] is the correct [IdentityProvider]
-     */
-    fun getClickedItem(position: Int): IdentityProvider = previousIdentityProviderList[position]
-
-
     fun setIdentityProviders(identityProviders: ArrayList<IdentityProvider>) {
         identityProviderList = identityProviders
         originalIdentityProviderList = (identityProviderList.clone() as List<*>)
             .filterIsInstance<IdentityProvider>() as ArrayList<IdentityProvider>
         notifyDataSetChanged()
-    }
-
-    fun moveIdentityProviderWithIdToTop(identityProviderId: Long) {
-        // this uses a trick for moving the desired identity to the first position
-        // False results to 0 and True to 1, that's why the Identity Provider with
-        // the given Id will be moved to the front when sortByDescending is used.
-        identityProviderList.sortByDescending { it.entityId == identityProviderId }
     }
 }

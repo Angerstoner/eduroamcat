@@ -72,15 +72,18 @@ class OrganizationFragment : Fragment() {
         with(binding.identitySearchEditText) {
             addTextChangedListener(object : TextWatcher {
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                    // tried with internal threshold of AutoCompleteTextView,
-                    // wont work because internal threshold seems to be always 1, even when explicitly set
-                    dropDownHeight = if (s != null && s.length >= SEARCH_INPUT_THRESHOLD) {
-                        identityProviderArrayAdapter.filter.filter(s)
-                        ViewGroup.LayoutParams.WRAP_CONTENT
-                    } else {
-                        SEARCH_DROPDOWN_HEIGHT_HIDDEN
+                    // only filter user input, not auto completion-input
+                    if (!isPerformingCompletion) {
+                        // tried with internal threshold of AutoCompleteTextView,
+                        // wont work because internal threshold seems to be always 1, even when explicitly set
+                        dropDownHeight = if (s != null && s.length >= SEARCH_INPUT_THRESHOLD) {
+                            identityProviderArrayAdapter.filter.filter(s)
+                            ViewGroup.LayoutParams.WRAP_CONTENT
+                        } else {
+                            SEARCH_DROPDOWN_HEIGHT_HIDDEN
+                        }
+                        parentActivity.blockNext()
                     }
-                    parentActivity.blockNext()
                 }
 
 
@@ -104,7 +107,7 @@ class OrganizationFragment : Fragment() {
      * Called when clicking on an Identity Provider from the list
      */
     private fun onIdentityProviderClick(pos: Int) {
-        val idp = identityProviderArrayAdapter.getClickedItem(pos)
+        val idp = identityProviderArrayAdapter.getItem(pos)
         saveIdentityProvider(idp)
         parentActivity.allowNext()
     }

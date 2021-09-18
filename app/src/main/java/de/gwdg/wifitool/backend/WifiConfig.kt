@@ -60,20 +60,10 @@ class WifiConfig(private val activity: Activity) {
 
         val results = ArrayList<WifiConfigResult>()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            ssidPairList.forEach { ssidPair -> results.add(connectNetworkAndroidQ(enterpriseConfig, ssidPair.first)) }
-
+            ssidPairList.forEach { ssidPair -> results.add(connectNetwork(enterpriseConfig, ssidPair.first)) }
         } else {
             ssidPairList.forEach { ssidPair ->
-                val result =
-                    if (hasEduroamConfiguration()) {
-                        val networkId = getNetworkIdForSsid(ssidPair.first)
-                        connectNetworkBelowQ(
-                            enterpriseConfig, ssidPair.first, ssidPair.second,
-//                            update = true, networkId
-                        )
-                    } else {
-                        connectNetworkBelowQ(enterpriseConfig, ssidPair.first, ssidPair.second)
-                    }
+                val result = connectNetworkBelowQ(enterpriseConfig, ssidPair.first, ssidPair.second)
                 results.add(result)
             }
         }
@@ -93,6 +83,7 @@ class WifiConfig(private val activity: Activity) {
         }
         return -1
     }
+
 
     @Deprecated("Deprecated for API >= Android Q", replaceWith = ReplaceWith("connectNetworkAndroidQ()"))
     private fun connectNetworkBelowQ(
@@ -114,14 +105,7 @@ class WifiConfig(private val activity: Activity) {
                 wifiConfig.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP)
         }
 
-        val networkId = if (update) {
-            // update existing network, identified by networkId
-            // only works, if existing network has been created by this application
-            wifiConfig.networkId = existingNetworkId
-            wifiManager.updateNetwork(wifiConfig)
-        } else {
-            wifiManager.addNetwork(wifiConfig)
-        }
+        val networkId = wifiManager.addNetwork(wifiConfig)
 
         // finally enable network and return result
         return if (wifiManager.enableNetwork(networkId, true))
@@ -130,8 +114,7 @@ class WifiConfig(private val activity: Activity) {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.Q)
-    private fun connectNetworkAndroidQ(enterpriseConfig: WifiEnterpriseConfig, ssid: String): WifiConfigResult {
-
+    private fun connectNetwork(enterpriseConfig: WifiEnterpriseConfig, ssid: String): WifiConfigResult {
         val suggestions: ArrayList<WifiNetworkSuggestion> = ArrayList()
         val suggestion = WifiNetworkSuggestion.Builder()
             .setSsid(ssid)
