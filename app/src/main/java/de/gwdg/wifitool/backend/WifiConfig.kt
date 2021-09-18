@@ -126,7 +126,6 @@ class WifiConfig(private val activity: Activity) {
             val addNetworkIntent = Intent(Settings.ACTION_WIFI_ADD_NETWORKS)
             addNetworkIntent.putParcelableArrayListExtra(Settings.EXTRA_WIFI_NETWORK_LIST, suggestions)
             activity.startActivityForResult(addNetworkIntent, ADD_WIFI_NETWORK_SUGGESTION_REQUEST_CODE)
-            //
             WifiConfigResult.ANDROID_R_NO_RESULT
         } else {
             val addStatus = wifiManager.addNetworkSuggestions(suggestions)
@@ -142,6 +141,8 @@ class WifiConfig(private val activity: Activity) {
         ANDROID_BELOW_Q_FAIL, // add/enable network fail
         ANDROID_Q_SUCCESS, // adding suggestion success
         ANDROID_Q_FAIL, // adding suggestion failed
-        ANDROID_R_NO_RESULT // activity has to check for intent result
+        ANDROID_R_NO_RESULT, // activity has to check for intent result
+        ANDROID_R_SUCCESS, // activity has checked intent result and adding was successful
+        ANDROID_R_FAIL // activity has checked intent result and adding failed
     }
 }

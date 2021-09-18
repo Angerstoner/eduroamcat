@@ -21,6 +21,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import de.gwdg.wifitool.R
 import de.gwdg.wifitool.backend.ADD_WIFI_NETWORK_SUGGESTION_REQUEST_CODE
+import de.gwdg.wifitool.backend.WifiConfig
 import de.gwdg.wifitool.backend.WifiConfig.WifiConfigResult.*
 import de.gwdg.wifitool.databinding.FragmentFeedbackBinding
 import de.gwdg.wifitool.frontend.activities.MainActivity
@@ -62,8 +63,8 @@ class FeedbackFragment : Fragment() {
     override fun onResume() {
         // TODO: replace following workaround by a real fix
         // this is needed because the button gets re-activated by the TextWatcher in the CredentialFragment
-        parentActivity.blockNext()
         val configAddResult = parentActivity.wifiConfigResults[0]
+        updateNextButton(configAddResult)
         if (hasLocationPermission() &&
             listOf(ANDROID_BELOW_Q_SUCCESS, ANDROID_Q_SUCCESS, ANDROID_R_NO_RESULT).contains(configAddResult)
         ) {
@@ -100,14 +101,17 @@ class FeedbackFragment : Fragment() {
                     if (addWifiNetworkResultList.contains(ADD_WIFI_RESULT_ADD_OR_UPDATE_FAILED)) {
                         binding.connectionAddFeedbackTextView.text =
                             getString(R.string.feedback_connection_add_error_text)
+                        updateNextButton(ANDROID_R_FAIL)
                     } else {
                         binding.connectionAddFeedbackTextView.text =
                             getString(R.string.feedback_connection_add_success_text)
+                        updateNextButton(ANDROID_R_SUCCESS)
                     }
                 }
             } else {
                 binding.connectionAddFeedbackTextView.text =
                     getString(R.string.feedback_connection_add_user_canceled_text)
+                updateNextButton(ANDROID_R_FAIL)
             }
         }
         super.onActivityResult(requestCode, resultCode, data)
@@ -168,6 +172,16 @@ class FeedbackFragment : Fragment() {
                 binding.connectionStatusFeedbackTextView.text =
                     getString(R.string.feedback_connection_status_disconnected_text)
             }
+        }
+    }
+
+    private fun updateNextButton(configAddResult: WifiConfig.WifiConfigResult) {
+        if (listOf(ANDROID_BELOW_Q_SUCCESS, ANDROID_Q_SUCCESS, ANDROID_R_SUCCESS).contains(configAddResult)) {
+            parentActivity.addNextButtonAction { parentActivity.finishAffinity() }
+            parentActivity.changeNextButtonText(getString(R.string.next_button_close))
+            parentActivity.allowNext()
+        } else {
+            parentActivity.blockNext()
         }
     }
 
