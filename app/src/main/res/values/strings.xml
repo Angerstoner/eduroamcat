@@ -2,6 +2,7 @@
     <string name="app_name">GWDG Wi-Fi Tool</string>
     <string name="next_button">Next</string>
     <string name="next_button_connect">Connect</string>
+    <string name="next_button_close">Close</string>
     <string name="back_button">Back</string>
 
     <string name="logo_content_desc">GWDG Wi-Fi Tool Logo</string>
