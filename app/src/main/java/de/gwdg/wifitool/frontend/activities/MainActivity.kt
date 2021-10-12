@@ -1,7 +1,9 @@
 package de.gwdg.wifitool.frontend.activities
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
+import android.webkit.MimeTypeMap
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback
@@ -32,6 +34,15 @@ class MainActivity : AppCompatActivity() {
         bindDots()
         bindNavigationButtons()
         profileApi = ProfileApi(this)
+        test()
+
+    }
+
+    private fun test() {
+        val extension = MimeTypeMap.getFileExtensionFromUrl("eduroam-android_8_10-GWDG_Goettingen-GWDG.eap-config")
+        val type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension) ?: "None"
+        Log.i(logTag, type)
+
     }
 
     private fun bindNavigationButtons() {
