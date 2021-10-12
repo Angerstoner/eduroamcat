@@ -157,7 +157,7 @@ class CredentialFragment : Fragment() {
         val wifiConfig = WifiConfig(parentActivity)
 
         // TODO: this value is used for communication and is only implemented as a temporary solution
-        // TODO: do communication in a proper way
+        // TODO: do communication in a proper way (e.g. via ViewModel)
         parentActivity.wifiConfigResults = wifiConfig.connectToEapNetwork(enterpriseConfig, ssid)
     }
 }

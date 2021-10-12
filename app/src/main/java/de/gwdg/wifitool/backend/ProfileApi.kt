@@ -139,7 +139,9 @@ class ProfileApi(private val activityContext: Context) {
      */
     fun downloadProfileConfig(profileId: Long, filename: String, onDownloadFinished: BroadcastReceiver) {
         val profileDownloadUri = Uri.parse(
-            API_ACTION_DOWNLOAD_CONFIG.format(AndroidDeviceGroup.getAndroidDeviceGroup(), profileId, lang)
+            // change eap-generic to other config types for specific Android versions (e.g. android_8_10, android_recent)
+            // see: https://github.com/GEANT/CAT/blob/master/tutorials/UserAPI.md -> listDevices
+            API_ACTION_DOWNLOAD_CONFIG.format("eap-generic", profileId, lang)
         )
         downloadToAppData(profileDownloadUri, filename, onDownloadFinished)
     }

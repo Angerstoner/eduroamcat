@@ -14,6 +14,15 @@
     <string name="welcome_screen_delete_old_config_text">An existing eduroam configuration was detected on your device. Please use the following popup to open the Wi-Fi settings and delete the old configuration.</string>
     <string name="welcome_screen_delete_old_config_text_android_10">Due to additional Android 10 restrictions, this app can not detect or delete old eduroam configurations. If you have an old eduroam connection, please use the following popup to open the Wi-Fi settings and delete the old configuration.</string>
 
+    <!-- Profile selection fragment texts   -->
+    <string name="profile_spinner_label">Select your user group:</string>
+
+
+    <!-- Credential fragment texts   -->
+    <string name="credential_user_hint">Username/E-Mail</string>
+    <string name="credential_password_hint">Password</string>
+
+
     <!-- Feedback fragment texts   -->
     <string name="feedback_connection_add_no_result_text"> </string>
     <string name="feedback_connection_add_success_text">The eduroam network has successfully been added to Wi-Fi networks.</string>
@@ -50,7 +59,7 @@
     <string name="dialog_button_open_wifi_settings">Wi-Fi Settings</string>
     <string name="dialog_button_cancel">Cancel</string>
     <string name="dialog_button_okay">Okay</string>
-    <string name="profile_spinner_label">Select your user group:</string>
 
+    <!-- other/unsorted-->
 
 </resources>
