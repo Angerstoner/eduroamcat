@@ -160,6 +160,7 @@ class FeedbackFragment : Fragment() {
                         binding.uninstallInfoTextView.visibility = View.VISIBLE
                     }
                     parentActivity.unregisterReceiver(feedbackReceiver)
+                    updateNextButton(ANDROID_R_SUCCESS)
                 } else {
                     // connected to different wifi
                     Log.i(logTag, "eduroam connection failed. Please check availability and user data")
