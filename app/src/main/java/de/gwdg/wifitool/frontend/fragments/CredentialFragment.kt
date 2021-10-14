@@ -17,6 +17,7 @@ import de.gwdg.wifitool.R
 import de.gwdg.wifitool.backend.ProfileApi
 import de.gwdg.wifitool.backend.WifiConfig
 import de.gwdg.wifitool.backend.models.Profile
+import de.gwdg.wifitool.backend.models.ProfileAttributes
 import de.gwdg.wifitool.backend.util.EapConfigParser
 import de.gwdg.wifitool.backend.util.WifiEnterpriseConfigurator
 import de.gwdg.wifitool.databinding.FragmentCredentialsBinding
@@ -50,6 +51,9 @@ class CredentialFragment : Fragment() {
             Log.i(logTag, "Downloading profile $profile")
             startProfileConfigDownload(profile!!.profileId)
             initProfileInfoBox()
+            updateNextButton()
+        } else if (parentActivity.eapConfigParser != null) {
+            initProfileInfoBoxFromEapConfig(parentActivity.eapConfigParser!!)
             updateNextButton()
         } else {
             Log.e(logTag, "Invalid Profile. Cannot continue.")
@@ -111,11 +115,25 @@ class CredentialFragment : Fragment() {
         }
     }
 
+    private fun initProfileInfoBoxFromEapConfig(eapConfigParser: EapConfigParser) {
+        val identityProviderName = eapConfigParser.getProviderDisplayName()
+        val identityProviderMail = eapConfigParser.getHelpdeskEmailAddress()
+        val identityProviderPhone = eapConfigParser.getHelpdeskPhoneNumber()
+        val identityProviderUrl = eapConfigParser.getHelpdeskWebAddress()
+        val identityProviderDesc = eapConfigParser.getProviderDescription()
+        val profileAttributes = ProfileAttributes(
+            -1, identityProviderName,
+            identityProviderMail, identityProviderPhone, identityProviderUrl, identityProviderDesc
+        )
+        binding.profileInformationCard.setProfileAttributes(this, profileAttributes)
+
+    }
+
 
     private fun isConnectAllowed(): Boolean {
         return binding.usernameEditText.text.toString() != ""
                 && binding.passwordEditText.text.toString() != ""
-                && profileDownloadFinished
+                && (profileDownloadFinished || parentActivity.eapConfigParser != null)
     }
 
     private fun getStoredProfile(): Profile? {
@@ -145,14 +163,17 @@ class CredentialFragment : Fragment() {
 
     private fun connectToWifi(configFilename: String) {
         val wifiEnterpriseConfigurator = WifiEnterpriseConfigurator()
-        val configParser = EapConfigParser(configFilename)
 
-        val enterpriseConfig = wifiEnterpriseConfigurator.getConfigFromFile(configParser).first()
+        if (parentActivity.eapConfigParser == null) {
+            parentActivity.eapConfigParser = EapConfigParser(configFilename)
+        }
+
+        val enterpriseConfig = wifiEnterpriseConfigurator.getConfigFromFile(parentActivity.eapConfigParser!!).first()
         if (enterpriseConfig.eapMethod != WifiEnterpriseConfig.Eap.PWD)
             enterpriseConfig.identity = binding.usernameEditText.text.toString().replace(" ", "")
         enterpriseConfig.password = binding.passwordEditText.text.toString()
 
-        val ssid = configParser.getSsidPairs()
+        val ssid = parentActivity.eapConfigParser!!.getSsidPairs()
 
         val wifiConfig = WifiConfig(parentActivity)
 

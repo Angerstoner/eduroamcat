@@ -10,11 +10,12 @@ import androidx.fragment.app.FragmentManager
 import com.google.android.material.card.MaterialCardView
 import de.gwdg.wifitool.R
 import de.gwdg.wifitool.backend.ProfileApi
+import de.gwdg.wifitool.backend.models.ProfileAttributes
 
 class ProfileInformationCard @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyle: Int = 0
+    defStyle: Int = 0,
 ) :
     ConstraintLayout(context, attrs, defStyle) {
     private val profilePreviewCard: MaterialCardView
@@ -37,17 +38,21 @@ class ProfileInformationCard @JvmOverloads constructor(
     }
 
     fun observeProfileAttributes(parent: Fragment, profileApi: ProfileApi) {
+        profileApi.getProfileAttributesLiveData().observe(parent, { profileAttributes ->
+            setProfileAttributes(parent, profileAttributes)
+        })
+    }
+
+    fun setProfileAttributes(parent: Fragment, profileAttributes: ProfileAttributes) {
         with(parent) {
-            profileApi.getProfileAttributesLiveData().observe(parent, { profileAttributes ->
-                with(profileAttributes) {
-                    profilePreviewLabel.text = getString(R.string.profile_preview_label_text)
-                    displayNameTextView.text = identityProviderName
-                    helpdeskWebTextView.text = identityProviderUrl
-                    helpdeskMailTextView.text = identityProviderMail
-                    helpdeskPhoneTextView.text = identityProviderPhone
-                    profileDescription = identityProviderDescription
-                }
-            })
+            with(profileAttributes) {
+                profilePreviewLabel.text = getString(R.string.profile_preview_label_text)
+                displayNameTextView.text = identityProviderName
+                helpdeskWebTextView.text = identityProviderUrl
+                helpdeskMailTextView.text = identityProviderMail
+                helpdeskPhoneTextView.text = identityProviderPhone
+                profileDescription = identityProviderDescription
+            }
         }
     }
 

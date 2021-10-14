@@ -1,17 +1,21 @@
 package de.gwdg.wifitool.frontend.activities
 
+import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.View
-import android.webkit.MimeTypeMap
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback
 import de.gwdg.wifitool.R
 import de.gwdg.wifitool.backend.ProfileApi
 import de.gwdg.wifitool.backend.WifiConfig
+import de.gwdg.wifitool.backend.util.EapConfigParser
 import de.gwdg.wifitool.databinding.ActivityMainBinding
 import de.gwdg.wifitool.frontend.adapters.MainPagerAdapter
+import org.xml.sax.SAXParseException
+import java.util.*
+import kotlin.collections.ArrayList
 
 
 class MainActivity : AppCompatActivity() {
@@ -20,6 +24,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var pagerAdapter: MainPagerAdapter
     private lateinit var dotImageViews: Array<ImageView>
     lateinit var profileApi: ProfileApi
+    var eapConfigParser: EapConfigParser? = null
 
     var wifiConfigResults: List<WifiConfig.WifiConfigResult> = ArrayList()
 
@@ -34,14 +39,27 @@ class MainActivity : AppCompatActivity() {
         bindDots()
         bindNavigationButtons()
         profileApi = ProfileApi(this)
-        test()
 
+
+        // check if app was opened from .eap-config file and try to load config from it
+        if (intent.dataString != null) {
+            loadConfigFromFile()
+        }
     }
 
-    private fun test() {
-        val extension = MimeTypeMap.getFileExtensionFromUrl("eduroam-android_8_10-GWDG_Goettingen-GWDG.eap-config")
-        val type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension) ?: "None"
-        Log.i(logTag, type)
+
+    // tries to open and parse eap-config file send to app
+    private fun loadConfigFromFile() {
+        val eapConfigFileUri = Uri.parse(intent.dataString)
+        val configInputStream = contentResolver.openInputStream(eapConfigFileUri)!!
+
+        try {
+            eapConfigParser = EapConfigParser(configInputStream)
+            binding.viewPager.setCurrentItem(3, false)
+            blockNext()
+        } catch (e: SAXParseException) {
+            Toast.makeText(this, "Could not parse file", Toast.LENGTH_SHORT).show()
+        }
 
     }
 

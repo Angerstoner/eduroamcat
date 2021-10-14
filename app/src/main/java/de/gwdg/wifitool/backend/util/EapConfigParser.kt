@@ -10,6 +10,7 @@ import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.w3c.dom.Node
 import java.io.File
+import java.io.InputStream
 import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
 import javax.xml.parsers.DocumentBuilderFactory
@@ -24,19 +25,21 @@ import javax.xml.parsers.DocumentBuilderFactory
  * Used tags can be found in [de.gwdg.wifitool.backend.util.EapConfigTags.kt]
  * Used util helpers can be found in [de.gwdg.wifitool.backend.util.XmlExtensions.kt]
  */
-class EapConfigParser(eapConfigFilePath: String) {
+class EapConfigParser(eapConfigInputStream: InputStream) {
     private val logTag = "EAPConfigParser"
     private val eapConfig: Document
 
+    //TODO test
     /**
      * Initialize a EapConfigParser instance with a given eap config
      * Since the eap config is given in XML format, it's accessed with [javax.xml.parsers.DocumentBuilder]
      * */
     init {
-        val eapConfigFile = File(eapConfigFilePath)
         val configBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder()
-        eapConfig = configBuilder.parse(eapConfigFile)
+        eapConfig = configBuilder.parse(eapConfigInputStream)
     }
+
+    constructor(eapConfigFilePath: String) : this(File(eapConfigFilePath).inputStream())
 
     /**
      * Searches the given [AUTHENTICATION_METHOD_PARENT] block for the given AuthenticationsMethods.
@@ -154,7 +157,7 @@ class EapConfigParser(eapConfigFilePath: String) {
 
     /**
      * Returns Pair of Strings containing the SSID and the minRSNProto Content.
-     * 
+     *
      * Every SSID has a corresponding minRSNProto Tag, which containts either CCMP or TKIP.
      * Since CCMP/TKIP is a network specific setting, this is paired with the SSID
      *
