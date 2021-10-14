@@ -44,6 +44,7 @@
             <!-- MIME Type registration -->
             <intent-filter>
                 <data
+                    android:host="*"
                     android:mimeType="*/*"
                     android:pathPattern=".*\\.eap-config"
                     android:scheme="content" />
