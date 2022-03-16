@@ -13,8 +13,6 @@ import de.gwdg.wifitool.frontend.activities.MainActivity
 import de.gwdg.wifitool.frontend.components.WifiSettingsDialog
 import kotlin.math.log
 
-const val REQUEST_CODE_LOCATION_PERMISSION = 101
-val PERMISSION_ARRAY_LOCATION = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
 
 class WelcomeFragment : Fragment() {
     private lateinit var binding: FragmentWelcomeBinding
@@ -40,4 +38,6 @@ class WelcomeFragment : Fragment() {
         parentActivity.addNextButtonAction(nextAction)
         super.onResume()
     }
+
+
 }

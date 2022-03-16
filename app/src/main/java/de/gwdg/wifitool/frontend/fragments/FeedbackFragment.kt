@@ -27,6 +27,10 @@ import de.gwdg.wifitool.databinding.FragmentFeedbackBinding
 import de.gwdg.wifitool.frontend.activities.MainActivity
 import de.gwdg.wifitool.frontend.components.WifiSettingsDialog
 
+// TODO: class for constants
+const val REQUEST_CODE_LOCATION_PERMISSION = 101
+val PERMISSION_ARRAY_LOCATION = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
+
 
 class FeedbackFragment : Fragment() {
     private val logTag = "FeedbackFragment"
