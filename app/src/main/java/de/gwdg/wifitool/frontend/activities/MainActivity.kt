@@ -23,6 +23,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var pagerAdapter: MainPagerAdapter
     private lateinit var dotImageViews: Array<ImageView>
+
+    // TODO: -> ViewModel
     lateinit var profileApi: ProfileApi
     var eapConfigParser: EapConfigParser? = null
 

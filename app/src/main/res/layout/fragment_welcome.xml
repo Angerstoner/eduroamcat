@@ -23,6 +23,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/greeterTextView" />
 
+    <!-- TODO: remove -> show directly in dialog-->
     <TextView
         android:id="@+id/oldConfigInfoText"
         android:layout_width="wrap_content"

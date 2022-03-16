@@ -26,8 +26,7 @@ class WifiConfig(private val activity: Activity) {
 
     /**
      * Method checks if an eduroam network is already set up on the system by fake-adding a
-     * new eduroam connection and obtaining the return of [WifiManager.addNetwork]. This only
-     * works, if Wi-Fi is enabled. With disabled Wi-Fi this defaults to false.
+     * new eduroam connection and obtaining the return of [WifiManager.addNetwork].
      *
      * The fake connection is removed after a successful check
      */
@@ -46,9 +45,12 @@ class WifiConfig(private val activity: Activity) {
             val networkId = wifiManager.addNetwork(fakeWifiConfig)
 
             // network id will be -1 if network could not be added
-            return if (wifiManager.isWifiEnabled) {
-                networkId == -1
-            } else false
+            return if (networkId != -1) {
+                // TODO: check for second run, otherwise this removes previously configured nets
+                // wifiManager.removeNetwork(networkId)
+                Log.i(logTag, "existing connection detected")
+                false
+            } else true
         }
         return false
     }

@@ -64,7 +64,7 @@ class OrganizationFragment : Fragment() {
             onIdentityProviderClick(position)
         }
 
-        //TODO: move download to welcome fragment
+        //TODO: start on app start
         profileApi.getAllIdentityProviders(onIdentityProviderListDownloadError).observe(this, { identityProviders ->
             identityProviderArrayAdapter.setIdentityProviders(identityProviders)
         })

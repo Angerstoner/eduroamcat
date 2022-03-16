@@ -77,7 +77,7 @@ class ProfileFragment : Fragment() {
         }
 
         profileApi.getIdentityProviderProfilesLiveData()
-            .observe(this, { profiles ->
+            .observe(this) { profiles ->
                 profileArrayAdapter.setProfiles(profiles)
                 // hide spinner/dropdown and label if there is nothing to select
                 binding.profileSpinnerLabel.visibility = if (profiles.size == 1) View.GONE else View.VISIBLE
@@ -87,7 +87,7 @@ class ProfileFragment : Fragment() {
                 val defaultProfile = profileArrayAdapter.getItem(0)
                 profileApi.updateProfileAttributes(defaultProfile)
                 saveProfile(defaultProfile)
-            })
+            }
     }
 
     private fun loadIdentityProviderId(): Long {

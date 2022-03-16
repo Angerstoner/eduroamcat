@@ -25,6 +25,7 @@ import de.gwdg.wifitool.backend.WifiConfig
 import de.gwdg.wifitool.backend.WifiConfig.WifiConfigResult.*
 import de.gwdg.wifitool.databinding.FragmentFeedbackBinding
 import de.gwdg.wifitool.frontend.activities.MainActivity
+import de.gwdg.wifitool.frontend.components.WifiSettingsDialog
 
 
 class FeedbackFragment : Fragment() {
@@ -117,10 +118,33 @@ class FeedbackFragment : Fragment() {
         super.onActivityResult(requestCode, resultCode, data)
     }
 
+
+    // TODO: add button which gives user option to check connection status (and asks for location permission)
+    /**
+     * Requests needed permissions if Android M or higher is used
+     * Android L and lower use only the AndroidManifest to grant permissions
+     */
+    private fun requestAppPermissions() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            requestPermissions(PERMISSION_ARRAY_LOCATION, REQUEST_CODE_LOCATION_PERMISSION)
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        if (requestCode == REQUEST_CODE_LOCATION_PERMISSION && permissions.contentEquals(PERMISSION_ARRAY_LOCATION)) {
+            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+                if (grantResults.size == 1 && grantResults.contains(-1)) {
+                    Log.i(logTag, "Location permission not granted. Not possible to check wifi status")
+                    WifiSettingsDialog().show(childFragmentManager, null)
+                }
+            }
+        }
+    }
+
     private fun hasLocationPermission(): Boolean {
         // permission check if Android M (6.0) or above
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            return parentActivity.checkSelfPermission(Manifest.permission.CHANGE_WIFI_STATE) ==
+            return parentActivity.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) ==
                     PackageManager.PERMISSION_GRANTED
         }
         // permission granted via manifest if below Android M
