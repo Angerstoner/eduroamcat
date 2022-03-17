@@ -21,6 +21,7 @@ import de.gwdg.wifitool.backend.models.ProfileAttributes
 import de.gwdg.wifitool.backend.util.EapConfigParser
 import de.gwdg.wifitool.backend.util.WifiEnterpriseConfigurator
 import de.gwdg.wifitool.databinding.FragmentCredentialsBinding
+import de.gwdg.wifitool.frontend.*
 import de.gwdg.wifitool.frontend.activities.MainActivity
 
 class CredentialFragment : Fragment() {
@@ -138,12 +139,12 @@ class CredentialFragment : Fragment() {
 
     private fun getStoredProfile(): Profile? {
         val sharedPref =
-            parentActivity.getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
+            parentActivity.getSharedPreferences(PREFERENCE_FILE_KEY, Context.MODE_PRIVATE)
         with(sharedPref) {
-            val identityProviderName = this.getString(getString(R.string.preference_identity_provider_name), null)
-            val identityProviderId = this.getLong(getString(R.string.preference_identity_provider_id), -1L)
-            val profileName = this.getString(getString(R.string.preference_profile_name), null)
-            val profileId = this.getLong(getString(R.string.preference_profile_id), -1L)
+            val identityProviderName = getString(PREFERENCE_IDENTITY_PROVIDER_NAME, null)
+            val identityProviderId = this.getLong(PREFERENCE_IDENTITY_PROVIDER_ID, -1L)
+            val profileName = this.getString(PREFERENCE_PROFILE_NAME, null)
+            val profileId = this.getLong(PREFERENCE_PROFILE_ID, -1L)
 
             if (identityProviderId != -1L && profileId != -1L && profileName != null && identityProviderName != null) {
                 return Profile(profileId, profileName, identityProviderId, identityProviderName)
@@ -154,8 +155,8 @@ class CredentialFragment : Fragment() {
 
     private fun getConfigFilename(profileId: Long): String {
         val sharedPref =
-            parentActivity.getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
-        val identityProviderName = sharedPref.getString(getString(R.string.preference_identity_provider_name), "")
+            parentActivity.getSharedPreferences(PREFERENCE_FILE_KEY, Context.MODE_PRIVATE)
+        val identityProviderName = sharedPref.getString(PREFERENCE_IDENTITY_PROVIDER_NAME, "")
         return "eduroam-${identityProviderName}_${profileId}.eap-config"
             .replace("[<>:\"/\\\\|?*, ]".toRegex(), "_")
     }

@@ -5,25 +5,12 @@
     android:layout_height="match_parent"
     android:padding="16dp">
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/identityProviderTextInputLayout"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense.ExposedDropdownMenu"
+    <de.gwdg.wifitool.frontend.components.IdentityProviderSearch
+        android:id="@+id/identityProviderSearch"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:endIconDrawable="@drawable/ic_search"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <AutoCompleteTextView
-            android:id="@+id/identitySearchEditText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:dropDownHeight="0dp"
-            android:hint="@string/org_search_content_desc"
-            android:importantForAutofill="no"
-            android:inputType="text"
-            android:lines="1"
-            app:layout_constraintTop_toTopOf="parent" />
-
-    </com.google.android.material.textfield.TextInputLayout>
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

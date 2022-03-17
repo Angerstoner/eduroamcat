@@ -12,9 +12,12 @@ import de.gwdg.wifitool.R
 import de.gwdg.wifitool.backend.ProfileApi
 import de.gwdg.wifitool.backend.models.Profile
 import de.gwdg.wifitool.databinding.FragmentProfileBinding
+import de.gwdg.wifitool.frontend.PREFERENCE_FILE_KEY
+import de.gwdg.wifitool.frontend.PREFERENCE_IDENTITY_PROVIDER_ID
+import de.gwdg.wifitool.frontend.PREFERENCE_PROFILE_ID
+import de.gwdg.wifitool.frontend.PREFERENCE_PROFILE_NAME
 import de.gwdg.wifitool.frontend.activities.MainActivity
 import de.gwdg.wifitool.frontend.adapters.ProfileArrayAdapter
-import java.lang.NullPointerException
 
 class ProfileFragment : Fragment() {
     private val logTag = "ProfileFragment"
@@ -92,8 +95,8 @@ class ProfileFragment : Fragment() {
 
     private fun loadIdentityProviderId(): Long {
         val sharedPref =
-            parentActivity.getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
-        return sharedPref.getLong(getString(R.string.preference_identity_provider_id), -1L)
+            parentActivity.getSharedPreferences(PREFERENCE_FILE_KEY, Context.MODE_PRIVATE)
+        return sharedPref.getLong(PREFERENCE_IDENTITY_PROVIDER_ID, -1L)
     }
 
 
@@ -104,10 +107,10 @@ class ProfileFragment : Fragment() {
      */
     private fun saveProfile(profile: Profile) {
         val sharedPref =
-            parentActivity.getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
+            parentActivity.getSharedPreferences(PREFERENCE_FILE_KEY, Context.MODE_PRIVATE)
         with(sharedPref.edit()) {
-            putLong(getString(R.string.preference_profile_id), profile.profileId)
-            putString(getString(R.string.preference_profile_name), profile.displayLabel)
+            putLong(PREFERENCE_PROFILE_ID, profile.profileId)
+            putString(PREFERENCE_PROFILE_NAME, profile.displayLabel)
             apply()
         }
     }

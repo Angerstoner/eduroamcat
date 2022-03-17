@@ -38,9 +38,9 @@ class ProfileInformationCard @JvmOverloads constructor(
     }
 
     fun observeProfileAttributes(parent: Fragment, profileApi: ProfileApi) {
-        profileApi.getProfileAttributesLiveData().observe(parent, { profileAttributes ->
+        profileApi.getProfileAttributesLiveData().observe(parent) { profileAttributes ->
             setProfileAttributes(parent, profileAttributes)
-        })
+        }
     }
 
     fun setProfileAttributes(parent: Fragment, profileAttributes: ProfileAttributes) {
