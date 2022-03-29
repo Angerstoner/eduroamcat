@@ -1,32 +1,24 @@
 package de.gwdg.wifitool.frontend.fragments
 
-import android.Manifest
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
-import de.gwdg.wifitool.backend.WifiConfig
 import de.gwdg.wifitool.databinding.FragmentWelcomeBinding
-import de.gwdg.wifitool.frontend.activities.MainActivity
 import de.gwdg.wifitool.frontend.components.WifiSettingsDialog
-import kotlin.math.log
 
 
-class WelcomeFragment : Fragment() {
+class WelcomeFragment : PagedFragment() {
     private lateinit var binding: FragmentWelcomeBinding
-    private lateinit var parentActivity: MainActivity
-    private lateinit var wifiConfig: WifiConfig
     private val logTag = "WelcomeFragment"
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         this.binding = FragmentWelcomeBinding.inflate(inflater, container, false)
-        parentActivity = activity as MainActivity
-        wifiConfig = WifiConfig(parentActivity)
-        parentActivity.allowNext()
+        allowNext()
         return this.binding.root
     }
+
 
     override fun onResume() {
         val nextAction = {
@@ -35,9 +27,7 @@ class WelcomeFragment : Fragment() {
                 WifiSettingsDialog().show(childFragmentManager, null)
             }
         }
-        parentActivity.addNextButtonAction(nextAction)
+        addNextButtonAction(nextAction)
         super.onResume()
     }
-
-
 }

@@ -34,7 +34,6 @@ class OrganizationFragment : Fragment() {
         try {
             parentActivity = activity as MainActivity
             profileApi = parentActivity.profileApi
-//            initAutoCompleteSearch()
         } catch (e: NullPointerException) {
             Log.e(logTag, "Context/Activity missing, could not init Fragment. \n${e.stackTrace}")
         }
@@ -59,6 +58,7 @@ class OrganizationFragment : Fragment() {
 
 
     // TODO: either move this to searchview or move searchview save-methods here
+    // or even to viewmodel
     private fun initSavedIdentityProvider(identityProvider: IdentityProvider) {
         binding.identityProviderSearch.setText(identityProvider.toString())
         parentActivity.allowNext()

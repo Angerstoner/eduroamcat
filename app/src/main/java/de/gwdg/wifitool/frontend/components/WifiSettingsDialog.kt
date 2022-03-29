@@ -38,8 +38,8 @@ class WifiSettingsDialog : DialogFragment() {
             // users has to delete this existing config by themselves
             WifiConfig(requestingActivity).hasEduroamConfiguration()
         } else Build.VERSION.SDK_INT == Build.VERSION_CODES.Q
-//          // on Android 10 the app can not detect if an eduroam config exists and
-//          // therefore needs to show this to every user
-//          // from Android 11 the app can overwrite existing eduroam connections
+            // on Android 10 the app can not detect if an eduroam config exists and
+            // therefore needs to show this to every user
+            // from Android 11 the app can overwrite existing eduroam connections
     }
 }

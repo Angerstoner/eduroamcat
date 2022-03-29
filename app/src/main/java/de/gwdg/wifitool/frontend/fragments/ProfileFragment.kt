@@ -7,7 +7,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
-import androidx.fragment.app.Fragment
 import de.gwdg.wifitool.R
 import de.gwdg.wifitool.backend.ProfileApi
 import de.gwdg.wifitool.backend.models.Profile
@@ -16,28 +15,20 @@ import de.gwdg.wifitool.frontend.PREFERENCE_FILE_KEY
 import de.gwdg.wifitool.frontend.PREFERENCE_IDENTITY_PROVIDER_ID
 import de.gwdg.wifitool.frontend.PREFERENCE_PROFILE_ID
 import de.gwdg.wifitool.frontend.PREFERENCE_PROFILE_NAME
-import de.gwdg.wifitool.frontend.activities.MainActivity
 import de.gwdg.wifitool.frontend.adapters.ProfileArrayAdapter
 
-class ProfileFragment : Fragment() {
+class ProfileFragment : PagedFragment() {
     private val logTag = "ProfileFragment"
     private lateinit var binding: FragmentProfileBinding
-    private lateinit var parentActivity: MainActivity
     private lateinit var profileApi: ProfileApi
     private lateinit var profileArrayAdapter: ProfileArrayAdapter
     private var identityProviderId = -1L
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         this.binding = FragmentProfileBinding.inflate(inflater, container, false)
-        parentActivity = activity as MainActivity
         profileApi = parentActivity.profileApi
-        try {
-            initProfileInfoBox()
-            initProfileSelectionSpinner()
-        } catch (e: NullPointerException) {
-            Log.e(logTag, "Context/Activity missing, could not init Fragment.\n ${e.stackTrace}")
-        }
-
+        initProfileInfoBox()
+        initProfileSelectionSpinner()
         return this.binding.root
     }
 
@@ -46,7 +37,7 @@ class ProfileFragment : Fragment() {
         identityProviderId = loadIdentityProviderId()
         if (identityProviderId != -1L) {
             profileApi.updateIdentityProviderProfiles(identityProviderId)
-            parentActivity.allowNext()
+            allowNext()
         } else {
             Log.e(logTag, "Invalid Identity Provider. Cannot continue.")
         }

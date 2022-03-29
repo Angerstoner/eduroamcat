@@ -32,10 +32,9 @@ const val REQUEST_CODE_LOCATION_PERMISSION = 101
 val PERMISSION_ARRAY_LOCATION = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
 
 
-class FeedbackFragment : Fragment() {
+class FeedbackFragment : PagedFragment() {
     private val logTag = "FeedbackFragment"
     private lateinit var binding: FragmentFeedbackBinding
-    private lateinit var parentActivity: MainActivity
     private var connectionTried = false
 
 
@@ -44,8 +43,7 @@ class FeedbackFragment : Fragment() {
             intent?.let {
                 context?.let {
                     if (intent.action == WifiManager.NETWORK_STATE_CHANGED_ACTION) {
-                        val wifiManager =
-                            parentActivity.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+                        val wifiManager = parentActivity.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
                         displayConnectionStatus(wifiManager.connectionInfo)
                     }
                 }
@@ -55,13 +53,6 @@ class FeedbackFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         this.binding = FragmentFeedbackBinding.inflate(inflater, container, false)
-
-        try {
-            parentActivity = activity as MainActivity
-        } catch (e: NullPointerException) {
-            Log.e(logTag, "Context/Activity missing, could not init Fragment.\n ${e.stackTrace}")
-        }
-
         return this.binding.root
     }
 
@@ -85,12 +76,10 @@ class FeedbackFragment : Fragment() {
         } else {
             // no connection feedback possible, only check WifiConfig feedback
             if (listOf(ANDROID_BELOW_Q_FAIL, ANDROID_Q_FAIL).contains(configAddResult)) {
-                binding.connectionAddFeedbackTextView.text =
-                    getString(R.string.feedback_connection_add_error_text)
+                binding.connectionAddFeedbackTextView.text = getString(R.string.feedback_connection_add_error_text)
                 binding.connectionStatusFeedbackTextView.visibility = View.GONE
             } else {
-                binding.connectionStatusFeedbackTextView.text =
-                    getString(R.string.feedback_connection_missing_permission_text)
+                binding.connectionStatusFeedbackTextView.text = getString(R.string.feedback_connection_missing_permission_text)
             }
         }
 
@@ -206,11 +195,11 @@ class FeedbackFragment : Fragment() {
 
     private fun updateNextButton(configAddResult: WifiConfig.WifiConfigResult) {
         if (listOf(ANDROID_BELOW_Q_SUCCESS, ANDROID_Q_SUCCESS, ANDROID_R_SUCCESS).contains(configAddResult)) {
-            parentActivity.addNextButtonAction { parentActivity.finishAffinity() }
-            parentActivity.changeNextButtonText(getString(R.string.next_button_close))
-            parentActivity.allowNext()
+            addNextButtonAction { parentActivity.finishAffinity() }
+            changeNextButtonText(getString(R.string.next_button_close))
+            allowNext()
         } else {
-            parentActivity.blockNext()
+            blockNext()
         }
     }
 

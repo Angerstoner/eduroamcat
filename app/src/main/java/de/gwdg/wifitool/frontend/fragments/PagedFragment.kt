@@ -1,24 +1,27 @@
 package de.gwdg.wifitool.frontend.fragments
 
+import android.content.Context
 import androidx.fragment.app.Fragment
 import de.gwdg.wifitool.frontend.activities.MainActivity
 
 abstract class PagedFragment : Fragment() {
     private val logTag = "PagedFragment (Base)"
-    private var parentActivity: MainActivity? = null
+    protected lateinit var parentActivity: MainActivity
 
-
-    public fun setParentActivity(activity: MainActivity) {
-        parentActivity = activity
+    override fun onAttach(context: Context) {
+        parentActivity = activity as MainActivity
+        super.onAttach(context)
     }
 
-    public fun blockNext() {
-        parentActivity?.blockNext()
+    protected fun blockNext() {
+        parentActivity.blockNext()
     }
 
-    public fun allowNext() {
-        parentActivity?.allowNext()
+    protected fun allowNext() {
+        parentActivity.allowNext()
     }
 
+    fun addNextButtonAction(action: () -> Unit) = parentActivity.addNextButtonAction(action)
 
+    fun changeNextButtonText(newText: String) = parentActivity.changeNextButtonText(newText)
 }

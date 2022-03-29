@@ -12,7 +12,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.fragment.app.Fragment
 import de.gwdg.wifitool.R
 import de.gwdg.wifitool.backend.ProfileApi
 import de.gwdg.wifitool.backend.WifiConfig
@@ -22,11 +21,9 @@ import de.gwdg.wifitool.backend.util.EapConfigParser
 import de.gwdg.wifitool.backend.util.WifiEnterpriseConfigurator
 import de.gwdg.wifitool.databinding.FragmentCredentialsBinding
 import de.gwdg.wifitool.frontend.*
-import de.gwdg.wifitool.frontend.activities.MainActivity
 
-class CredentialFragment : Fragment() {
+class CredentialFragment : PagedFragment() {
     private val logTag = "CredentialFragment"
-    private lateinit var parentActivity: MainActivity
     private lateinit var profileApi: ProfileApi
     private lateinit var binding: FragmentCredentialsBinding
     private var profile: Profile? = null
@@ -36,28 +33,28 @@ class CredentialFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         this.binding = FragmentCredentialsBinding.inflate(inflater, container, false)
-        try {
-            parentActivity = activity as MainActivity
-            profileApi = parentActivity.profileApi
-        } catch (e: NullPointerException) {
-            Log.e(logTag, "Context/Activity missing, could not init Fragment.\n ${e.stackTrace}")
-        }
+        profileApi = parentActivity.profileApi
         return this.binding.root
     }
 
     override fun onResume() {
         initEditTexts()
         profile = getStoredProfile()
-        if (profile != null) {
-            Log.i(logTag, "Downloading profile $profile")
-            startProfileConfigDownload(profile!!.profileId)
-            initProfileInfoBox()
-            updateNextButton()
-        } else if (parentActivity.eapConfigParser != null) {
-            initProfileInfoBoxFromEapConfig(parentActivity.eapConfigParser!!)
-            updateNextButton()
-        } else {
-            Log.e(logTag, "Invalid Profile. Cannot continue.")
+        when {
+            profile != null -> {
+                Log.i(logTag, "Downloading profile $profile")
+                startProfileConfigDownload(profile!!.profileId)
+                initProfileInfoBox()
+                updateNextButton()
+            }
+            parentActivity.eapConfigParser != null -> {
+                // called when the app is opened by clicking on an .eap-config file (importing)
+                initProfileInfoBoxFromEapConfig(parentActivity.eapConfigParser!!)
+                updateNextButton()
+            }
+            else -> {
+                Log.e(logTag, "Invalid Profile. Cannot continue.")
+            }
         }
         super.onResume()
     }
@@ -93,9 +90,9 @@ class CredentialFragment : Fragment() {
 
     private fun updateNextButton() {
         if (isConnectAllowed()) {
-            parentActivity.addNextButtonAction { connectToWifi(profileDownloadPath) }
-            parentActivity.changeNextButtonText(getString(R.string.next_button_connect))
-            parentActivity.allowNext()
+            addNextButtonAction { connectToWifi(profileDownloadPath) }
+            changeNextButtonText(getString(R.string.next_button_connect))
+            allowNext()
         } else {
             if (binding.usernameEditText.text.toString() != ""
                 && binding.passwordEditText.text.toString() != ""
@@ -103,7 +100,7 @@ class CredentialFragment : Fragment() {
                 Toast.makeText(parentActivity, "Please wait, Profile download is not finished yet", Toast.LENGTH_LONG)
                     .show()
             }
-            parentActivity.blockNext()
+            blockNext()
         }
     }
 
