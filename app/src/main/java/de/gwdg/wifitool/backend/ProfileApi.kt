@@ -49,6 +49,7 @@ const val JSON_TAG_PROFILE_ATTR_DESCRIPTION = "description"
 const val LOG_MESSAGE_MISSING_DATA = "Could not add %s (missing data)"
 
 //TODO: add caching/check for existing data before download
+//TODO: caching -> frontend -> viewmodel
 
 class ProfileApi(private val activityContext: Context) {
     private val logTag = "ProfileApi"

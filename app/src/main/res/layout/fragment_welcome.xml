@@ -9,7 +9,7 @@
         android:id="@+id/greeterTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingBottom="32dp"
+        android:paddingBottom="32sp"
         android:text="@string/welcome_screen_greeter_text"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -18,7 +18,7 @@
         android:id="@+id/locationInfoText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingBottom="32dp"
+        android:paddingBottom="32sp"
         android:text="@string/welcome_screen_location_info_text"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/greeterTextView" />
